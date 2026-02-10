@@ -178,12 +178,21 @@ export const ContractModal = ({ isOpen, onClose, planName = "Plan Fibra X" }: Co
                                             </div>
                                         </div>
 
-                                        <div className="pt-6">
+                                        <div className="pt-6 space-y-4">
                                             <NeonButton className="w-full py-4 flex items-center justify-center gap-2 text-base">
                                                 Finalizar Contratación
                                                 <Send className="w-4 h-4" />
                                             </NeonButton>
-                                            <p className="text-center text-[9px] text-slate-500 mt-6 uppercase tracking-widest leading-relaxed">
+
+                                            <button
+                                                type="button"
+                                                onClick={onClose}
+                                                className="w-full py-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-white transition-colors"
+                                            >
+                                                [ Regresar / Cancelar ]
+                                            </button>
+
+                                            <p className="text-center text-[9px] text-slate-500 mt-2 uppercase tracking-widest leading-relaxed">
                                                 Al hacer clic en "Finalizar", un asesor se pondrá en contacto contigo en los <span className="text-neon-cyan">próximos 15 minutos</span> para validar tu identidad e iniciar la instalación.
                                             </p>
                                         </div>

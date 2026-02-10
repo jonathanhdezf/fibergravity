@@ -103,11 +103,19 @@ export const SupportTicketModal = ({ isOpen, onClose }: SupportTicketModalProps)
                                         />
                                     </div>
 
-                                    <div className="pt-4">
+                                    <div className="pt-4 space-y-4">
                                         <NeonButton className="w-full py-4 flex items-center justify-center gap-2 text-base">
                                             Enviar Reporte Técnico
                                             <Send className="w-4 h-4" />
                                         </NeonButton>
+
+                                        <button
+                                            type="button"
+                                            onClick={onClose}
+                                            className="w-full py-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-white transition-colors text-center"
+                                        >
+                                            [ Regresar / Cancelar ]
+                                        </button>
                                     </div>
 
                                     <div className="flex items-center gap-4 p-4 rounded-2xl bg-neon-cyan/5 border border-neon-cyan/10">

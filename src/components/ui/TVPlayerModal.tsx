@@ -80,8 +80,15 @@ export const TVPlayerModal = ({ isOpen, onClose, channelName = "Canal en Vivo", 
                                 </button>
                                 <button
                                     onClick={onClose}
+                                    className="px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:border-white/30 text-white text-[10px] font-bold uppercase tracking-widest transition-all"
+                                >
+                                    Regresar
+                                </button>
+
+                                <button
+                                    onClick={onClose}
                                     aria-label="Cerrar Reproductor"
-                                    className="p-3 rounded-full bg-red-500/10 hover:bg-red-500/40 text-red-500 transition-all ml-4 group/close"
+                                    className="p-3 rounded-full bg-red-500/10 hover:bg-red-500/40 text-red-500 transition-all group/close"
                                 >
                                     <X className="w-6 h-6 group-hover/close:rotate-90 transition-transform" />
                                 </button>
