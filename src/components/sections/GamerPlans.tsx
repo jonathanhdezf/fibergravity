@@ -90,7 +90,7 @@ export const GamerPlans = () => {
     const { scrollXProgress } = useScroll({ container: containerRef });
 
     return (
-        <section className="py-24 relative overflow-hidden bg-gradient-to-b from-black to-slate-900/50">
+        <section id="gamer" className="py-24 relative overflow-hidden bg-gradient-to-b from-black to-slate-900/50">
             {/* Background Effects */}
             <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-neon-cyan/5 blur-[120px] rounded-full pointer-events-none" />
             <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-neon-magenta/5 blur-[120px] rounded-full pointer-events-none" />

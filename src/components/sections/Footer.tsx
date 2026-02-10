@@ -39,18 +39,20 @@ export const Footer = () => {
                     <div>
                         <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-sm">Servicios</h4>
                         <ul className="space-y-4 text-slate-400">
-                            <li><a href="#" className="hover:text-neon-cyan transition-colors">Internet Fibra</a></li>
-                            <li><a href="#" className="hover:text-neon-cyan transition-colors">TV por Cable</a></li>
-                            <li><a href="#" className="hover:text-neon-cyan transition-colors">Planes Gamer</a></li>
-                            <li><a href="#" className="hover:text-neon-cyan transition-colors">Empresas</a></li>
+                            <li><a href="#plans-header" className="hover:text-neon-cyan transition-colors">Internet Fibra</a></li>
+                            <li><a href="#television" className="hover:text-neon-cyan transition-colors">TV de Cable</a></li>
+                            <li><a href="#gamer" className="hover:text-neon-cyan transition-colors">Planes Gamer</a></li>
+                            <li><a href="#home-office" className="hover:text-neon-cyan transition-colors">Home Office</a></li>
+                            <li><a href="#empresas" className="hover:text-neon-cyan transition-colors">Empresas</a></li>
                         </ul>
                     </div>
 
                     <div>
                         <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-sm">Compañía</h4>
                         <ul className="space-y-4 text-slate-400">
-                            <li><a href="#" className="hover:text-neon-cyan transition-colors">Nosotros</a></li>
-                            <li><a href="#" className="hover:text-neon-cyan transition-colors">Soporte Tecnico</a></li>
+                            <li><a href="#nosotros" className="hover:text-neon-cyan transition-colors">Nosotros</a></li>
+                            <li><a href="#soporte" className="hover:text-neon-cyan transition-colors">Soporte Técnico</a></li>
+                            <li><a href="/descargas" className="hover:text-neon-cyan transition-colors">Descargas</a></li>
                             <li><a href="#privacidad" className="hover:text-neon-cyan transition-colors">Privacidad</a></li>
                             <li><a href="#contacto" className="hover:text-neon-cyan transition-colors">Contacto</a></li>
                         </ul>

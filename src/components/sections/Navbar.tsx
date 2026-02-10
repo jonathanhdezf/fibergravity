@@ -189,7 +189,7 @@ export const Navbar = () => {
                                 className="mt-8 p-8 rounded-3xl bg-gradient-to-br from-neon-cyan/10 to-transparent border border-neon-cyan/10 text-center"
                             >
                                 <div className="text-[10px] font-black tracking-[0.4em] text-neon-cyan uppercase mb-4">
-                                    Digital Experience 2024
+                                    Digital Experience 2026
                                 </div>
                                 <h4 className="text-white text-lg font-black italic mb-6">
                                     ¿Listo para la máxima potencia?
