@@ -73,7 +73,7 @@ const StreamingClientPage = () => {
                             <div className="absolute inset-[-20px] bg-gradient-to-r from-neon-cyan/20 to-neon-magenta/20 blur-[60px] rounded-full opacity-50 group-hover:opacity-80 transition-opacity" />
                             <GlassCard className="relative aspect-video overflow-hidden border-white/10 shadow-2xl !p-0 rounded-[32px]">
                                 <img
-                                    src="https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?auto=format&fit=crop&q=80&w=2070"
+                                    src="https://mundobytes.com/wp-content/uploads/2025/04/pluto-tv.webp"
                                     alt="Streaming Experience"
                                     className="w-full h-full object-cover opacity-50 transition-transform duration-700 group-hover:scale-110"
                                 />
@@ -160,7 +160,7 @@ const StreamingClientPage = () => {
                             <GlassCard className="!p-8 border-white/10 group/app" hoverEffect={false}>
                                 <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8 text-center sm:text-left">
                                     <div className="w-20 h-20 rounded-3xl bg-black border border-white/10 flex items-center justify-center p-3 shadow-2xl group-hover/app:border-neon-cyan/50 transition-colors duration-500">
-                                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Pluto_TV_logo.svg/1024px-Pluto_TV_logo.svg.png" alt="Pluto TV Logo" className="w-full h-auto" />
+                                        <img src="https://github.com/jonathanhdezf/fibergravity/blob/main/public/pluto-tv-logo.png?raw=true" alt="Pluto TV Logo" className="w-full h-auto" />
                                     </div>
                                     <div className="flex-1">
                                         <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
@@ -192,8 +192,8 @@ const StreamingClientPage = () => {
                             {/* Tubi TV */}
                             <GlassCard className="!p-8 border-white/10 group/app" hoverEffect={false}>
                                 <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8 text-center sm:text-left">
-                                    <div className="w-20 h-20 rounded-3xl bg-[#ff4b2b] border border-white/10 flex items-center justify-center p-4 shadow-2xl group-hover/app:border-neon-magenta/50 transition-colors duration-500">
-                                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Tubi_logo.svg/1280px-Tubi_logo.svg.png" alt="Tubi Logo" className="w-full h-auto brightness-0 invert" />
+                                    <div className="w-20 h-20 rounded-3xl bg-black border border-white/10 flex items-center justify-center p-2 shadow-2xl group-hover/app:border-neon-magenta/50 transition-colors duration-500 overflow-hidden">
+                                        <img src="https://github.com/jonathanhdezf/fibergravity/blob/main/public/Tubi.jpg?raw=true" alt="Tubi TV Logo" className="w-full h-full object-cover rounded-2xl" />
                                     </div>
                                     <div className="flex-1">
                                         <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
