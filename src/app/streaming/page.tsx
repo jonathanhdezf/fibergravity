@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Play, Tv, Info, ArrowLeft, ExternalLink, Monitor, Globe, ShieldCheck } from "lucide-react";
+import { Play, Tv, Info, ArrowLeft, ExternalLink, Monitor, Globe, ShieldCheck, Apple, Smartphone } from "lucide-react";
 import { Navbar } from "@/components/sections/Navbar";
 import { Footer } from "@/components/sections/Footer";
 import { GlassCard } from "@/components/ui/GlassCard";
@@ -145,6 +145,83 @@ const StreamingClientPage = () => {
                                 <p className="text-sm text-slate-500 leading-relaxed">{feat.desc}</p>
                             </div>
                         ))}
+                    </div>
+                    {/* Official Apps Downloads */}
+                    <div className="mt-32 pt-20 border-t border-white/5">
+                        <div className="text-center mb-16 px-4">
+                            <h2 className="text-3xl font-black italic mb-4 uppercase tracking-tighter">Lleva el Streaming Contigo</h2>
+                            <p className="text-slate-400 max-w-xl mx-auto text-sm md:text-base">
+                                Como parte de nuestro compromiso con la <span className="text-white font-bold">neutralidad tecnológica</span>, facilitamos el acceso a las aplicaciones oficiales para que disfrutes de contenido gratuito en cualquier dispositivo.
+                            </p>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                            {/* Pluto TV */}
+                            <GlassCard className="!p-8 border-white/10 group/app" hoverEffect={false}>
+                                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8 text-center sm:text-left">
+                                    <div className="w-20 h-20 rounded-3xl bg-black border border-white/10 flex items-center justify-center p-3 shadow-2xl group-hover/app:border-neon-cyan/50 transition-colors duration-500">
+                                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Pluto_TV_logo.svg/1024px-Pluto_TV_logo.svg.png" alt="Pluto TV Logo" className="w-full h-auto" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
+                                            <h3 className="text-2xl font-black italic">Pluto TV</h3>
+                                            <ShieldCheck className="w-4 h-4 text-neon-cyan" />
+                                        </div>
+                                        <p className="text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black mb-4">Live TV & Movies • 100% Gratis</p>
+                                        <p className="text-xs text-slate-400 leading-relaxed max-w-xs">Cientos de canales en vivo y miles de películas on-demand sin suscripción.</p>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <a href="https://apps.apple.com/us/app/pluto-tv-live-tv-and-movies/id751717277" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-3 px-4 py-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-neon-cyan/10 hover:border-neon-cyan/30 transition-all group/store">
+                                        <Apple className="w-5 h-5 text-slate-400 group-hover/store:text-white" />
+                                        <div className="text-left">
+                                            <p className="text-[7px] text-slate-500 font-bold uppercase tracking-widest leading-none">Download on the</p>
+                                            <p className="text-xs font-black text-white">App Store</p>
+                                        </div>
+                                    </a>
+                                    <a href="https://play.google.com/store/apps/details?id=tv.pluto.android" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-3 px-4 py-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-neon-cyan/10 hover:border-neon-cyan/30 transition-all group/store">
+                                        <Smartphone className="w-5 h-5 text-slate-400 group-hover/store:text-white" />
+                                        <div className="text-left">
+                                            <p className="text-[7px] text-slate-500 font-bold uppercase tracking-widest leading-none">Get it on</p>
+                                            <p className="text-xs font-black text-white">Google Play</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            </GlassCard>
+
+                            {/* Tubi TV */}
+                            <GlassCard className="!p-8 border-white/10 group/app" hoverEffect={false}>
+                                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8 text-center sm:text-left">
+                                    <div className="w-20 h-20 rounded-3xl bg-[#ff4b2b] border border-white/10 flex items-center justify-center p-4 shadow-2xl group-hover/app:border-neon-magenta/50 transition-colors duration-500">
+                                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Tubi_logo.svg/1280px-Tubi_logo.svg.png" alt="Tubi Logo" className="w-full h-auto brightness-0 invert" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
+                                            <h3 className="text-2xl font-black italic">Tubi TV</h3>
+                                            <ShieldCheck className="w-4 h-4 text-neon-magenta" />
+                                        </div>
+                                        <p className="text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black mb-4">Fox Corp • Streaming Gratuito</p>
+                                        <p className="text-xs text-slate-400 leading-relaxed max-w-xs">La colección más grande de películas y series gratuitas, 100% legal.</p>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <a href="https://apps.apple.com/us/app/tubi-watch-movies-tv-shows/id886445756" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-3 px-4 py-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-neon-magenta/10 hover:border-neon-magenta/30 transition-all group/store">
+                                        <Apple className="w-5 h-5 text-slate-400 group-hover/store:text-white" />
+                                        <div className="text-left">
+                                            <p className="text-[7px] text-slate-500 font-bold uppercase tracking-widest leading-none">Download on the</p>
+                                            <p className="text-xs font-black text-white">App Store</p>
+                                        </div>
+                                    </a>
+                                    <a href="https://play.google.com/store/apps/details?id=com.tubitv" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-3 px-4 py-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-neon-magenta/10 hover:border-neon-magenta/30 transition-all group/store">
+                                        <Smartphone className="w-5 h-5 text-slate-400 group-hover/store:text-white" />
+                                        <div className="text-left">
+                                            <p className="text-[7px] text-slate-500 font-bold uppercase tracking-widest leading-none">Get it on</p>
+                                            <p className="text-xs font-black text-white">Google Play</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            </GlassCard>
+                        </div>
                     </div>
                 </div>
             </section>
