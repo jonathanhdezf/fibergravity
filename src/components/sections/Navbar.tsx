@@ -53,7 +53,7 @@ export const Navbar = () => {
 
     return (
         <nav
-            className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${scrolled ? "py-4 bg-black/80 backdrop-blur-xl border-b border-white/5" : "py-8 bg-transparent"
+            className={`fixed top-0 left-0 right-0 z-[1000] transition-all duration-500 ${scrolled ? "py-4 bg-black/80 backdrop-blur-xl border-b border-white/5 shadow-2xl" : "py-8 bg-transparent"
                 }`}
         >
             <div className="container mx-auto px-6 flex justify-between items-center">
@@ -115,8 +115,8 @@ export const Navbar = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="fixed inset-0 z-[1000] lg:hidden overflow-y-auto bg-black/95 backdrop-blur-xl"
+                        transition={{ duration: 0.3 }}
+                        className="fixed inset-0 z-[1100] lg:hidden overflow-y-auto bg-black/95 backdrop-blur-xl"
                     >
                         <div className="relative min-h-full flex flex-col pt-32 pb-16 px-8 items-center z-10">
                             <div className="w-full max-w-sm space-y-2">
