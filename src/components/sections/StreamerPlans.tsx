@@ -106,8 +106,8 @@ export const StreamerPlans = () => {
                             <Video className="w-3 h-3" />
                             Bitrate Control Audit
                         </div>
-                        <h2 className="text-4xl md:text-6xl font-black italic">
-                            Streamer Hub <span className="text-neon-magenta neon-text-magenta">Analizado</span> <br />
+                        <h2 className="text-4xl md:text-6xl font-black italic pr-4">
+                            Streamer Hub <span className="text-neon-magenta neon-text-magenta pr-2">Analizado</span> <br />
                             <span className="text-white">Profesionalmente</span>
                         </h2>
                     </motion.div>

@@ -20,9 +20,9 @@ export const PlansHeader = () => {
                         Nuestras Soluciones
                     </div>
 
-                    <h2 className="text-5xl md:text-7xl font-black italic mb-6">
-                        Planes que <span className="text-neon-cyan neon-text-cyan">Transforman</span> <br />
-                        tu Experiencia <span className="text-neon-magenta neon-text-magenta">Digital</span>
+                    <h2 className="text-5xl md:text-7xl font-black italic mb-6 pr-4">
+                        Planes que <span className="text-neon-cyan neon-text-cyan pr-2">Transforman</span> <br />
+                        tu Experiencia <span className="text-neon-magenta neon-text-magenta pr-2">Digital</span>
                     </h2>
 
                     <div className="w-24 h-1 bg-gradient-to-r from-neon-cyan to-neon-magenta mx-auto rounded-full mb-8" />

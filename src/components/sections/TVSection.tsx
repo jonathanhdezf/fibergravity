@@ -182,8 +182,8 @@ export const TVSection = () => {
                             <Tv className="w-3 h-3" />
                             Curaduría Doble Play
                         </div>
-                        <h2 className="text-4xl md:text-6xl font-black italic">
-                            Internet + <span className="text-neon-magenta neon-text-magenta">TV de Cable</span> <br />
+                        <h2 className="text-4xl md:text-6xl font-black italic pr-4">
+                            Internet + <span className="text-neon-magenta neon-text-magenta pr-2">TV de Cable</span> <br />
                             <span className="text-white">Curado por Expertos</span>
                         </h2>
                     </motion.div>

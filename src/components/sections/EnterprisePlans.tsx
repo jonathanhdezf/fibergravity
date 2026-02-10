@@ -121,8 +121,8 @@ export const EnterprisePlans = () => {
                             <Building2 className="w-3 h-3" />
                             B2B Connectivity Expert
                         </div>
-                        <h2 className="text-4xl md:text-6xl font-black italic">
-                            Consultoría <span className="text-neon-cyan neon-text-cyan">Corporativa</span> <br />
+                        <h2 className="text-4xl md:text-6xl font-black italic pr-4">
+                            Consultoría <span className="text-neon-cyan neon-text-cyan pr-2">Corporativa</span> <br />
                             <span className="text-white">Especializada</span>
                         </h2>
                     </motion.div>

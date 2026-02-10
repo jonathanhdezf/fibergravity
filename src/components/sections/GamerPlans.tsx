@@ -105,8 +105,8 @@ export const GamerPlans = () => {
                             <Zap className="w-3 h-3" />
                             Auditoría de Latencia
                         </div>
-                        <h2 className="text-4xl md:text-6xl font-black italic">
-                            Dominio <span className="text-neon-cyan neon-text-cyan">Gamer</span> <br />
+                        <h2 className="text-4xl md:text-6xl font-black italic pr-4">
+                            Dominio <span className="text-neon-cyan neon-text-cyan pr-2">Gamer</span> <br />
                             <span className="text-white">Auditado</span>
                         </h2>
                     </motion.div>

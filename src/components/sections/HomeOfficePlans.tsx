@@ -106,8 +106,8 @@ export const HomeOfficePlans = () => {
                             <Briefcase className="w-3 h-3" />
                             Productivity Audit
                         </div>
-                        <h2 className="text-4xl md:text-6xl font-black italic">
-                            Productividad <span className="text-neon-cyan neon-text-cyan">Bajo</span> <br />
+                        <h2 className="text-4xl md:text-6xl font-black italic pr-4">
+                            Productividad <span className="text-neon-cyan neon-text-cyan pr-2">Bajo</span> <br />
                             <span className="text-white">Análisis</span>
                         </h2>
                     </motion.div>

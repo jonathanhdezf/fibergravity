@@ -59,9 +59,9 @@ export const Hero = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.8 }}
                 >
-                    <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-tight mb-6 italic">
+                    <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-tight mb-6 italic pr-4 md:pr-8">
                         Tu conexión <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan via-white to-neon-magenta neon-text-cyan">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan via-white to-neon-magenta neon-text-cyan pr-2">
                             perfecta en <br /> Teziutlán
                         </span>
                     </h1>
