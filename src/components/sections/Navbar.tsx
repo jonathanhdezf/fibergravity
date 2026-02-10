@@ -154,10 +154,21 @@ export const Navbar = () => {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: i * 0.04 }}
                                     onClick={(e) => {
-                                        // Allow navigation to happen first, then close local state
+                                        // SENIOR FIX: Real mobile devices need a moment to process anchor links
+                                        // before the body overflow is restored and the overlay is hidden.
+
+                                        // Close menu first to restore body scroll
                                         setMobileMenu(false);
-                                        // We don't call window.history.back() here because clicking an anchor
-                                        // already changes the hash/location, and back() would revert it.
+
+                                        // If it's a hash link, we manually trigger the scroll to be 100% sure
+                                        const targetId = link.href.replace('#', '');
+                                        const element = document.getElementById(targetId);
+                                        if (element) {
+                                            // Small timeout to wait for 'overflow: hidden' to be removed from body
+                                            setTimeout(() => {
+                                                element.scrollIntoView({ behavior: 'smooth' });
+                                            }, 100);
+                                        }
                                     }}
                                     className="flex items-center justify-between p-5 rounded-3xl bg-white/[0.03] border border-white/5 active:bg-white/10 active:scale-[0.98] transition-all no-underline group"
                                 >
