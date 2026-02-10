@@ -150,7 +150,7 @@ export const GamerPlans = () => {
 
                 <div
                     ref={containerRef}
-                    className="flex overflow-x-auto gap-8 px-6 pb-12 snap-x snap-mandatory no-scrollbar cursor-grab active:cursor-grabbing scroll-smooth"
+                    className="flex overflow-x-auto gap-8 px-6 pt-10 pb-12 snap-x snap-mandatory no-scrollbar cursor-grab active:cursor-grabbing scroll-smooth"
                 >
                     {/* Spacer for centering logic */}
                     <div className="min-w-[5vw] h-1 md:block hidden" />
@@ -161,10 +161,10 @@ export const GamerPlans = () => {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             whileInView={{ opacity: 1, scale: 1, y: 0 }}
                             transition={{ delay: i * 0.1 }}
-                            className="min-w-[300px] md:min-w-[380px] snap-center"
+                            className="min-w-[300px] md:min-w-[380px] snap-center py-4"
                         >
                             <GlassCard
-                                className={`h-full border-white/5 relative group hover:border-${plan.color === 'cyan' ? 'neon-cyan' : plan.color === 'magenta' ? 'neon-magenta' : 'white'}/30 transition-all duration-500`}
+                                className={`h-full border-white/5 relative group hover:border-${plan.color === 'cyan' ? 'neon-cyan' : plan.color === 'magenta' ? 'neon-magenta' : 'white'}/30 transition-all duration-500 !overflow-visible`}
                                 hoverEffect={true}
                             >
                                 {plan.recommendation && (
