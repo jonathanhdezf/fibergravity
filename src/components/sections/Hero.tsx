@@ -48,7 +48,7 @@ export const Hero = () => {
                         Experimenta la fibra óptica de ultra alta velocidad. Sin fricción, sin retrasos, solo pura potencia digital.
                     </p>
                     <div className="flex flex-wrap gap-4">
-                        <a href="#planes" className="contents">
+                        <a href="#plans-header" className="contents">
                             <NeonButton variant="cyan">Ver Planes</NeonButton>
                         </a>
                         <a href="#cobertura" className="contents">
@@ -57,15 +57,49 @@ export const Hero = () => {
                     </div>
 
                     <div className="mt-12 flex gap-8">
-                        <div className="flex flex-col gap-2">
-                            <span className="text-neon-cyan font-bold text-2xl">1000MB</span>
-                            <span className="text-xs text-slate-500 tracking-widest uppercase">Velocidad Máxima</span>
-                        </div>
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 1 }}
+                            className="flex flex-col gap-2 relative group"
+                        >
+                            <motion.span
+                                animate={{
+                                    color: ["#00f3ff", "#ffffff", "#00f3ff"],
+                                    scale: [1, 1.05, 1],
+                                    textShadow: ["0 0 20px rgba(0,243,255,0.5)", "0 0 10px rgba(0,243,255,0.2)", "0 0 20px rgba(0,243,255,0.5)"]
+                                }}
+                                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                                className="text-neon-cyan font-black text-3xl italic"
+                            >
+                                1000MB
+                            </motion.span>
+                            <span className="text-[10px] text-slate-500 tracking-[0.2em] font-black uppercase">Velocidad Máxima</span>
+                            <div className="absolute -left-4 top-0 w-1 h-full bg-gradient-to-b from-neon-cyan to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </motion.div>
+
                         <div className="w-px h-12 bg-white/10" />
-                        <div className="flex flex-col gap-2">
-                            <span className="text-neon-magenta font-bold text-2xl">0ms</span>
-                            <span className="text-xs text-slate-500 tracking-widest uppercase">Latencia Local</span>
-                        </div>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 1.2 }}
+                            className="flex flex-col gap-2 relative group"
+                        >
+                            <motion.span
+                                animate={{
+                                    color: ["#ff00ff", "#ffffff", "#ff00ff"],
+                                    scale: [1, 1.05, 1],
+                                    textShadow: ["0 0 20px rgba(255,0,255,0.5)", "0 0 10px rgba(255,0,255,0.2)", "0 0 20px rgba(255,0,255,0.5)"]
+                                }}
+                                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+                                className="text-neon-magenta font-black text-3xl italic"
+                            >
+                                0ms
+                            </motion.span>
+                            <span className="text-[10px] text-slate-500 tracking-[0.2em] font-black uppercase">Latencia Local</span>
+                            <div className="absolute -left-4 top-0 w-1 h-full bg-gradient-to-b from-neon-magenta to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </motion.div>
                     </div>
                 </motion.div>
 

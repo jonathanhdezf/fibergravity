@@ -5,7 +5,7 @@ import { Rocket } from "lucide-react";
 
 export const PlansHeader = () => {
     return (
-        <section className="pt-24 pb-12 bg-black relative overflow-hidden">
+        <section id="plans-header" className="pt-24 pb-12 bg-black relative overflow-hidden">
             {/* Background Glow */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-neon-cyan/10 blur-[120px] rounded-full pointer-events-none" />
 
