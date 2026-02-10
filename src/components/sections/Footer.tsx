@@ -63,8 +63,8 @@ export const Footer = () => {
                 <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
                     <p>© 2026 FiberGravity - Marketplace Digital de Telecomunicaciones. Teziutlán, Puebla.</p>
                     <div className="flex gap-6">
-                        <a href="#" className="hover:text-white transition-colors">Términos</a>
-                        <a href="#" className="hover:text-white transition-colors">Cookies</a>
+                        <a href="/terminos" className="hover:text-white transition-colors">Términos</a>
+                        <a href="/cookies" className="hover:text-white transition-colors">Cookies</a>
                     </div>
                 </div>
             </div>
