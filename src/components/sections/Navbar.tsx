@@ -93,53 +93,30 @@ export const Navbar = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="fixed inset-0 z-[1000] lg:hidden overflow-y-auto bg-black"
+                        transition={{ duration: 0.2 }}
+                        className="fixed inset-0 z-[1000] lg:hidden overflow-y-auto bg-black/95 backdrop-blur-xl"
                     >
-                        {/* Backdrop with extreme blur and dark gradient */}
-                        <div className="fixed inset-0 bg-black/95 backdrop-blur-2xl" />
-
-                        {/* Decorative animated elements in background */}
-                        <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                            <motion.div
-                                animate={{
-                                    scale: [1, 1.2, 1],
-                                    opacity: [0.1, 0.2, 0.1],
-                                    rotate: [0, 90, 0]
-                                }}
-                                transition={{ duration: 15, repeat: Infinity }}
-                                className="absolute -top-[10%] -left-[10%] w-[500px] h-[500px] bg-neon-cyan/20 rounded-full blur-[120px]"
-                            />
-                            <motion.div
-                                animate={{
-                                    scale: [1.2, 1, 1.2],
-                                    opacity: [0.1, 0.15, 0.1],
-                                    rotate: [0, -90, 0]
-                                }}
-                                transition={{ duration: 18, repeat: Infinity }}
-                                className="absolute -bottom-[10%] -right-[10%] w-[500px] h-[500px] bg-neon-magenta/20 rounded-full blur-[120px]"
-                            />
-                        </div>
-
                         <div className="relative min-h-full flex flex-col pt-32 pb-16 px-8 items-center z-10">
-                            <div className="w-full max-w-sm space-y-1">
+                            <div className="w-full max-w-sm space-y-2">
                                 {navLinks.map((link, i) => (
                                     <motion.a
                                         key={link.name}
                                         href={link.href}
-                                        initial={{ x: -30, opacity: 0 }}
-                                        animate={{ x: 0, opacity: 1 }}
-                                        exit={{ x: 30, opacity: 0 }}
-                                        transition={{ delay: i * 0.05, ease: "easeOut" }}
-                                        onClick={() => {
-                                            setMobileMenu(false);
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 10 }}
+                                        transition={{
+                                            delay: i * 0.04,
+                                            duration: 0.3,
+                                            ease: "easeOut"
                                         }}
-                                        className="flex items-center justify-between group p-4 rounded-2xl border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-95 transition-all text-white no-underline w-full"
+                                        onClick={() => setMobileMenu(false)}
+                                        className="flex items-center justify-between group p-4 rounded-2xl bg-white/[0.02] border border-white/5 active:bg-white/10 transition-all text-white no-underline w-full will-change-transform"
                                     >
                                         <div className="flex items-center gap-6">
                                             <span className="text-white/20 font-black text-xl group-hover:text-neon-cyan transition-colors">0{i + 1}</span>
                                             <div className="flex flex-col">
-                                                <span className="text-xl font-black uppercase tracking-tighter italic group-hover:text-white group-hover:translate-x-1 transition-all">
+                                                <span className="text-xl font-black uppercase tracking-tighter italic group-hover:text-white transition-all">
                                                     {link.name}
                                                 </span>
                                                 <span className="text-[7px] font-black tracking-[0.3em] text-slate-500 uppercase flex items-center gap-2">
@@ -156,8 +133,8 @@ export const Navbar = () => {
                                 initial={{ y: 20, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
                                 exit={{ y: 20, opacity: 0 }}
-                                transition={{ delay: 0.4 }}
-                                className="mt-8 w-full max-w-sm pt-8 border-t border-white/10 flex flex-col gap-6"
+                                transition={{ delay: 0.3, duration: 0.4 }}
+                                className="mt-8 w-full max-w-sm pt-8 border-t border-white/10 flex flex-col gap-6 will-change-transform"
                             >
                                 <div className="flex justify-between items-center text-[10px] font-black tracking-widest text-slate-500 uppercase">
                                     <span>Broker Digital</span>
