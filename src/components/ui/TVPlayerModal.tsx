@@ -17,7 +17,7 @@ export const TVPlayerModal = ({ isOpen, onClose, channelName = "Canal en Vivo", 
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className={`fixed inset-0 z-[11000] flex justify-center overflow-y-auto custom-scrollbar ${isTheater ? "items-start pt-24 md:pt-28" : "items-center"}`}>
+                <div className={`fixed inset-0 z-[11000] flex justify-center overflow-y-auto custom-scrollbar ${isTheater ? "items-start pt-12 md:pt-16" : "items-center"}`}>
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}

@@ -71,7 +71,7 @@ export const TelmexGamerModal = ({ isOpen, onClose }: TelmexGamerModalProps) => 
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[11000] flex items-start md:items-center justify-center p-4 md:p-6 overflow-y-auto pt-24 md:pt-6">
+                <div className="fixed inset-0 z-[11000] flex items-start md:items-center justify-center p-4 md:p-6 overflow-y-auto pt-12 md:pt-6">
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}

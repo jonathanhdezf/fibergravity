@@ -14,7 +14,7 @@ export const SupportTicketModal = ({ isOpen, onClose }: SupportTicketModalProps)
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[11000] flex items-start justify-center p-4 md:p-6 overflow-y-auto pt-24 md:pt-32">
+                <div className="fixed inset-0 z-[11000] flex items-start justify-center p-4 md:p-6 overflow-y-auto pt-12 md:pt-20">
                     {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
