@@ -1,6 +1,5 @@
 import { Navbar } from "@/components/sections/Navbar";
 import { Hero } from "@/components/sections/Hero";
-import { About } from "@/components/sections/About";
 import { PlansHeader } from "@/components/sections/PlansHeader";
 import { GamerPlans } from "@/components/sections/GamerPlans";
 import { StreamerPlans } from "@/components/sections/StreamerPlans";
@@ -21,7 +20,6 @@ export default function Home() {
       <main className="min-h-screen">
         <Navbar />
         <Hero />
-        <About />
         <PlansHeader />
         <GamerPlans />
         <StreamerPlans />

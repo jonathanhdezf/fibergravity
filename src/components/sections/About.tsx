@@ -1,8 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Shield, Zap, Headphones, Globe, ArrowRight, Users } from "lucide-react";
+import { Shield, Zap, Headphones, Globe, ArrowRight, Users, ArrowLeft } from "lucide-react";
 import { GlassCard } from "../ui/GlassCard";
+import Link from "next/link";
 
 const features = [
     {
@@ -33,7 +34,7 @@ const features = [
 
 export const About = () => {
     return (
-        <section id="nosotros" className="relative py-24 overflow-hidden">
+        <section id="nosotros" className="relative py-32 overflow-hidden bg-[#020617]">
             {/* Dynamic Light Streaks (Speed Visual) */}
             <div className="absolute inset-0 pointer-events-none opacity-20">
                 {[...Array(5)].map((_, i) => (
@@ -53,6 +54,11 @@ export const About = () => {
             </div>
 
             <div className="container mx-auto px-6 relative z-10">
+                <Link href="/" className="inline-flex items-center gap-2 text-slate-500 hover:text-white transition-colors mb-12 group">
+                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                    Volver al Inicio
+                </Link>
+
                 <div className="grid lg:grid-cols-2 gap-16 items-center">
                     <motion.div
                         initial={{ opacity: 0, x: -30 }}
@@ -60,10 +66,20 @@ export const About = () => {
                         transition={{ duration: 0.8 }}
                         viewport={{ once: true }}
                     >
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-white/60 text-[10px] font-black uppercase tracking-[0.3em] mb-8">
-                            <Users className="w-3.5 h-3.5 text-neon-cyan" />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            transition={{
+                                duration: 0.5,
+                                type: "spring",
+                                stiffness: 100
+                            }}
+                            viewport={{ once: true }}
+                            className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neon-cyan/20 bg-neon-cyan/5 text-neon-cyan text-[10px] font-black uppercase tracking-[0.3em] mb-8"
+                        >
+                            <Users className="w-3.5 h-3.5 animate-pulse" />
                             Marketplace Digital
-                        </div>
+                        </motion.div>
                         <h2 className="text-4xl md:text-6xl font-black mb-8 leading-tight">
                             Comparamos redes, <br />
                             <span className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-magenta pr-4 pb-1">
