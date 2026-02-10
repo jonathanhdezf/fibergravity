@@ -85,7 +85,7 @@ const gamerPlans = [
 ];
 
 export const GamerPlans = () => {
-    const { openModal, openGamerModal } = useModal();
+    const { openModal, openGamerModal, openProviderGamerModal } = useModal();
     const containerRef = useRef<HTMLDivElement>(null);
     const { scrollXProgress } = useScroll({ container: containerRef });
 
@@ -212,6 +212,14 @@ export const GamerPlans = () => {
                                         onClick={() => {
                                             if (plan.provider.includes("Telmex")) {
                                                 openGamerModal();
+                                            } else if (plan.provider.includes("Totalplay")) {
+                                                openProviderGamerModal("Totalplay");
+                                            } else if (plan.provider.includes("Megacable")) {
+                                                openProviderGamerModal("Megacable");
+                                            } else if (plan.provider.includes("Telcel")) {
+                                                openProviderGamerModal("Telcel");
+                                            } else if (plan.provider.includes("Impactel") || plan.provider.includes("Cablecom")) {
+                                                openProviderGamerModal("Impactel/Cablecom");
                                             } else {
                                                 openModal(plan.provider);
                                             }
