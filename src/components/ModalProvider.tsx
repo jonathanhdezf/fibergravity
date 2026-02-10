@@ -6,6 +6,7 @@ import { SupportTicketModal } from "./ui/SupportTicketModal";
 import { TVPlayerModal } from "./ui/TVPlayerModal";
 import { TelmexGamerModal } from "./ui/TelmexGamerModal";
 import { ProviderGamerModal } from "./ui/ProviderGamerModal";
+import { CategoryModal, PlanCategory } from "./ui/CategoryModal";
 
 interface ModalContextType {
     openModal: (planName?: string) => void;
@@ -13,6 +14,7 @@ interface ModalContextType {
     openPlayerModal: (channelName: string, channelUrl: string) => void;
     openGamerModal: () => void;
     openProviderGamerModal: (provider: "Totalplay" | "Megacable" | "Telcel" | "Impactel/Cablecom") => void;
+    openCategoryModal: (category: PlanCategory, providerName: string) => void;
     closeModal: () => void;
 }
 
@@ -25,12 +27,15 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
     const [isGamerOpen, setIsGamerOpen] = useState(false);
     const [isProviderGamerOpen, setIsProviderGamerOpen] = useState(false);
     const [selectedProvider, setSelectedProvider] = useState<"Totalplay" | "Megacable" | "Telcel" | "Impactel/Cablecom" | undefined>(undefined);
+    const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState<PlanCategory | undefined>(undefined);
+    const [selectedProviderName, setSelectedProviderName] = useState<string | undefined>(undefined);
 
     // Multiple states for different context data
     const [planName, setPlanName] = useState<string | undefined>(undefined);
     const [playerData, setPlayerData] = useState<{ name: string, url: string } | undefined>(undefined);
 
-    const isAnyModalOpen = isContractOpen || isSupportOpen || isPlayerOpen || isGamerOpen || isProviderGamerOpen;
+    const isAnyModalOpen = isContractOpen || isSupportOpen || isPlayerOpen || isGamerOpen || isProviderGamerOpen || isCategoryOpen;
 
     const openModal = (plan?: string) => {
         setPlanName(plan);
@@ -60,6 +65,13 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
         window.history.pushState({ modal: "provider-gamer" }, "");
     };
 
+    const openCategoryModal = (category: PlanCategory, providerName: string) => {
+        setSelectedCategory(category);
+        setSelectedProviderName(providerName);
+        setIsCategoryOpen(true);
+        window.history.pushState({ modal: "category-modal" }, "");
+    };
+
     const closeModal = () => {
         if (isAnyModalOpen) {
             // If the modal was closed via UI (not back button), we need to go back in history
@@ -74,6 +86,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
         setIsPlayerOpen(false);
         setIsGamerOpen(false);
         setIsProviderGamerOpen(false);
+        setIsCategoryOpen(false);
     };
 
     // Handle browser back button (popstate)
@@ -85,6 +98,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
             setIsPlayerOpen(false);
             setIsGamerOpen(false);
             setIsProviderGamerOpen(false);
+            setIsCategoryOpen(false);
         };
 
         window.addEventListener("popstate", handlePopState);
@@ -92,7 +106,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     return (
-        <ModalContext.Provider value={{ openModal, openSupportModal, openPlayerModal, openGamerModal, openProviderGamerModal, closeModal }}>
+        <ModalContext.Provider value={{ openModal, openSupportModal, openPlayerModal, openGamerModal, openProviderGamerModal, openCategoryModal, closeModal }}>
             {children}
             <ContractModal isOpen={isContractOpen} onClose={closeModal} planName={planName} />
             <SupportTicketModal isOpen={isSupportOpen} onClose={closeModal} />
@@ -108,6 +122,14 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
                     isOpen={isProviderGamerOpen}
                     onClose={closeModal}
                     provider={selectedProvider}
+                />
+            )}
+            {selectedCategory && selectedProviderName && (
+                <CategoryModal
+                    isOpen={isCategoryOpen}
+                    onClose={closeModal}
+                    category={selectedCategory}
+                    providerName={selectedProviderName}
                 />
             )}
         </ModalContext.Provider>

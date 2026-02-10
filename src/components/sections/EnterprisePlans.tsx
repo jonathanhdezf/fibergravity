@@ -101,7 +101,7 @@ const enterprisePlans = [
 ];
 
 export const EnterprisePlans = () => {
-    const { openModal } = useModal();
+    const { openCategoryModal } = useModal();
     const containerRef = useRef<HTMLDivElement>(null);
     const { scrollXProgress } = useScroll({ container: containerRef });
 
@@ -225,7 +225,7 @@ export const EnterprisePlans = () => {
                                         </div>
                                     </div>
                                     <NeonButton
-                                        onClick={() => openModal(plan.provider)}
+                                        onClick={() => openCategoryModal("Enterprise", plan.provider)}
                                         variant={plan.color === "cyan" ? "cyan" : "white"}
                                         className="!py-2.5 !px-5 text-[10px]"
                                     >

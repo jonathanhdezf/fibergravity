@@ -86,7 +86,7 @@ const homeOfficePlans = [
 ];
 
 export const HomeOfficePlans = () => {
-    const { openModal } = useModal();
+    const { openCategoryModal } = useModal();
     const containerRef = useRef<HTMLDivElement>(null);
     const { scrollXProgress } = useScroll({ container: containerRef });
 
@@ -210,7 +210,7 @@ export const HomeOfficePlans = () => {
                                         </div>
                                     </div>
                                     <NeonButton
-                                        onClick={() => openModal(plan.provider)}
+                                        onClick={() => openCategoryModal("HomeOffice", plan.provider)}
                                         variant={plan.color === "cyan" ? "cyan" : "white"}
                                         className="!py-2.5 !px-5 text-[10px]"
                                     >

@@ -86,7 +86,7 @@ const streamerPlans = [
 ];
 
 export const StreamerPlans = () => {
-    const { openModal } = useModal();
+    const { openCategoryModal } = useModal();
     const containerRef = useRef<HTMLDivElement>(null);
     const { scrollXProgress } = useScroll({ container: containerRef });
 
@@ -210,7 +210,7 @@ export const StreamerPlans = () => {
                                         </div>
                                     </div>
                                     <NeonButton
-                                        onClick={() => openModal(plan.provider)}
+                                        onClick={() => openCategoryModal("Streamer", plan.provider)}
                                         variant={plan.color === "magenta" ? "magenta" : plan.color === "cyan" ? "cyan" : "white"}
                                         className="!py-2.5 !px-5 text-[10px]"
                                     >
