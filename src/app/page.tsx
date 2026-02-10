@@ -1,7 +1,6 @@
 import { Navbar } from "@/components/sections/Navbar";
 import { Hero } from "@/components/sections/Hero";
 import { About } from "@/components/sections/About";
-import { BentoGrid } from "@/components/sections/BentoGrid";
 import { GamerPlans } from "@/components/sections/GamerPlans";
 import { StreamerPlans } from "@/components/sections/StreamerPlans";
 import { HomeOfficePlans } from "@/components/sections/HomeOfficePlans";
@@ -25,7 +24,6 @@ export default function Home() {
         <Navbar />
         <Hero />
         <About />
-        <BentoGrid />
         <GamerPlans />
         <StreamerPlans />
         <HomeOfficePlans />
