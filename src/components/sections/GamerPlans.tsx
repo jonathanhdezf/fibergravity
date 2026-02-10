@@ -124,24 +124,24 @@ export const GamerPlans = () => {
             {/* Horizontal Carousel */}
             <div className="relative group/carousel">
                 {/* Desktop Navigation Buttons */}
-                <div className="absolute top-1/2 -translate-y-1/2 left-4 md:left-12 z-40 hidden md:block opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-500">
+                <div className="absolute top-1/2 -translate-y-1/2 left-4 md:left-12 z-40 hidden md:block opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-500 pointer-events-none">
                     <button
                         onClick={() => {
                             if (containerRef.current) containerRef.current.scrollBy({ left: -400, behavior: 'smooth' });
                         }}
-                        className="w-14 h-14 rounded-full bg-black/60 backdrop-blur-2xl border border-white/10 flex items-center justify-center text-white hover:bg-neon-cyan/20 hover:border-neon-cyan/50 hover:text-neon-cyan transition-all shadow-[0_0_30px_rgba(0,0,0,0.5)] group/btn"
+                        className="w-14 h-14 rounded-full bg-black/60 backdrop-blur-2xl border border-white/10 flex items-center justify-center text-white hover:bg-neon-cyan/20 hover:border-neon-cyan/50 hover:text-neon-cyan transition-all shadow-[0_0_30px_rgba(0,0,0,0.5)] group/btn pointer-events-auto"
                         aria-label="Anterior"
                     >
                         <ChevronRight className="w-8 h-8 rotate-180 group-hover/btn:-translate-x-1 transition-transform" />
                     </button>
                 </div>
 
-                <div className="absolute top-1/2 -translate-y-1/2 right-4 md:right-12 z-40 hidden md:block opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-500">
+                <div className="absolute top-1/2 -translate-y-1/2 right-4 md:right-12 z-40 hidden md:block opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-500 pointer-events-none">
                     <button
                         onClick={() => {
                             if (containerRef.current) containerRef.current.scrollBy({ left: 400, behavior: 'smooth' });
                         }}
-                        className="w-14 h-14 rounded-full bg-black/60 backdrop-blur-2xl border border-white/10 flex items-center justify-center text-white hover:bg-neon-magenta/20 hover:border-neon-magenta/50 hover:text-neon-magenta transition-all shadow-[0_0_30px_rgba(0,0,0,0.5)] group/btn"
+                        className="w-14 h-14 rounded-full bg-black/60 backdrop-blur-2xl border border-white/10 flex items-center justify-center text-white hover:bg-neon-magenta/20 hover:border-neon-magenta/50 hover:text-neon-magenta transition-all shadow-[0_0_30px_rgba(0,0,0,0.5)] group/btn pointer-events-auto"
                         aria-label="Siguiente"
                     >
                         <ChevronRight className="w-8 h-8 group-hover/btn:translate-x-1 transition-transform" />
@@ -164,7 +164,7 @@ export const GamerPlans = () => {
                             className="min-w-[300px] md:min-w-[380px] snap-center py-4"
                         >
                             <GlassCard
-                                className={`h-full border-white/5 relative group hover:border-${plan.color === 'cyan' ? 'neon-cyan' : plan.color === 'magenta' ? 'neon-magenta' : 'white'}/30 transition-all duration-500 !overflow-visible`}
+                                className={`h-full border-white/5 relative z-10 group hover:border-${plan.color === 'cyan' ? 'neon-cyan' : plan.color === 'magenta' ? 'neon-magenta' : 'white'}/30 transition-all duration-500 !overflow-visible`}
                                 hoverEffect={true}
                             >
                                 {plan.recommendation && (
@@ -217,7 +217,7 @@ export const GamerPlans = () => {
                                             }
                                         }}
                                         variant={plan.color === "magenta" ? "magenta" : plan.color === "cyan" ? "cyan" : "white"}
-                                        className="!py-2.5 !px-5 text-[10px]"
+                                        className="!py-2.5 !px-5 text-[10px] relative z-20"
                                     >
                                         Elegir Pack
                                     </NeonButton>

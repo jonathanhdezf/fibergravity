@@ -21,7 +21,7 @@ export const GlassCard = ({ children, className, hoverEffect = true, onClick }: 
                 className
             )}
         >
-            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
             {children}
         </motion.div>
     );
