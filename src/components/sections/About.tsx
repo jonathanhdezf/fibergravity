@@ -7,26 +7,26 @@ import { GlassCard } from "../ui/GlassCard";
 const features = [
     {
         icon: <Zap className="w-8 h-8 text-neon-cyan" />,
-        title: "Internet de Ultra Velocidad",
-        description: "Conexiones eficientes de fibra óptica que eliminan cualquier rastro de latencia en tu vida digital.",
+        title: "Comparativa Inteligente",
+        description: "Filtramos los mejores planes de Teziutlán basándonos en velocidad real, precio y beneficios de cada proovedor.",
         delay: 0.1
     },
     {
         icon: <Globe className="w-8 h-8 text-neon-magenta" />,
-        title: "Transmisión de Datos",
-        description: "Infraestructura robusta para el envío masivo de información con estabilidad garantizada al 99.9%.",
+        title: "Neutralidad Total",
+        description: "No favorecemos a ninguna marca; nuestro único compromiso es encontrar la opción más eficiente para tu hogar o empresa.",
         delay: 0.2
     },
     {
         icon: <Shield className="w-8 h-8 text-white" />,
-        title: "Telefonía Fija Cristalina",
-        description: "Comunicación sin interferencias, uniendo hogares y empresas con la máxima calidad de voz.",
+        title: "Gestión Directa",
+        description: "Nosotros nos encargamos de los trámites y la logística con el proveedor para que tú solo disfrutes de la conexión.",
         delay: 0.3
     },
     {
         icon: <Headphones className="w-8 h-8 text-neon-cyan" />,
-        title: "Soporte Especializado",
-        description: "Un equipo técnico de élite monitoreando tu conexión 24/7 para que nunca dejes de avanzar.",
+        title: "Asesoría de Élite",
+        description: "Un equipo experto te guía en la elección del plan, asegurando que no pagues de más por servicios que no necesitas.",
         delay: 0.4
     }
 ];
@@ -62,26 +62,26 @@ export const About = () => {
                     >
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-white/60 text-[10px] font-black uppercase tracking-[0.3em] mb-8">
                             <Users className="w-3.5 h-3.5 text-neon-cyan" />
-                            Nosotros
+                            Marketplace Digital
                         </div>
                         <h2 className="text-4xl md:text-6xl font-black mb-8 leading-tight">
-                            Más que internet, <br />
+                            Comparamos redes, <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-magenta">
-                                impulsamos tu futuro
+                                conectamos estilos
                             </span>
                         </h2>
                         <p className="text-xl text-slate-400 mb-10 leading-relaxed">
-                            En <span className="text-white font-bold italic font-space">FiberGravity</span>, no solo instalamos cables. Diseñamos autopistas digitales de alta eficiencia para que la comunicación de nuestros clientes fluya sin límites.
+                            En <span className="text-white font-bold italic font-space">FiberGravity</span>, funcionamos como tu broker digital de telecomunicaciones en Teziutlán. Nuestra misión es simplificar tu búsqueda, analizando el mercado para ofrecerte la recomendación perfecta.
                         </p>
 
                         <div className="space-y-6">
                             <div className="flex items-center gap-4 group cursor-help">
                                 <div className="w-12 h-px bg-neon-cyan group-hover:w-20 transition-all duration-500" />
-                                <span className="text-sm uppercase tracking-[0.3em] font-bold text-slate-500 group-hover:text-neon-cyan transition-colors">Innovación Constante</span>
+                                <span className="text-sm uppercase tracking-[0.3em] font-bold text-slate-500 group-hover:text-neon-cyan transition-colors">Broker Especializado</span>
                             </div>
                             <div className="flex items-center gap-4 group cursor-help">
                                 <div className="w-12 h-px bg-neon-magenta group-hover:w-20 transition-all duration-500" />
-                                <span className="text-sm uppercase tracking-[0.3em] font-bold text-slate-500 group-hover:text-neon-magenta transition-colors">Estabilidad Absoluta</span>
+                                <span className="text-sm uppercase tracking-[0.3em] font-bold text-slate-500 group-hover:text-neon-magenta transition-colors">Análisis de Mercado</span>
                             </div>
                         </div>
 
@@ -92,9 +92,9 @@ export const About = () => {
                             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity">
                                 <Zap className="w-16 h-16 text-neon-cyan" />
                             </div>
-                            <h3 className="text-xl font-bold mb-4">Nuestro Compromiso</h3>
+                            <h3 className="text-xl font-bold mb-4">Misión Marketplace</h3>
                             <p className="text-slate-400">
-                                Garantizar calidad y soporte técnico de nivel superior, transformando la manera en que el mundo se conecta.
+                                Ser el puente tecnológico entre los mejores proveedores y los usuarios de Teziutlán, garantizando transparencia y ahorro en cada conexión.
                             </p>
                         </motion.div>
                     </motion.div>

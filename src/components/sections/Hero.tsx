@@ -58,14 +58,14 @@ export const Hero = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.8 }}
                 >
-                    <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-tight mb-6">
-                        Internet que <br />
+                    <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-tight mb-6 italic">
+                        Tu conexión <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan via-white to-neon-magenta neon-text-cyan">
-                            desafía la <br /> gravedad
+                            perfecta en <br /> Teziutlán
                         </span>
                     </h1>
                     <p className="text-xl text-slate-400 mb-8 max-w-lg leading-relaxed">
-                        Experimenta la fibra óptica de ultra alta velocidad. Sin fricción, sin retrasos, solo pura potencia digital.
+                        El comparador de Internet y TV que te conecta con el plan ideal para tu estilo de vida o negocio. Analizamos, comparamos y tú eliges la máxima potencia.
                     </p>
                     <div className="flex flex-wrap gap-4">
                         <a href="#plans-header" className="contents">
