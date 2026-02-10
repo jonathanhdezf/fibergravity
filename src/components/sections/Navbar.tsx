@@ -2,13 +2,23 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Wifi, Menu, X, ArrowUpRight, Zap, Shield, Tv, Radar, Gauge, Users } from "lucide-react";
+import { Wifi, Menu, X, ArrowUpRight, Zap, Shield, Tv, Radar, Gauge, Users, ChevronDown } from "lucide-react";
 import { NeonButton } from "../ui/NeonButton";
 import { useModal } from "../ModalProvider";
 
 const navLinks = [
     { name: "Inicio", href: "#hero", icon: <Zap className="w-4 h-4" /> },
-    { name: "Planes de Internet", href: "#plans-header", icon: <Shield className="w-4 h-4" /> },
+    {
+        name: "Planes de Internet",
+        href: "#plans-header",
+        icon: <Shield className="w-4 h-4" />,
+        submenu: [
+            { name: "Gamer", href: "#gamer" },
+            { name: "Streamer", href: "#streamer" },
+            { name: "Home Office", href: "#home-office" },
+            { name: "Empresas", href: "#empresas" },
+        ]
+    },
     { name: "Internet + TV", href: "#television", icon: <Tv className="w-4 h-4" /> },
     { name: "Medidor de Velocidad", href: "#speed-test", icon: <Gauge className="w-4 h-4" /> },
     { name: "Cobertura", href: "#cobertura", icon: <Radar className="w-4 h-4" /> },
@@ -94,13 +104,33 @@ export const Navbar = () => {
                     <div className="hidden lg:flex items-center gap-8 pr-2">
                         <ul className="flex items-center gap-6">
                             {navLinks.map((link) => (
-                                <li key={link.name}>
-                                    <a
-                                        href={link.href}
-                                        className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-colors"
-                                    >
-                                        {link.name}
-                                    </a>
+                                <li key={link.name} className="relative group/item">
+                                    <div className="flex items-center gap-1">
+                                        <a
+                                            href={link.href}
+                                            className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-colors py-4 flex items-center gap-1"
+                                        >
+                                            {link.name}
+                                            {link.submenu && <ChevronDown className="w-3 h-3 group-hover/item:rotate-180 transition-transform duration-300" />}
+                                        </a>
+                                    </div>
+
+                                    {link.submenu && (
+                                        <div className="absolute top-[100%] left-0 pt-2 opacity-0 translate-y-2 pointer-events-none group-hover/item:opacity-100 group-hover/item:translate-y-0 group-hover/item:pointer-events-auto transition-all duration-300 z-[10000]">
+                                            <div className="bg-black/90 backdrop-blur-2xl border border-white/10 rounded-2xl p-2 min-w-[160px] shadow-2xl">
+                                                {link.submenu.map((sub) => (
+                                                    <a
+                                                        key={sub.name}
+                                                        href={sub.href}
+                                                        className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-[9px] font-bold uppercase tracking-widest text-slate-400 hover:text-neon-cyan transition-all"
+                                                    >
+                                                        <div className="w-1 h-1 rounded-full bg-neon-cyan/50" />
+                                                        {sub.name}
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </li>
                             ))}
                         </ul>
@@ -145,39 +175,67 @@ export const Navbar = () => {
                     >
                         <div className="w-full max-w-sm mx-auto flex flex-col gap-2">
                             {navLinks.map((link, i) => (
-                                <motion.a
-                                    key={link.name}
-                                    href={link.href}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: i * 0.04 }}
-                                    onClick={(e) => {
-                                        // SENIOR FIX: Real mobile devices need a moment to process anchor links
-                                        // before the body overflow is restored and the overlay is hidden.
+                                <div key={link.name} className="flex flex-col gap-2">
+                                    <motion.a
+                                        href={link.href}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: i * 0.04 }}
+                                        onClick={(e) => {
+                                            if (!link.submenu) {
+                                                setMobileMenu(false);
+                                                const targetId = link.href.replace('#', '');
+                                                const element = document.getElementById(targetId);
+                                                if (element) {
+                                                    setTimeout(() => {
+                                                        element.scrollIntoView({ behavior: 'smooth' });
+                                                    }, 100);
+                                                }
+                                            }
+                                        }}
+                                        className="flex items-center justify-between p-5 rounded-3xl bg-white/[0.03] border border-white/5 active:bg-white/10 active:scale-[0.98] transition-all no-underline group"
+                                    >
+                                        <div className="flex items-center gap-5">
+                                            <span className="text-white/20 font-black text-lg group-hover:text-neon-cyan transition-colors">0{i + 1}</span>
+                                            <span className="text-xl font-black uppercase tracking-tighter italic text-white group-hover:translate-x-1 transition-transform">
+                                                {link.name}
+                                            </span>
+                                        </div>
+                                        {link.submenu ? (
+                                            <ChevronDown className="w-5 h-5 text-slate-700" />
+                                        ) : (
+                                            <ArrowUpRight className="w-5 h-5 text-slate-700 group-hover:text-neon-cyan transition-colors" />
+                                        )}
+                                    </motion.a>
 
-                                        // Close menu first to restore body scroll
-                                        setMobileMenu(false);
-
-                                        // If it's a hash link, we manually trigger the scroll to be 100% sure
-                                        const targetId = link.href.replace('#', '');
-                                        const element = document.getElementById(targetId);
-                                        if (element) {
-                                            // Small timeout to wait for 'overflow: hidden' to be removed from body
-                                            setTimeout(() => {
-                                                element.scrollIntoView({ behavior: 'smooth' });
-                                            }, 100);
-                                        }
-                                    }}
-                                    className="flex items-center justify-between p-5 rounded-3xl bg-white/[0.03] border border-white/5 active:bg-white/10 active:scale-[0.98] transition-all no-underline group"
-                                >
-                                    <div className="flex items-center gap-5">
-                                        <span className="text-white/20 font-black text-lg group-hover:text-neon-cyan transition-colors">0{i + 1}</span>
-                                        <span className="text-xl font-black uppercase tracking-tighter italic text-white group-hover:translate-x-1 transition-transform">
-                                            {link.name}
-                                        </span>
-                                    </div>
-                                    <ArrowUpRight className="w-5 h-5 text-slate-700 group-hover:text-neon-cyan transition-colors" />
-                                </motion.a>
+                                    {link.submenu && (
+                                        <div className="grid grid-cols-2 gap-2 px-2 pb-4">
+                                            {link.submenu.map((sub, subIdx) => (
+                                                <motion.a
+                                                    key={sub.name}
+                                                    href={sub.href}
+                                                    initial={{ opacity: 0, scale: 0.95 }}
+                                                    animate={{ opacity: 1, scale: 1 }}
+                                                    transition={{ delay: (i * 0.04) + (subIdx * 0.05) }}
+                                                    onClick={() => {
+                                                        setMobileMenu(false);
+                                                        const targetId = sub.href.replace('#', '');
+                                                        const element = document.getElementById(targetId);
+                                                        if (element) {
+                                                            setTimeout(() => {
+                                                                element.scrollIntoView({ behavior: 'smooth' });
+                                                            }, 100);
+                                                        }
+                                                    }}
+                                                    className="flex items-center gap-3 p-4 rounded-2xl bg-white/[0.02] border border-white/5 text-[10px] font-bold uppercase tracking-widest text-slate-500 active:text-neon-cyan"
+                                                >
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-neon-cyan/30" />
+                                                    {sub.name}
+                                                </motion.a>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             ))}
 
                             <motion.div
