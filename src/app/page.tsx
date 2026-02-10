@@ -4,6 +4,7 @@ import { About } from "@/components/sections/About";
 import { BentoGrid } from "@/components/sections/BentoGrid";
 import { GamerPlans } from "@/components/sections/GamerPlans";
 import { StreamerPlans } from "@/components/sections/StreamerPlans";
+import { HomeOfficePlans } from "@/components/sections/HomeOfficePlans";
 import { TVSection } from "@/components/sections/TVSection";
 import { SupportSection } from "@/components/sections/SupportSection";
 import { SpeedTest } from "@/components/sections/SpeedTest";
@@ -26,6 +27,7 @@ export default function Home() {
         <BentoGrid />
         <GamerPlans />
         <StreamerPlans />
+        <HomeOfficePlans />
         <TVSection />
         <SupportSection />
         <SpeedTest />
