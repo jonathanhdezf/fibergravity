@@ -21,6 +21,22 @@ export const Navbar = () => {
     const [mobileMenu, setMobileMenu] = useState(false);
     const { openModal } = useModal();
 
+    // Fix: Handle physical back button to close menu
+    useEffect(() => {
+        if (mobileMenu) {
+            window.history.pushState({ menuOpen: true }, "");
+        }
+
+        const handlePopState = (e: PopStateEvent) => {
+            if (mobileMenu) {
+                setMobileMenu(false);
+            }
+        };
+
+        window.addEventListener("popstate", handlePopState);
+        return () => window.removeEventListener("popstate", handlePopState);
+    }, [mobileMenu]);
+
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 50);
         window.addEventListener("scroll", handleScroll);
@@ -46,7 +62,7 @@ export const Navbar = () => {
                         <Wifi className="w-8 h-8 text-neon-cyan group-hover:scale-110 transition-transform relative z-10" />
                         <div className="absolute inset-0 bg-neon-cyan blur-lg opacity-40 animate-pulse" />
                     </div>
-                    <span className="text-2xl font-black tracking-tighter italic">
+                    <span className="text-2xl font-black tracking-tighter italic text-white no-underline">
                         FIBER<span className="text-neon-cyan neon-text-cyan">GRAVITY</span>
                     </span>
                 </a>
@@ -78,11 +94,17 @@ export const Navbar = () => {
 
                 {/* Mobile Trigger */}
                 <button
-                    className="lg:hidden z-[110] p-2 hover:bg-white/5 rounded-full transition-colors"
-                    onClick={() => setMobileMenu(!mobileMenu)}
+                    className="lg:hidden z-[1100] p-2 hover:bg-white/5 rounded-full transition-colors relative"
+                    onClick={() => {
+                        if (mobileMenu) {
+                            window.history.back(); // Use back to close if we pushed state
+                        } else {
+                            setMobileMenu(true);
+                        }
+                    }}
                     aria-label={mobileMenu ? "Cerrar menú" : "Abrir menú"}
                 >
-                    {mobileMenu ? <X className="w-8 h-8" /> : <Menu className="w-8 h-8" />}
+                    {mobileMenu ? <X className="w-8 h-8 text-white" /> : <Menu className="w-8 h-8 text-white" />}
                 </button>
             </div>
 
@@ -110,7 +132,9 @@ export const Navbar = () => {
                                             duration: 0.3,
                                             ease: "easeOut"
                                         }}
-                                        onClick={() => setMobileMenu(false)}
+                                        onClick={() => {
+                                            if (mobileMenu) window.history.back();
+                                        }}
                                         className="flex items-center justify-between group p-4 rounded-2xl bg-white/[0.02] border border-white/5 active:bg-white/10 transition-all text-white no-underline w-full will-change-transform"
                                     >
                                         <div className="flex items-center gap-6">
@@ -142,7 +166,7 @@ export const Navbar = () => {
                                 </div>
                                 <NeonButton
                                     onClick={() => {
-                                        setMobileMenu(false);
+                                        if (mobileMenu) window.history.back();
                                         openModal();
                                     }}
                                     className="w-full !py-4 text-xs font-black tracking-[0.2em]"
