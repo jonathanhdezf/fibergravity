@@ -4,7 +4,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { NeonButton } from "../ui/NeonButton";
 import { GlassCard } from "../ui/GlassCard";
-import { Cpu, Zap, Radio } from "lucide-react";
+import { Cpu, Zap, Wifi } from "lucide-react";
 
 import { useModal } from "../ModalProvider";
 
@@ -231,7 +231,7 @@ export const Hero = () => {
                                             transition={{ duration: 4, repeat: Infinity }}
                                             className="w-24 h-24 rounded-3xl bg-gradient-to-br from-slate-900 to-black border border-white/10 flex items-center justify-center shadow-inner group-hover:border-neon-cyan transition-colors"
                                         >
-                                            <Radio className="text-neon-cyan w-12 h-12" />
+                                            <Wifi className="text-neon-cyan w-12 h-12" />
                                         </motion.div>
 
                                         {/* Data Oscilloscope Layout */}
