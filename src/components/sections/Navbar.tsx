@@ -93,13 +93,14 @@ export const Navbar = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[105] lg:hidden"
+                        transition={{ duration: 0.3 }}
+                        className="fixed inset-0 z-[1000] lg:hidden overflow-y-auto bg-black"
                     >
                         {/* Backdrop with extreme blur and dark gradient */}
-                        <div className="absolute inset-0 bg-black/95 backdrop-blur-2xl" />
+                        <div className="fixed inset-0 bg-black/95 backdrop-blur-2xl" />
 
                         {/* Decorative animated elements in background */}
-                        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                        <div className="fixed inset-0 overflow-hidden pointer-events-none">
                             <motion.div
                                 animate={{
                                     scale: [1, 1.2, 1],
@@ -120,31 +121,33 @@ export const Navbar = () => {
                             />
                         </div>
 
-                        <div className="relative h-full flex flex-col justify-center items-center p-8">
-                            <div className="w-full max-w-sm space-y-2">
+                        <div className="relative min-h-full flex flex-col pt-32 pb-16 px-8 items-center z-10">
+                            <div className="w-full max-w-sm space-y-1">
                                 {navLinks.map((link, i) => (
                                     <motion.a
                                         key={link.name}
                                         href={link.href}
-                                        initial={{ x: -50, opacity: 0 }}
+                                        initial={{ x: -30, opacity: 0 }}
                                         animate={{ x: 0, opacity: 1 }}
-                                        exit={{ x: 50, opacity: 0 }}
-                                        transition={{ delay: i * 0.08, ease: "easeOut" }}
-                                        onClick={() => setMobileMenu(false)}
-                                        className="flex items-center justify-between group p-4 rounded-2xl border border-white/0 hover:border-white/10 hover:bg-white/5 transition-all"
+                                        exit={{ x: 30, opacity: 0 }}
+                                        transition={{ delay: i * 0.05, ease: "easeOut" }}
+                                        onClick={() => {
+                                            setMobileMenu(false);
+                                        }}
+                                        className="flex items-center justify-between group p-4 rounded-2xl border border-transparent hover:border-white/10 hover:bg-white/5 active:scale-95 transition-all text-white no-underline w-full"
                                     >
                                         <div className="flex items-center gap-6">
-                                            <span className="text-white/20 font-black text-2xl group-hover:text-neon-cyan transition-colors">0{i + 1}</span>
+                                            <span className="text-white/20 font-black text-xl group-hover:text-neon-cyan transition-colors">0{i + 1}</span>
                                             <div className="flex flex-col">
-                                                <span className="text-2xl font-black uppercase tracking-tighter italic group-hover:text-white group-hover:translate-x-2 transition-all">
+                                                <span className="text-xl font-black uppercase tracking-tighter italic group-hover:text-white group-hover:translate-x-1 transition-all">
                                                     {link.name}
                                                 </span>
-                                                <span className="text-[8px] font-black tracking-[0.3em] text-slate-500 uppercase flex items-center gap-2">
-                                                    {link.icon} Analysis Optimized
+                                                <span className="text-[7px] font-black tracking-[0.3em] text-slate-500 uppercase flex items-center gap-2">
+                                                    {link.icon} Live Analysis
                                                 </span>
                                             </div>
                                         </div>
-                                        <ArrowUpRight className="w-6 h-6 text-slate-700 group-hover:text-neon-cyan transition-colors" />
+                                        <ArrowUpRight className="w-5 h-5 text-slate-700 group-hover:text-neon-cyan transition-colors" />
                                     </motion.a>
                                 ))}
                             </div>
@@ -153,10 +156,10 @@ export const Navbar = () => {
                                 initial={{ y: 20, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1 }}
                                 exit={{ y: 20, opacity: 0 }}
-                                transition={{ delay: 0.6 }}
-                                className="mt-12 w-full max-w-sm pt-8 border-t border-white/10 flex flex-col gap-6"
+                                transition={{ delay: 0.4 }}
+                                className="mt-8 w-full max-w-sm pt-8 border-t border-white/10 flex flex-col gap-6"
                             >
-                                <div className="flex justify-between items-center text-xs font-black tracking-widest text-slate-500 uppercase">
+                                <div className="flex justify-between items-center text-[10px] font-black tracking-widest text-slate-500 uppercase">
                                     <span>Broker Digital</span>
                                     <span className="text-neon-cyan">Teziutlán v2.4</span>
                                 </div>
@@ -165,7 +168,7 @@ export const Navbar = () => {
                                         setMobileMenu(false);
                                         openModal();
                                     }}
-                                    className="w-full !py-5 text-sm font-black tracking-[0.2em]"
+                                    className="w-full !py-4 text-xs font-black tracking-[0.2em]"
                                     variant="cyan"
                                 >
                                     INICIAR CONTRATACIÓN
