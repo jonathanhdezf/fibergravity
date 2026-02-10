@@ -1,9 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Mail, Phone, MapPin, Send, MessageSquare, Globe2 } from "lucide-react";
+import { Mail, Phone, MapPin, Send, MessageSquare, Globe2, ArrowLeft } from "lucide-react";
 import { GlassCard } from "../ui/GlassCard";
 import { NeonButton } from "../ui/NeonButton";
+import Link from "next/link";
 
 const contactInfo = [
     {
@@ -37,6 +38,11 @@ export const Contact = () => {
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-neon-magenta/5 rounded-full blur-[120px] pointer-events-none" />
 
             <div className="container mx-auto px-6 relative z-10">
+                <Link href="/" className="inline-flex items-center gap-2 text-slate-500 hover:text-white transition-colors mb-12 group">
+                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                    Volver al Inicio
+                </Link>
+
                 <div className="grid lg:grid-cols-2 gap-16 items-start">
                     {/* Left Column: Info & Text */}
                     <motion.div
@@ -45,10 +51,20 @@ export const Contact = () => {
                         transition={{ duration: 0.8 }}
                         viewport={{ once: true }}
                     >
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-neon-cyan/30 bg-neon-cyan/5 text-neon-cyan text-sm font-bold tracking-widest uppercase mb-8">
-                            <MessageSquare className="w-4 h-4" />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            transition={{
+                                duration: 0.5,
+                                type: "spring",
+                                stiffness: 100
+                            }}
+                            viewport={{ once: true }}
+                            className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neon-cyan/20 bg-neon-cyan/5 text-neon-cyan text-[10px] font-black uppercase tracking-[0.3em] mb-8"
+                        >
+                            <MessageSquare className="w-3.5 h-3.5 animate-pulse" />
                             Contacto Directo
-                        </div>
+                        </motion.div>
 
                         <h2 className="text-4xl md:text-6xl font-black mb-8 leading-tight italic">
                             ¿Listo para el <br />

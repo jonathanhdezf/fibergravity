@@ -10,9 +10,7 @@ export default function PrivacyPage() {
         <ModalProvider>
             <main className="min-h-screen">
                 <Navbar />
-                <div className="pt-20">
-                    <Privacy />
-                </div>
+                <Privacy />
                 <Footer />
             </main>
         </ModalProvider>

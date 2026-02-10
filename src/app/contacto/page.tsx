@@ -10,9 +10,7 @@ export default function ContactoPage() {
         <ModalProvider>
             <main className="min-h-screen">
                 <Navbar />
-                <div className="pt-20">
-                    <Contact />
-                </div>
+                <Contact />
                 <Footer />
             </main>
         </ModalProvider>

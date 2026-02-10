@@ -70,7 +70,7 @@ export const Coverage = () => {
                             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-neon-magenta/30 bg-neon-magenta/5 text-neon-magenta text-xs font-black tracking-widest uppercase mb-6"
                         >
                             <Radar className="w-3.5 h-3.5" />
-                            Auditoría de Infraestructura
+                            Cobertura regional
                         </motion.div>
 
                         <motion.h2
