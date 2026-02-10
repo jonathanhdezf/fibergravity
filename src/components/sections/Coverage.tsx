@@ -70,7 +70,7 @@ export const Coverage = () => {
                             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-neon-magenta/30 bg-neon-magenta/5 text-neon-magenta text-xs font-black tracking-widest uppercase mb-6"
                         >
                             <Radar className="w-3.5 h-3.5" />
-                            Red Regional Activa
+                            Auditoría de Infraestructura
                         </motion.div>
 
                         <motion.h2
@@ -80,9 +80,9 @@ export const Coverage = () => {
                             viewport={{ once: true }}
                             className="text-4xl md:text-7xl font-black italic leading-[0.9] mb-8"
                         >
-                            Teziutlán y la región <br />
+                            Sabemos quién llega <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-white">
-                                bajo nuestra señal
+                                hasta tu domicilio
                             </span>
                         </motion.h2>
 
@@ -93,7 +93,7 @@ export const Coverage = () => {
                             viewport={{ once: true }}
                             className="text-xl text-slate-400 font-light leading-relaxed"
                         >
-                            No importa el terreno ni el clima. Hemos desplegado una red de fibra óptica diseñada específicamente para la geografía de la Sierra Nororiental.
+                            No pierdas tiempo con ventas falsas. Auditamos la cobertura real de cada proveedor en la Sierra Nororiental para decirte exactamente quién ofrece la mejor señal en tu ubicación.
                         </motion.p>
                     </div>
 

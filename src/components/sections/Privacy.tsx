@@ -58,9 +58,9 @@ export const Privacy = () => {
                         viewport={{ once: true }}
                         className="text-4xl md:text-6xl font-black mb-8 leading-tight italic"
                     >
-                        Tu identidad digital, <br />
+                        Tus datos, <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-magenta">
-                            blindada por expertos
+                            tu elección protegida
                         </span>
                     </motion.h2>
 
@@ -71,7 +71,7 @@ export const Privacy = () => {
                         viewport={{ once: true }}
                         className="text-xl text-slate-400 leading-relaxed font-light"
                     >
-                        En <span className="text-white font-bold italic">FiberGravity</span> entendemos que la privacidad no es una opción, sino un derecho fundamental en la era de la información.
+                        Como broker digital, en <span className="text-white font-bold italic">FiberGravity</span> actuamos como tu escudo. Tu información solo fluye hacia el proveedor que tú elijas bajo los más altos estándares de encriptación y transparencia.
                     </motion.p>
                 </div>
 

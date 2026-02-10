@@ -15,8 +15,8 @@ export const Footer = () => {
                                 FIBER<span className="text-neon-cyan">GRAVITY</span>
                             </span>
                         </div>
-                        <p className="text-slate-400 max-w-sm mb-6 leading-relaxed">
-                            La Red de Fibra Óptica más avanzada del país. Redefiniendo los estándares de velocidad y estabilidad para la era digital.
+                        <p className="text-slate-400 max-w-sm mb-6 leading-relaxed text-sm">
+                            El marketplace #1 de telecomunicaciones en Teziutlán. Comparamos proovedores para conectarte con el futuro, sin complicaciones y con asesoría experta.
                         </p>
                         <div className="flex gap-4">
                             {[
@@ -58,7 +58,7 @@ export const Footer = () => {
                 </div>
 
                 <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
-                    <p>© 2026 FiberGravity Telecom. Todos los derechos reservados.</p>
+                    <p>© 2026 FiberGravity - Marketplace Digital de Telecomunicaciones. Teziutlán, Puebla.</p>
                     <div className="flex gap-6">
                         <a href="#" className="hover:text-white transition-colors">Términos</a>
                         <a href="#" className="hover:text-white transition-colors">Cookies</a>

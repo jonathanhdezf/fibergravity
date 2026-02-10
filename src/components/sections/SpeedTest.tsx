@@ -52,12 +52,12 @@ export const SpeedTest = () => {
 
                 <div className="grid md:grid-cols-2 gap-12 items-center relative z-10">
                     <div className="text-center md:text-left">
-                        <h2 className="text-4xl font-black mb-6 flex items-center justify-center md:justify-start gap-4">
+                        <h2 className="text-4xl font-black mb-6 flex items-center justify-center md:justify-start gap-4 italic">
                             <Gauge className="text-neon-cyan w-10 h-10" />
-                            Velocidad Real
+                            Auditoría de Conexión
                         </h2>
                         <p className="text-slate-400 text-lg mb-8">
-                            No solo prometemos gigabits, los entregamos. Nuestra infraestructura está diseñada para mantener el pico de rendimiento incluso en horas de alta demanda.
+                            Mide el rendimiento real de tu proovedor actual. Como broker neutral, te ayudamos a auditar si estás recibiendo lo que pagas para recomendarte una alternativa superior si es necesario.
                         </p>
                         <div className="flex flex-col gap-4">
                             <div className="flex items-center gap-3">

@@ -16,18 +16,18 @@ import { NeonButton } from "../ui/NeonButton";
 const supportSteps = [
     {
         icon: <MessageSquare className="w-6 h-6 text-neon-cyan" />,
-        title: "Contacto Inmediato",
-        description: "Chatea con nuestros expertos en tiempo real a través de WhatsApp o nuestro portal."
+        title: "Gestión de Broker",
+        description: "Servimos de puente ante cualquier falla. Nosotros gestionamos el reporte con el proveedor por ti."
     },
     {
         icon: <Settings className="w-6 h-6 text-neon-magenta" />,
-        title: "Diagnóstico Remoto",
-        description: "Resolvemos el 85% de las incidencias de forma instantánea sin visitas técnicas."
+        title: "Auditoría de Señal",
+        description: "Monitoreamos la calidad de tu conexión local para asegurar que recibes los Megas contratados."
     },
     {
         icon: <ShieldCheck className="w-6 h-6 text-white" />,
-        title: "Garantía de Servicio",
-        description: "Si el problema persiste, un técnico llegará a tu hogar en menos de 24 horas."
+        title: "Garantía de Resolución",
+        description: "Si el proovedor no cumple, nuestro equipo técnico local interviene para encontrar una solución."
     }
 ];
 
@@ -53,16 +53,16 @@ export const SupportSection = () => {
                     >
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-neon-cyan/30 bg-neon-cyan/10 text-neon-cyan text-xs font-bold mb-8 uppercase tracking-widest">
                             <Clock className="w-4 h-4" />
-                            Soporte 24/7 Sin Descanso
+                            Soporte Local en Teziutlán
                         </div>
 
                         <h2 className="text-4xl md:text-6xl font-black mb-6 leading-tight">
-                            Resolución <span className="text-neon-cyan neon-text-cyan">Inteligente</span> <br />
-                            y Velocidad Humana
+                            Resolución <span className="text-neon-cyan neon-text-cyan">Experta</span> <br />
+                            y Defensa del Usuario
                         </h2>
 
                         <p className="text-lg text-slate-400 mb-10 leading-relaxed max-w-xl">
-                            Sabemos que tu conexión es vital. Por eso hemos diseñado un sistema de soporte técnico que reacciona antes de que tú lo notes. Tecnología de punta respaldada por personas reales.
+                            Como tu broker de confianza, no solo buscamos el plan perfecto; nos aseguramos de que se mantenga así. Un solo punto de contacto para gestionar todo tu ecosistema digital.
                         </p>
 
                         <div className="grid gap-6">
@@ -108,8 +108,8 @@ export const SupportSection = () => {
                                 </div>
 
                                 <h3 className="text-3xl font-black mb-4 italic">¿Necesitas ayuda ahora mismo?</h3>
-                                <p className="text-slate-400 mb-8 leading-relaxed">
-                                    Escanea el código o haz clic para iniciar una videollamada de asistencia técnica o hablar directamente con un experto en fibra óptica.
+                                <p className="text-slate-400 mb-8 leading-relaxed text-sm">
+                                    ¿Problemas con tu servicio actual? Escanea el código para hablar con un especialista en conectividad regional. Auditamos tu conexión y gestionamos soluciones inmediatas con el proovedor.
                                 </p>
 
                                 <div className="p-4 bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 flex flex-col items-center gap-6 group/qr transition-all hover:border-neon-cyan/30">
