@@ -55,7 +55,7 @@ export const Footer = () => {
                             <li><a href="#soporte" className="hover:text-neon-cyan transition-colors">Soporte Técnico</a></li>
                             <li><a href="/descargas" className="hover:text-neon-cyan transition-colors">Descargas</a></li>
                             <li><a href="/privacidad" className="hover:text-neon-cyan transition-colors">Privacidad</a></li>
-                            <li><a href="#contacto" className="hover:text-neon-cyan transition-colors">Contacto</a></li>
+                            <li><a href="/contacto" className="hover:text-neon-cyan transition-colors">Contacto</a></li>
                         </ul>
                     </div>
                 </div>
