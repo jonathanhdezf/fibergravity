@@ -8,9 +8,8 @@ import { useModal } from "../ModalProvider";
 
 const navLinks = [
     { name: "Inicio", href: "#hero", icon: <Zap className="w-4 h-4" /> },
-    { name: "Marketplace", href: "#nosotros", icon: <Users className="w-4 h-4" /> },
     { name: "Planes de Internet", href: "#plans-header", icon: <Shield className="w-4 h-4" /> },
-    { name: "TV & Cable", href: "#television", icon: <Tv className="w-4 h-4" /> },
+    { name: "Internet + TV", href: "#television", icon: <Tv className="w-4 h-4" /> },
     { name: "Cobertura", href: "#cobertura", icon: <Radar className="w-4 h-4" /> },
     { name: "Audit Speed", href: "#speed-test", icon: <Gauge className="w-4 h-4" /> },
 ];
