@@ -85,7 +85,7 @@ const gamerPlans = [
 ];
 
 export const GamerPlans = () => {
-    const { openModal } = useModal();
+    const { openModal, openGamerModal } = useModal();
     const containerRef = useRef<HTMLDivElement>(null);
     const { scrollXProgress } = useScroll({ container: containerRef });
 
@@ -209,7 +209,13 @@ export const GamerPlans = () => {
                                         </div>
                                     </div>
                                     <NeonButton
-                                        onClick={() => openModal(plan.provider)}
+                                        onClick={() => {
+                                            if (plan.provider.includes("Telmex")) {
+                                                openGamerModal();
+                                            } else {
+                                                openModal(plan.provider);
+                                            }
+                                        }}
                                         variant={plan.color === "magenta" ? "magenta" : plan.color === "cyan" ? "cyan" : "white"}
                                         className="!py-2.5 !px-5 text-[10px]"
                                     >

@@ -8,9 +8,10 @@ interface NeonButtonProps {
     variant?: "cyan" | "magenta" | "white";
     className?: string;
     onClick?: () => void;
+    type?: "button" | "submit" | "reset";
 }
 
-export const NeonButton = ({ children, variant = "cyan", className, onClick }: NeonButtonProps) => {
+export const NeonButton = ({ children, variant = "cyan", className, onClick, type = "button" }: NeonButtonProps) => {
     const styles = {
         cyan: "bg-neon-cyan/20 border-neon-cyan text-neon-cyan hover:bg-neon-cyan hover:text-black neon-glow-cyan",
         magenta: "bg-neon-magenta/20 border-neon-magenta text-neon-magenta hover:bg-neon-magenta hover:text-black neon-glow-magenta",
@@ -22,6 +23,7 @@ export const NeonButton = ({ children, variant = "cyan", className, onClick }: N
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={onClick}
+            type={type}
             className={cn(
                 "px-8 py-3 rounded-full border-2 font-bold transition-all duration-300 uppercase tracking-widest text-sm",
                 styles[variant],

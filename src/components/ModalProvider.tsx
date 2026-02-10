@@ -4,11 +4,13 @@ import { createContext, useContext, useState, ReactNode, useEffect } from "react
 import { ContractModal } from "./ui/ContractModal";
 import { SupportTicketModal } from "./ui/SupportTicketModal";
 import { TVPlayerModal } from "./ui/TVPlayerModal";
+import { TelmexGamerModal } from "./ui/TelmexGamerModal";
 
 interface ModalContextType {
     openModal: (planName?: string) => void;
     openSupportModal: () => void;
     openPlayerModal: (channelName: string, channelUrl: string) => void;
+    openGamerModal: () => void;
     closeModal: () => void;
 }
 
@@ -18,12 +20,13 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
     const [isContractOpen, setIsContractOpen] = useState(false);
     const [isSupportOpen, setIsSupportOpen] = useState(false);
     const [isPlayerOpen, setIsPlayerOpen] = useState(false);
+    const [isGamerOpen, setIsGamerOpen] = useState(false);
 
     // Multiple states for different context data
     const [planName, setPlanName] = useState<string | undefined>(undefined);
     const [playerData, setPlayerData] = useState<{ name: string, url: string } | undefined>(undefined);
 
-    const isAnyModalOpen = isContractOpen || isSupportOpen || isPlayerOpen;
+    const isAnyModalOpen = isContractOpen || isSupportOpen || isPlayerOpen || isGamerOpen;
 
     const openModal = (plan?: string) => {
         setPlanName(plan);
@@ -42,6 +45,11 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
         window.history.pushState({ modal: "player" }, "");
     };
 
+    const openGamerModal = () => {
+        setIsGamerOpen(true);
+        window.history.pushState({ modal: "gamer" }, "");
+    };
+
     const closeModal = () => {
         if (isAnyModalOpen) {
             // If the modal was closed via UI (not back button), we need to go back in history
@@ -54,6 +62,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
         setIsContractOpen(false);
         setIsSupportOpen(false);
         setIsPlayerOpen(false);
+        setIsGamerOpen(false);
     };
 
     // Handle browser back button (popstate)
@@ -63,6 +72,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
             setIsContractOpen(false);
             setIsSupportOpen(false);
             setIsPlayerOpen(false);
+            setIsGamerOpen(false);
         };
 
         window.addEventListener("popstate", handlePopState);
@@ -70,7 +80,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     return (
-        <ModalContext.Provider value={{ openModal, openSupportModal, openPlayerModal, closeModal }}>
+        <ModalContext.Provider value={{ openModal, openSupportModal, openPlayerModal, openGamerModal, closeModal }}>
             {children}
             <ContractModal isOpen={isContractOpen} onClose={closeModal} planName={planName} />
             <SupportTicketModal isOpen={isSupportOpen} onClose={closeModal} />
@@ -80,6 +90,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
                 channelName={playerData?.name}
                 channelUrl={playerData?.url}
             />
+            <TelmexGamerModal isOpen={isGamerOpen} onClose={closeModal} />
         </ModalContext.Provider>
     );
 };
