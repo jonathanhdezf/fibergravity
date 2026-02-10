@@ -17,7 +17,7 @@ export const TVPlayerModal = ({ isOpen, onClose, channelName = "Canal en Vivo", 
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className={`fixed inset-0 z-[120] flex justify-center overflow-y-auto custom-scrollbar ${isTheater ? "items-start" : "items-center pt-24 pb-10"}`}>
+                <div className={`fixed inset-0 z-[120] flex justify-center overflow-y-auto custom-scrollbar ${isTheater ? "items-start pt-24 md:pt-28" : "items-center"}`}>
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -33,12 +33,13 @@ export const TVPlayerModal = ({ isOpen, onClose, channelName = "Canal en Vivo", 
                             scale: 1,
                             y: 0,
                             width: isTheater ? "100%" : "90%",
-                            maxWidth: isTheater ? "100%" : "1200px"
+                            maxWidth: isTheater ? "100%" : "1200px",
+                            height: isTheater ? "calc(100vh - 120px)" : "auto"
                         }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         transition={{ duration: 0.4, ease: "circOut" }}
                         className={`relative z-10 bg-black overflow-hidden shadow-[0_0_100px_rgba(0,0,0,1)] border-white/5 transition-all duration-500
-                            ${isTheater ? "h-screen rounded-none border-0" : "aspect-video rounded-3xl border md:p-0"}
+                            ${isTheater ? "rounded-none border-0" : "aspect-video rounded-3xl border md:p-0"}
                         `}
                     >
                         {/* Player Header - Auto hide in theater */}
