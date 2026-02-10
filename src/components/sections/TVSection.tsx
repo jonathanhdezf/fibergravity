@@ -143,7 +143,7 @@ export const TVSection = () => {
     const carouselRef = useRef<HTMLDivElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
     const { scrollXProgress } = useScroll({ container: carouselRef });
-    const { openModal, openPlayerModal } = useModal();
+    const { openCategoryModal, openPlayerModal } = useModal();
 
     useEffect(() => {
         const enrichedChannels = channelList.map(ch => ({
@@ -180,11 +180,11 @@ export const TVSection = () => {
                     >
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neon-magenta/30 bg-neon-magenta/10 text-neon-magenta text-[10px] font-black uppercase tracking-widest mb-4 mx-auto md:mx-0">
                             <Tv className="w-3 h-3" />
-                            Curaduría Doble Play
+                            Paquetes combinados
                         </div>
                         <h2 className="text-4xl md:text-6xl font-black italic pr-4">
                             Internet + <span className="inline-block text-neon-magenta neon-text-magenta pr-6 pb-1">TV de Cable</span> <br />
-                            <span className="text-white">Curado por Expertos</span>
+                            <span className="text-white">Seleccionados para ti</span>
                         </h2>
                     </motion.div>
 
@@ -289,7 +289,7 @@ export const TVSection = () => {
                                         </div>
                                     </div>
                                     <NeonButton
-                                        onClick={() => openModal(plan.provider)}
+                                        onClick={() => openCategoryModal("TV", plan.provider)}
                                         variant={plan.color === "magenta" ? "magenta" : plan.color === "cyan" ? "cyan" : "white"}
                                         className="!py-2.5 !px-5 text-[10px]"
                                     >

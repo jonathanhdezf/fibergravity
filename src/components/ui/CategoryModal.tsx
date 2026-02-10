@@ -1,11 +1,11 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Zap, ShieldCheck, Video, Briefcase, Building2, Globe, Star, Check, Sparkles } from "lucide-react";
+import { X, Zap, ShieldCheck, Video, Briefcase, Building2, Globe, Star, Check, Sparkles, Tv } from "lucide-react";
 import { NeonButton } from "./NeonButton";
 import { useEffect, useState } from "react";
 
-export type PlanCategory = "Streamer" | "HomeOffice" | "Enterprise";
+export type PlanCategory = "Streamer" | "HomeOffice" | "Enterprise" | "TV";
 
 interface CategoryModalProps {
     isOpen: boolean;
@@ -88,6 +88,36 @@ const categoryData: Record<string, any> = {
             ],
             "Impactel Negocios": [
                 { name: "Básico Negocio", speed: "50 Megas", type: "HFC Cable", price: "$500", features: ["Internet + TV Local", "Precio Fijo", "Atención de Fallas", "Simple & Funcional"] }
+            ]
+        }
+    },
+    TV: {
+        title: "Entertainment Bundle",
+        tag: "Double Play Certified",
+        icon: <Tv className="w-6 h-6" />,
+        accent: "neon-magenta",
+        bgGradient: "from-magenta-600/10",
+        plans: {
+            "Totalplay Doble Play": [
+                { name: "Totalplay Fun", speed: "150 Megas", type: "Simétrico", price: "$450", features: ["TV HD Pack Básico", "Velocidad Fibra", "Llamadas Inc.", "WiFi 6 Ready"] },
+                { name: "Totalplay Cinema", speed: "250 Megas", type: "Simétrico", price: "$650", features: ["TV HD Pack Cine", "Velocidad Simétrica", "Soporte Premium", "Apps TV Incluidas"] }
+            ],
+            "Megacable Doble Play": [
+                { name: "Xview+ Connect", speed: "300 Megas", type: "Simétrico", price: "$680", features: ["Xview+ HD Pack", "Netflix Estándar Inc.", "Telefonía Ilimitada", "Canales Premium Promo"] },
+                { name: "Xview+ Ultra", speed: "500 Megas", type: "Simétrico", price: "$880", features: ["Xview+ Full Pack", "Netflix Premium Inc.", "Amazon Prime Inc.", "WiFi Ultra Mesh"] }
+            ],
+            "Telmex Infinitum + TV": [
+                { name: "Infinitum Plus", speed: "80 Megas", type: "Fibra Opt.", price: "$399", features: ["Claro Video Grátis", "Netflix & Disney+ Promo", "Fija Ilimitada", "Antivirus McAfee"] },
+                { name: "Infinitum Cinema", speed: "150 Megas", type: "Fibra Opt.", price: "$549", features: ["HBO Max Inc.", "Netflix Multi-pantalla", "Soporte Infinitum", "IP Dinámica"] }
+            ],
+            "izzi 150 Megas + TV+": [
+                { name: "izzi tv+ Smart", speed: "150 Megas", type: "HFC/Fibra", price: "$720", features: ["izzi tv+ Interactive", "Canales Exclusivos izzi", "Netflix Ready", "App izzi go Inc."] }
+            ],
+            "Cablecom Estándar": [
+                { name: "Combo Pyme-Hogar", speed: "100 Megas", type: "Cable HFC", price: "$350", features: ["TV Digital 80 Canales", "Internet Estable", "Soporte Local", "Sin Plazos"] }
+            ],
+            "Impactel Básico": [
+                { name: "Impactel Home", speed: "Internet + TV", type: "Regional", price: "$280", features: ["Canales Regionales", "Navegación Básica", "Instalación Rápida", "Atención Teziutlán"] }
             ]
         }
     }
