@@ -231,7 +231,7 @@ export const Hero = () => {
                                             transition={{ duration: 4, repeat: Infinity }}
                                             className="w-24 h-24 rounded-3xl bg-gradient-to-br from-slate-900 to-black border border-white/10 flex items-center justify-center shadow-inner group-hover:border-neon-cyan transition-colors"
                                         >
-                                            <Wifi className="text-neon-cyan w-12 h-12" />
+                                            <img src="/favicon.svg" alt="FiberGravity Icon" className="w-16 h-16" />
                                         </motion.div>
 
                                         {/* Data Oscilloscope Layout */}

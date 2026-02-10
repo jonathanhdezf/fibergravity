@@ -1,0 +1,30 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="brand-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F3FF" />
+      <stop offset="100%" stop-color="#FF00FF" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="15" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  
+  <!-- Orbital Ring (Gravity) -->
+  <circle cx="256" cy="256" r="200" stroke="url(#brand-gradient)" stroke-width="20" stroke-dasharray="80 40" filter="url(#glow)">
+    <animateTransform attributeName="transform" type="rotate" from="0 256 256" to="360 256 256" dur="20s" repeatCount="indefinite" />
+  </circle>
+  
+  <!-- Wifi/Fiber Waves (Fiber) -->
+  <path d="M156 186C186 156 216 141 256 141C296 141 336 156 356 186" stroke="#00F3FF" stroke-width="25" stroke-linecap="round" filter="url(#glow)">
+    <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite" />
+  </path>
+  <path d="M196 246C216 226 236 216 256 216C276 216 306 226 316 246" stroke="#FF00FF" stroke-width="25" stroke-linecap="round" filter="url(#glow)">
+    <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite" />
+  </path>
+  
+  <!-- Central Core -->
+  <circle cx="256" cy="326" r="30" fill="white" filter="url(#glow)">
+    <animate attributeName="r" values="25;35;25" dur="1.5s" repeatCount="indefinite" />
+  </circle>
+</svg>

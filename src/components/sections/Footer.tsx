@@ -10,7 +10,7 @@ export const Footer = () => {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
                     <div className="md:col-span-2">
                         <div className="flex items-center gap-2 mb-6 cursor-pointer">
-                            <Wifi className="w-8 h-8 text-neon-cyan" />
+                            <img src="/favicon.svg" alt="FiberGravity Logo" className="w-10 h-10" />
                             <span className="text-2xl font-bold tracking-tighter">
                                 FIBER<span className="text-neon-cyan">GRAVITY</span>
                             </span>

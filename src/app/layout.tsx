@@ -13,8 +13,11 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Internet de Alta Velocidad | Fibra Óptica + TV",
-  description: "Disfruta de la mejor conexión de fibra óptica y televisión por cable con tecnología Zero Gravity.",
+  title: "FiberGravity | Internet de Alta Velocidad | Fibra Óptica + TV",
+  description: "Marketplace #1 de telecomunicaciones en Teziutlán. Fibra óptica y televisión con tecnología Zero Gravity.",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({

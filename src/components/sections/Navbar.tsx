@@ -82,7 +82,7 @@ export const Navbar = () => {
                     {/* Logo Area */}
                     <a href="#hero" className="flex items-center gap-2 pl-3 md:pl-5 group">
                         <div className="relative">
-                            <Wifi className="w-6 h-6 md:w-8 md:h-8 text-neon-cyan group-hover:scale-110 transition-transform" />
+                            <img src="/favicon.svg" alt="FiberGravity Logo" className="w-8 h-8 md:w-10 md:h-10 group-hover:scale-110 transition-transform" />
                             <div className="absolute inset-0 bg-neon-cyan blur-md opacity-20" />
                         </div>
                         <span className="text-xl font-black tracking-tighter italic text-white hidden sm:block">
