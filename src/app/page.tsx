@@ -7,7 +7,6 @@ import { StreamerPlans } from "@/components/sections/StreamerPlans";
 import { HomeOfficePlans } from "@/components/sections/HomeOfficePlans";
 import { EnterprisePlans } from "@/components/sections/EnterprisePlans";
 import { TVSection } from "@/components/sections/TVSection";
-import { SupportSection } from "@/components/sections/SupportSection";
 import { SpeedTest } from "@/components/sections/SpeedTest";
 import { Coverage } from "@/components/sections/Coverage";
 import { Footer } from "@/components/sections/Footer";
@@ -29,7 +28,6 @@ export default function Home() {
         <HomeOfficePlans />
         <EnterprisePlans />
         <TVSection />
-        <SupportSection />
         <SpeedTest />
         <Coverage />
         <Partners />
