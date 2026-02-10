@@ -220,7 +220,7 @@ export const Hero = () => {
                                         {/* Status Header */}
                                         <div className="flex flex-col items-center gap-2">
                                             <div className="flex gap-1 text-[8px] font-black text-neon-cyan uppercase tracking-[0.4em]">
-                                                <span className="animate-pulse">●</span> Hub Activo
+                                                <span className="animate-pulse">●</span> FiberGravity
                                             </div>
                                             <div className="w-12 h-[2px] bg-gradient-to-r from-transparent via-neon-cyan to-transparent" />
                                         </div>
@@ -237,8 +237,8 @@ export const Hero = () => {
                                         {/* Data Oscilloscope Layout */}
                                         <div className="w-full px-8 space-y-4">
                                             <div className="flex justify-between items-center text-[8px] text-slate-500 font-bold tracking-widest uppercase">
-                                                <span>FiberGravity</span>
-                                                <span className="text-neon-magenta">Optimizado</span>
+                                                <span>Conexión</span>
+                                                <span className="text-neon-magenta">Optimizada</span>
                                             </div>
                                             <div className="h-12 w-full flex items-center gap-[4px]">
                                                 {[...Array(12)].map((_, i) => (
