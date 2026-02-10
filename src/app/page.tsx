@@ -13,7 +13,6 @@ import { Coverage } from "@/components/sections/Coverage";
 import { Footer } from "@/components/sections/Footer";
 
 import { Contact } from "@/components/sections/Contact";
-import { Privacy } from "@/components/sections/Privacy";
 import { Partners } from "@/components/sections/Partners";
 
 import { ModalProvider } from "@/components/ModalProvider";
@@ -35,7 +34,6 @@ export default function Home() {
         <SpeedTest />
         <Coverage />
         <Contact />
-        <Privacy />
         <Partners />
         <Footer />
       </main>
