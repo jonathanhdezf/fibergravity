@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 interface NeonButtonProps {
     children: React.ReactNode;
-    variant?: "cyan" | "magenta";
+    variant?: "cyan" | "magenta" | "white";
     className?: string;
     onClick?: () => void;
 }
@@ -14,6 +14,7 @@ export const NeonButton = ({ children, variant = "cyan", className, onClick }: N
     const styles = {
         cyan: "bg-neon-cyan/20 border-neon-cyan text-neon-cyan hover:bg-neon-cyan hover:text-black neon-glow-cyan",
         magenta: "bg-neon-magenta/20 border-neon-magenta text-neon-magenta hover:bg-neon-magenta hover:text-black neon-glow-magenta",
+        white: "bg-white/10 border-white/40 text-white hover:bg-white hover:text-black shadow-[0_0_15px_rgba(255,255,255,0.1)]",
     };
 
     return (

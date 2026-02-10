@@ -133,10 +133,10 @@ export const Coverage = () => {
                                         <MapPin className="w-6 h-6 text-neon-cyan" />
                                     </div>
                                     <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${zone.status === 'Full Fiber'
-                                            ? 'border-neon-cyan/40 text-neon-cyan bg-neon-cyan/5'
-                                            : zone.status === 'Active'
-                                                ? 'border-white/20 text-white bg-white/5'
-                                                : 'border-neon-magenta/40 text-neon-magenta bg-neon-magenta/5'
+                                        ? 'border-neon-cyan/40 text-neon-cyan bg-neon-cyan/5'
+                                        : zone.status === 'Active'
+                                            ? 'border-white/20 text-white bg-white/5'
+                                            : 'border-neon-magenta/40 text-neon-magenta bg-neon-magenta/5'
                                         }`}>
                                         {zone.status}
                                     </span>
@@ -179,7 +179,7 @@ export const Coverage = () => {
                     <div className="flex gap-4 md:gap-12 flex-wrap justify-center">
                         <div className="text-center">
                             <div className="text-2xl font-black text-white">99.9%</div>
-                            <div className="text-[10px] text-slate-500 uppercase tracking-[0.2em]">Uptime</div>
+                            <div className="text-[10px] text-slate-500 uppercase tracking-[0.2em]">Simpre Activo</div>
                         </div>
                         <div className="text-center">
                             <div className="text-2xl font-black text-white">24/7</div>

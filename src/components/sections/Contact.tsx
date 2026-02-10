@@ -9,22 +9,22 @@ const contactInfo = [
     {
         icon: <Phone className="w-6 h-6 text-neon-cyan" />,
         label: "Llámanos",
-        value: "01 800 FIBER-G",
+        value: "231 102 4672",
         subValue: "Atención 24/7",
         delay: 0.1
     },
     {
         icon: <Mail className="w-6 h-6 text-neon-magenta" />,
         label: "Email",
-        value: "contacto@fibergravity.com",
+        value: "fibergravity@gmail.com",
         subValue: "Respuesta en < 2h",
         delay: 0.2
     },
     {
         icon: <MapPin className="w-6 h-6 text-white" />,
         label: "Oficina Central",
-        value: "Av. Futuro 101, Tech City",
-        subValue: "Silicon Valley, CA",
+        value: "Matamoros 507, Centro",
+        subValue: "Teziutlán Puebla, México",
         delay: 0.3
     }
 ];

@@ -2,6 +2,7 @@ import { Navbar } from "@/components/sections/Navbar";
 import { Hero } from "@/components/sections/Hero";
 import { About } from "@/components/sections/About";
 import { BentoGrid } from "@/components/sections/BentoGrid";
+import { GamerPlans } from "@/components/sections/GamerPlans";
 import { TVSection } from "@/components/sections/TVSection";
 import { SupportSection } from "@/components/sections/SupportSection";
 import { SpeedTest } from "@/components/sections/SpeedTest";
@@ -22,6 +23,7 @@ export default function Home() {
         <Hero />
         <About />
         <BentoGrid />
+        <GamerPlans />
         <TVSection />
         <SupportSection />
         <SpeedTest />

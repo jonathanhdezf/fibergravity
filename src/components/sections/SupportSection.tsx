@@ -112,14 +112,19 @@ export const SupportSection = () => {
                                     Escanea el código o haz clic para iniciar una videollamada de asistencia técnica o hablar directamente con un experto en fibra óptica.
                                 </p>
 
-                                <div className="p-6 bg-white/5 rounded-3xl border border-white/10 flex flex-col items-center gap-6">
-                                    {/* Mock QR Code UI */}
-                                    <div className="w-32 h-32 bg-white p-2 rounded-xl">
-                                        <div className="w-full h-full bg-[radial-gradient(circle,black_1px,transparent_1px)] bg-[size:10px_10px]" />
+                                <div className="p-4 bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 flex flex-col items-center gap-6 group/qr transition-all hover:border-neon-cyan/30">
+                                    {/* Real QR Code UI */}
+                                    <div className="w-full max-w-[180px] aspect-square overflow-hidden rounded-2xl border border-white/10 shadow-2xl relative">
+                                        <div className="absolute inset-0 bg-white group-hover/qr:opacity-90 transition-opacity" />
+                                        <img
+                                            src="/qr-soporte.jpg"
+                                            alt="QR Soporte Técnico"
+                                            className="w-full h-full object-contain relative z-10 p-2"
+                                        />
                                     </div>
                                     <div className="text-center">
                                         <span className="text-[10px] uppercase font-black text-slate-500 tracking-[0.2em]">Escanea para Soporte</span>
-                                        <div className="text-neon-cyan font-bold mt-1 tracking-widest tracking-widest">01-800-GRAVITY</div>
+                                        <div className="text-neon-cyan font-bold mt-1 tracking-widest">01-800-GRAVITY</div>
                                     </div>
                                 </div>
 
