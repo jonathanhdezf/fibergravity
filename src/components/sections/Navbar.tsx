@@ -77,8 +77,8 @@ export const Navbar = () => {
                         y: scrolled ? 0 : 0,
                     }}
                     className={`max-w-7xl flex items-center justify-between p-2 md:p-3 rounded-full border shadow-2xl pointer-events-auto transition-all duration-300 ${scrolled
-                            ? "bg-black/70 backdrop-blur-xl border-white/10 shadow-neon-cyan/5"
-                            : "bg-black/30 backdrop-blur-md border-white/5"
+                        ? "bg-black/70 backdrop-blur-xl border-white/10 shadow-neon-cyan/5"
+                        : "bg-black/30 backdrop-blur-md border-white/5"
                         }`}
                 >
                     {/* Logo Area */}
@@ -153,7 +153,12 @@ export const Navbar = () => {
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: i * 0.04 }}
-                                    onClick={closeMenu}
+                                    onClick={(e) => {
+                                        // Allow navigation to happen first, then close local state
+                                        setMobileMenu(false);
+                                        // We don't call window.history.back() here because clicking an anchor
+                                        // already changes the hash/location, and back() would revert it.
+                                    }}
                                     className="flex items-center justify-between p-5 rounded-3xl bg-white/[0.03] border border-white/5 active:bg-white/10 active:scale-[0.98] transition-all no-underline group"
                                 >
                                     <div className="flex items-center gap-5">
