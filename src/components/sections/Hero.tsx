@@ -35,6 +35,7 @@ export const Hero = () => {
 
     return (
         <section
+            id="hero"
             ref={containerRef}
             className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden"
         >

@@ -45,7 +45,7 @@ export const SpeedTest = () => {
     }, [isInView]);
 
     return (
-        <section className="py-24 container mx-auto px-6" ref={ref}>
+        <section id="speed-test" className="py-24 container mx-auto px-6" ref={ref}>
             <GlassCard className="max-w-4xl mx-auto py-12 md:py-20 relative overflow-hidden" hoverEffect={false}>
                 {/* Background glow */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-neon-cyan/20 blur-[100px]" />
