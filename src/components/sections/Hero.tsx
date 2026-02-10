@@ -1,11 +1,31 @@
 "use client";
 
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { NeonButton } from "../ui/NeonButton";
 import { Cpu, Zap, Radio } from "lucide-react";
 
 import { useModal } from "../ModalProvider";
+
+const CountUp = ({ start = 0, end, duration = 2, suffix = "" }: { start?: number, end: number, duration?: number, suffix?: string }) => {
+    const [count, setCount] = useState(start);
+
+    useEffect(() => {
+        let startTime: number | null = null;
+        const animate = (timestamp: number) => {
+            if (!startTime) startTime = timestamp;
+            const progress = Math.min((timestamp - startTime) / (duration * 1000), 1);
+            const currentCount = start + (end - start) * progress;
+            setCount(Math.floor(currentCount));
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            }
+        };
+        requestAnimationFrame(animate);
+    }, [start, end, duration]);
+
+    return <span>{count}{suffix}</span>;
+};
 
 export const Hero = () => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -72,7 +92,7 @@ export const Hero = () => {
                                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                                 className="text-neon-cyan font-black text-3xl italic"
                             >
-                                1000MB
+                                <CountUp end={1000} suffix="MB" duration={2.5} />
                             </motion.span>
                             <span className="text-[10px] text-slate-500 tracking-[0.2em] font-black uppercase">Velocidad Máxima</span>
                             <div className="absolute -left-4 top-0 w-1 h-full bg-gradient-to-b from-neon-cyan to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -95,7 +115,7 @@ export const Hero = () => {
                                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
                                 className="text-neon-magenta font-black text-3xl italic"
                             >
-                                0ms
+                                <CountUp start={99} end={0} suffix="ms" duration={3} />
                             </motion.span>
                             <span className="text-[10px] text-slate-500 tracking-[0.2em] font-black uppercase">Latencia Local</span>
                             <div className="absolute -left-4 top-0 w-1 h-full bg-gradient-to-b from-neon-magenta to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
