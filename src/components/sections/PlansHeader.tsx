@@ -28,7 +28,7 @@ export const PlansHeader = () => {
                     <div className="w-24 h-1 bg-gradient-to-r from-neon-cyan to-neon-magenta mx-auto rounded-full mb-8" />
 
                     <p className="text-slate-400 max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
-                        Explora nuestras categorías especializadas. Hemos diseñado cada plan basándonos en métricas reales de uso para garantizar que pagues exactamente por la potencia que necesitas.
+                        Nuestra tecnología analiza la infraestructura de cada rincón de Teziutlán. Selecciona tu perfil y accede a las recomendaciones auditadas que garantizan el mejor desempeño para tu inversión.
                     </p>
                 </motion.div>
             </div>

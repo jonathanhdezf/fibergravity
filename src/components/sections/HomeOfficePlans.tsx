@@ -102,13 +102,13 @@ export const HomeOfficePlans = () => {
                         initial={{ opacity: 0, x: -20 }}
                         whileInView={{ opacity: 1, x: 0 }}
                     >
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 bg-white/5 text-white text-[10px] font-black uppercase tracking-widest mb-4">
-                            <Briefcase className="w-3 h-3 text-neon-cyan" />
-                            Work From Anywhere
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-sky-500/30 bg-sky-500/10 text-sky-400 text-[10px] font-black uppercase tracking-widest mb-4">
+                            <Briefcase className="w-3 h-3" />
+                            Productivity Audit
                         </div>
                         <h2 className="text-4xl md:text-6xl font-black italic">
-                            Productividad <span className="text-neon-cyan neon-text-cyan">Sin</span> <br />
-                            <span className="text-white">Interrupciones</span>
+                            Productividad <span className="text-neon-cyan neon-text-cyan">Bajo</span> <br />
+                            <span className="text-white">Análisis</span>
                         </h2>
                     </motion.div>
 
@@ -117,7 +117,7 @@ export const HomeOfficePlans = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         className="text-slate-400 max-w-md text-sm leading-relaxed"
                     >
-                        Diseñamos soluciones para que el trabajo hibrido sea fluido. Latencia mínima para Teams y Zoom, con la velocidad que tu carrera exige.
+                        Analizamos la estabilidad bajo carga masiva. Selecciona los planes con mejor desempeño en videoconferencias y multitarea según nuestras auditorías en Teziutlán.
                     </motion.p>
                 </div>
             </div>

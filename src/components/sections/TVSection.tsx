@@ -180,11 +180,11 @@ export const TVSection = () => {
                     >
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neon-magenta/30 bg-neon-magenta/10 text-neon-magenta text-[10px] font-black uppercase tracking-widest mb-4 mx-auto md:mx-0">
                             <Tv className="w-3 h-3" />
-                            Mega Entretenimiento
+                            Curaduría Doble Play
                         </div>
                         <h2 className="text-4xl md:text-6xl font-black italic">
                             Internet + <span className="text-neon-magenta neon-text-magenta">TV de Cable</span> <br />
-                            <span className="text-white">Doble Play</span>
+                            <span className="text-white">Curado por Expertos</span>
                         </h2>
                     </motion.div>
 
@@ -193,7 +193,7 @@ export const TVSection = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         className="text-slate-400 max-w-md text-sm leading-relaxed mx-auto md:mx-0"
                     >
-                        Fusionamos la potencia de la fibra óptica con la mejor programación HD. Cine, deportes y series en un solo recibo con estabilidad total.
+                        Maximizamos tu inversión en ocio. Comparamos los mejores paquetes de TV e Internet para encontrar el equilibrio perfecto entre apps de streaming, canales HD y velocidad real.
                     </motion.p>
                 </div>
             </div>

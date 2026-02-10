@@ -102,13 +102,13 @@ export const StreamerPlans = () => {
                         initial={{ opacity: 0, x: -20 }}
                         whileInView={{ opacity: 1, x: 0 }}
                     >
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neon-magenta/30 bg-neon-magenta/10 text-neon-magenta text-[10px] font-black uppercase tracking-widest mb-4">
-                            <Radio className="w-3 h-3 animate-pulse" />
-                            Streamer Hub
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neon-magenta/20 bg-neon-magenta/5 text-neon-magenta text-[10px] font-black uppercase tracking-widest mb-4">
+                            <Video className="w-3 h-3" />
+                            Bitrate Control Audit
                         </div>
                         <h2 className="text-4xl md:text-6xl font-black italic">
-                            Tu Set-Up Merece <br />
-                            <span className="text-neon-magenta neon-text-magenta">Conexión</span> de <span className="text-neon-cyan neon-text-cyan">Élite</span>
+                            Streamer Hub <span className="text-neon-magenta neon-text-magenta">Analizado</span> <br />
+                            <span className="text-white">Profesionalmente</span>
                         </h2>
                     </motion.div>
 
@@ -117,7 +117,7 @@ export const StreamerPlans = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         className="text-slate-400 max-w-md text-sm leading-relaxed"
                     >
-                        Transmite en 4K/8K sin fotogramas perdidos. Hemos filtrado los planes con el mejor bitrate y estabilidad para creadores de contenido.
+                        El éxito de tu canal depende de la estabilidad. Comparamos los bitrates de subida de los proveedores en Teziutlán para garantizar transmisiones 4K sin pérdida de cuadros.
                     </motion.p>
                 </div>
             </div>

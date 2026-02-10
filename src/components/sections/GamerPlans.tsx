@@ -101,13 +101,13 @@ export const GamerPlans = () => {
                         initial={{ opacity: 0, x: -20 }}
                         whileInView={{ opacity: 1, x: 0 }}
                     >
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-400 text-[10px] font-black uppercase tracking-widest mb-4">
-                            <Gamepad2 className="w-3 h-3" />
-                            Zona Pro-Gamer
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neon-cyan/20 bg-neon-cyan/5 text-neon-cyan text-[10px] font-black uppercase tracking-widest mb-4">
+                            <Zap className="w-3 h-3" />
+                            Auditoría de Latencia
                         </div>
                         <h2 className="text-4xl md:text-6xl font-black italic">
-                            Eleva tu <span className="text-neon-cyan neon-text-cyan">Latency</span> <br />
-                            al Nivel <span className="text-neon-magenta neon-text-magenta">Dios</span>
+                            Dominio <span className="text-neon-cyan neon-text-cyan">Gamer</span> <br />
+                            <span className="text-white">Auditado</span>
                         </h2>
                     </motion.div>
 
@@ -116,7 +116,7 @@ export const GamerPlans = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         className="text-slate-400 max-w-md text-sm leading-relaxed"
                     >
-                        Seleccionamos los mejores planes del mercado optimizados para cada perfil de jugador. Desde competitivos en PC hasta leyendas de móvil.
+                        No todos los Megas son iguales. Hemos auditado las rutas de red de cada proovedor en Teziutlán para recomendarte los planes con el Ping más bajo hacia tus servidores favoritos.
                     </motion.p>
                 </div>
             </div>

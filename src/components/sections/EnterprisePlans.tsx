@@ -119,11 +119,11 @@ export const EnterprisePlans = () => {
                     >
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-sky-500/30 bg-sky-500/10 text-sky-400 text-[10px] font-black uppercase tracking-widest mb-4">
                             <Building2 className="w-3 h-3" />
-                            Business Intelligence
+                            B2B Connectivity Expert
                         </div>
                         <h2 className="text-4xl md:text-6xl font-black italic">
-                            Impulsa tu <span className="text-neon-cyan neon-text-cyan">Crecimiento</span> <br />
-                            <span className="text-white">Empresarial</span>
+                            Consultoría <span className="text-neon-cyan neon-text-cyan">Corporativa</span> <br />
+                            <span className="text-white">Especializada</span>
                         </h2>
                     </motion.div>
 
@@ -132,7 +132,7 @@ export const EnterprisePlans = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         className="text-slate-400 max-w-md text-sm leading-relaxed"
                     >
-                        Soluciones de conectividad diseñadas para la escala de tu negocio. Desde PyMEs en ascenso hasta corporativos globales de alto tráfico.
+                        Tu empresa requiere certezas. Comparamos niveles de servicio (SLA) y capacidad de escalabilidad para conectarte con el proveedor que garantice tu operación 24/7.
                     </motion.p>
                 </div>
             </div>
