@@ -183,7 +183,7 @@ export const TVSection = () => {
                             Curaduría Doble Play
                         </div>
                         <h2 className="text-4xl md:text-6xl font-black italic pr-4">
-                            Internet + <span className="text-neon-magenta neon-text-magenta pr-2">TV de Cable</span> <br />
+                            Internet + <span className="inline-block text-neon-magenta neon-text-magenta pr-6 pb-1">TV de Cable</span> <br />
                             <span className="text-white">Curado por Expertos</span>
                         </h2>
                     </motion.div>

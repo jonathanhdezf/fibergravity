@@ -21,8 +21,8 @@ export const PlansHeader = () => {
                     </div>
 
                     <h2 className="text-5xl md:text-7xl font-black italic mb-6 pr-4">
-                        Planes que <span className="text-neon-cyan neon-text-cyan pr-2">Transforman</span> <br />
-                        tu Experiencia <span className="text-neon-magenta neon-text-magenta pr-2">Digital</span>
+                        Planes que <span className="inline-block text-neon-cyan neon-text-cyan pr-6 pb-1">Transforman</span> <br />
+                        tu Experiencia <span className="inline-block text-neon-magenta neon-text-magenta pr-6 pb-1">Digital</span>
                     </h2>
 
                     <div className="w-24 h-1 bg-gradient-to-r from-neon-cyan to-neon-magenta mx-auto rounded-full mb-8" />

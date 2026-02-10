@@ -106,7 +106,7 @@ export const GamerPlans = () => {
                             Auditoría de Latencia
                         </div>
                         <h2 className="text-4xl md:text-6xl font-black italic pr-4">
-                            Dominio <span className="text-neon-cyan neon-text-cyan pr-2">Gamer</span> <br />
+                            Dominio <span className="inline-block text-neon-cyan neon-text-cyan pr-6 pb-1">Gamer</span> <br />
                             <span className="text-white">Auditado</span>
                         </h2>
                     </motion.div>

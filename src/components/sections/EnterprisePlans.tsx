@@ -122,7 +122,7 @@ export const EnterprisePlans = () => {
                             B2B Connectivity Expert
                         </div>
                         <h2 className="text-4xl md:text-6xl font-black italic pr-4">
-                            Consultoría <span className="text-neon-cyan neon-text-cyan pr-2">Corporativa</span> <br />
+                            Consultoría <span className="inline-block text-neon-cyan neon-text-cyan pr-6 pb-1">Corporativa</span> <br />
                             <span className="text-white">Especializada</span>
                         </h2>
                     </motion.div>

@@ -66,7 +66,7 @@ export const About = () => {
                         </div>
                         <h2 className="text-4xl md:text-6xl font-black mb-8 leading-tight">
                             Comparamos redes, <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-magenta">
+                            <span className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-magenta pr-4 pb-1">
                                 conectamos estilos
                             </span>
                         </h2>
