@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Shield, Zap, Headphones, Globe, ArrowRight } from "lucide-react";
+import { Shield, Zap, Headphones, Globe, ArrowRight, Users } from "lucide-react";
 import { GlassCard } from "../ui/GlassCard";
 
 const features = [
@@ -60,6 +60,10 @@ export const About = () => {
                         transition={{ duration: 0.8 }}
                         viewport={{ once: true }}
                     >
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-white/60 text-[10px] font-black uppercase tracking-[0.3em] mb-8">
+                            <Users className="w-3.5 h-3.5 text-neon-cyan" />
+                            Nosotros
+                        </div>
                         <h2 className="text-4xl md:text-6xl font-black mb-8 leading-tight">
                             Más que internet, <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-magenta">
