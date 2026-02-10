@@ -50,10 +50,13 @@ export const Hero = () => {
     const y1 = useTransform(scrollY, [0, 500], [0, 100]);
     const { openModal } = useModal();
 
-    // Mouse Parallax Effect
+    // Mouse Parallax Effect (Desktop only)
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
+            // Guard for mobile/touch devices
+            if (window.matchMedia("(hover: none)").matches) return;
+
             setMousePos({
                 x: (e.clientX / window.innerWidth - 0.5) * 40,
                 y: (e.clientY / window.innerHeight - 0.5) * 40
@@ -71,33 +74,36 @@ export const Hero = () => {
         >
             {/* 1. ADVANCED BACKGROUND: Persistence Grid & Perspective */}
             <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-                {/* 3D Perspective Grid */}
+                {/* 3D Perspective Grid - Optimized for Mobile */}
                 <div
-                    className="absolute inset-0 opacity-20"
+                    className="absolute inset-0 opacity-20 md:opacity-10 lg:opacity-20 translate-z-0"
                     style={{
                         backgroundImage: `linear-gradient(to right, #00f3ff11 1px, transparent 1px), linear-gradient(to bottom, #00f3ff11 1px, transparent 1px)`,
                         backgroundSize: '100px 100px',
-                        transform: 'perspective(1000px) rotateX(60deg) translateY(-100px) scale(2)',
-                        maskImage: 'radial-gradient(ellipse at center, black, transparent 70%)'
+                        transform: 'perspective(1000px) rotateX(60deg) translateY(-100px) scale(1.5)',
+                        maskImage: 'radial-gradient(ellipse at center, black, transparent 70%)',
+                        WebkitMaskImage: 'radial-gradient(ellipse at center, black, transparent 70%)'
                     }}
                 />
 
-                {/* Animated Data Streams */}
+                {/* Animated Data Streams - Fewer streams on mobile to save CPU */}
                 <DataStream top="15%" delay={0} />
-                <DataStream top="35%" delay={1.5} />
-                <DataStream top="65%" delay={0.8} />
+                <div className="hidden md:block">
+                    <DataStream top="35%" delay={1.5} />
+                    <DataStream top="65%" delay={0.8} />
+                </div>
                 <DataStream top="85%" delay={2.2} />
 
-                {/* Ambient Orbs */}
+                {/* Ambient Orbs - Scaled down for mobile */}
                 <motion.div
-                    animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
+                    animate={{ scale: [1, 1.1, 1], opacity: [0.05, 0.15, 0.05] }}
                     transition={{ duration: 10, repeat: Infinity }}
-                    className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-neon-cyan/20 rounded-full blur-[120px]"
+                    className="absolute top-1/4 left-1/4 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-neon-cyan/20 rounded-full blur-[80px] md:blur-[120px]"
                 />
                 <motion.div
-                    animate={{ scale: [1.2, 1, 1.2], opacity: [0.1, 0.2, 0.1] }}
+                    animate={{ scale: [1.1, 1, 1.1], opacity: [0.05, 0.15, 0.05] }}
                     transition={{ duration: 12, repeat: Infinity }}
-                    className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-neon-magenta/15 rounded-full blur-[120px]"
+                    className="absolute bottom-1/4 right-1/4 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-neon-magenta/15 rounded-full blur-[80px] md:blur-[120px]"
                 />
             </div>
 
@@ -180,14 +186,14 @@ export const Hero = () => {
                     className="relative flex justify-center items-center perspective-[1000px]"
                 >
                     <div className="relative w-80 h-80 md:w-[550px] md:h-[550px]">
-                        {/* Outer Orbit Layers */}
+                        {/* Outer Orbit Layers - More responsive spacing */}
                         {[...Array(3)].map((_, i) => (
                             <motion.div
                                 key={i}
                                 animate={{ rotate: i % 2 === 0 ? 360 : -360 }}
                                 transition={{ duration: 15 + (i * 10), repeat: Infinity, ease: "linear" }}
-                                className={`absolute inset-0 rounded-full border border-dashed pointer-events-none
-                                    ${i === 0 ? 'border-neon-cyan/20 m-0' : i === 1 ? 'border-neon-magenta/10 m-10' : 'border-white/5 m-20'}
+                                className={`absolute inset-0 rounded-full border border-dashed pointer-events-none transition-all
+                                    ${i === 0 ? 'border-neon-cyan/20 m-0' : i === 1 ? 'border-neon-magenta/10 m-4 md:m-10' : 'border-white/5 m-8 md:m-20'}
                                 `}
                             />
                         ))}
