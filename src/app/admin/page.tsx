@@ -661,6 +661,42 @@ export default function PremiumAdminDashboard() {
         return null;
     }
 
+    const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+
+    const navItems = [
+        { id: 'overview', icon: TrendingUp, label: 'Vista General' },
+        {
+            id: 'ventas',
+            icon: Users,
+            label: 'Ventas',
+            submenu: [
+                { id: 'leads', icon: Users, label: 'Leads' },
+                { id: 'ventas', icon: UserPlus, label: 'Vendedores' },
+            ]
+        },
+        {
+            id: 'tecnica',
+            icon: Wrench,
+            label: 'Área Técnica',
+            submenu: [
+                { id: 'tickets', icon: LifeBuoy, label: 'Soporte' },
+                { id: 'technicians', icon: Wrench, label: 'Técnicos' },
+            ]
+        },
+        {
+            id: 'sistemas',
+            icon: Settings,
+            label: 'Sistemas',
+            submenu: [
+                { id: 'inventory', icon: Package, label: 'Catálogo' },
+                { id: 'traffic', icon: Globe, label: 'Tráfico' },
+                { id: 'integrations', icon: Settings, label: 'Integraciones' },
+                { id: 'logs', icon: Activity, label: 'Log' }
+            ]
+        },
+        { id: 'blog', icon: BookOpen, label: 'Blog' },
+    ];
+
     return (
         <div className="relative min-h-screen bg-[#020617] text-white selection:bg-neon-cyan/30">
             {/* 1. ADMINISTRATION INTERFACE (Hidden when printing) */}
@@ -676,27 +712,29 @@ export default function PremiumAdminDashboard() {
                                 <span className="font-black italic tracking-tighter text-xl">FIBER<span className="text-neon-cyan">OS</span></span>
                             </div>
                             <div className="hidden md:flex gap-1">
-                                {[
-                                    { id: 'overview', icon: TrendingUp, label: 'Vista General' },
-                                    { id: 'leads', icon: Users, label: 'Leads' },
-                                    { id: 'tickets', icon: LifeBuoy, label: 'Soporte' },
-                                    { id: 'technicians', icon: Wrench, label: 'Técnicos' },
-                                    { id: 'ventas', icon: UserPlus, label: 'Vendedores' },
-                                    { id: 'inventory', icon: Package, label: 'Catálogo' },
-                                    { id: 'blog', icon: BookOpen, label: 'Blog' },
-                                    { id: 'traffic', icon: Globe, label: 'Tráfico' },
-                                    { id: 'integrations', icon: Settings, label: 'Sistemas' },
-                                    { id: 'logs', icon: Activity, label: 'Log' }
-                                ].map((tab) => (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => setActiveTab(tab.id as any)}
-                                        title={tab.label}
-                                        className={`flex items-center gap-2 px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-white/10 text-neon-cyan' : 'text-slate-500 hover:text-white hover:bg-white/5'
-                                            }`}
-                                    >
-                                        <tab.icon className="w-4 h-4" /> {tab.label}
-                                    </button>
+                                {navItems.map((item: any) => (
+                                    <div key={item.id} className="relative group/menu">
+                                        <button
+                                            onClick={() => !item.submenu && setActiveTab(item.id as any)}
+                                            className={`flex items-center gap-2 px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === item.id ? 'bg-white/10 text-neon-cyan' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
+                                        >
+                                            <item.icon className="w-4 h-4" /> {item.label}
+                                        </button>
+
+                                        {item.submenu && (
+                                            <div className="absolute top-full left-0 mt-2 w-48 bg-black/90 border border-white/10 rounded-xl p-2 opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all transform translate-y-2 group-hover/menu:translate-y-0 backdrop-blur-xl">
+                                                {item.submenu.map((sub: any) => (
+                                                    <button
+                                                        key={sub.id}
+                                                        onClick={() => setActiveTab(sub.id as any)}
+                                                        className={`w-full flex items-center gap-2 px-4 py-3 rounded-lg text-[10px] font-bold uppercase tracking-wider text-left transition-all ${activeTab === sub.id ? 'bg-neon-cyan/20 text-neon-cyan' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}
+                                                    >
+                                                        <sub.icon className="w-3 h-3" /> {sub.label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 ))}
                             </div>
                         </div>
@@ -731,32 +769,44 @@ export default function PremiumAdminDashboard() {
                             initial={{ opacity: 0, y: -20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
-                            className="fixed top-20 left-0 right-0 z-[49] bg-black/95 backdrop-blur-3xl border-b border-white/10 p-6 md:hidden"
+                            className="fixed top-20 left-0 right-0 z-[49] bg-black/95 backdrop-blur-3xl border-b border-white/10 p-6 md:hidden overflow-y-auto max-h-[80vh]"
                         >
-                            <div className="flex flex-col gap-4">
-                                {[
-                                    { id: 'overview', icon: TrendingUp, label: 'Vista General' },
-                                    { id: 'leads', icon: Users, label: 'Leads' },
-                                    { id: 'tickets', icon: LifeBuoy, label: 'Soporte' },
-                                    { id: 'technicians', icon: Wrench, label: 'Técnicos' },
-                                    { id: 'ventas', icon: UserPlus, label: 'Vendedores' },
-                                    { id: 'inventory', icon: Package, label: 'Catálogo' },
-                                    { id: 'blog', icon: BookOpen, label: 'Blog' },
-                                    { id: 'traffic', icon: Globe, label: 'Tráfico' },
-                                    { id: 'integrations', icon: Settings, label: 'Sistemas' },
-                                    { id: 'logs', icon: Activity, label: 'Log' }
-                                ].map((tab) => (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => {
-                                            setActiveTab(tab.id as any);
-                                            setIsMobileMenuOpen(false);
-                                        }}
-                                        className={`flex items-center gap-4 p-5 rounded-2xl text-[12px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-neon-cyan/10 text-neon-cyan' : 'text-slate-500'
-                                            }`}
-                                    >
-                                        <tab.icon className="w-6 h-6" /> {tab.label}
-                                    </button>
+                            <div className="flex flex-col gap-2">
+                                {navItems.map((item: any) => (
+                                    <div key={item.id} className="flex flex-col">
+                                        <button
+                                            onClick={() => {
+                                                if (item.submenu) {
+                                                    setOpenSubmenu(openSubmenu === item.id ? null : item.id);
+                                                } else {
+                                                    setActiveTab(item.id as any);
+                                                    setIsMobileMenuOpen(false);
+                                                }
+                                            }}
+                                            className={`flex items-center justify-between p-4 rounded-xl text-[12px] font-black uppercase tracking-widest transition-all ${activeTab === item.id ? 'bg-neon-cyan/10 text-neon-cyan' : 'text-slate-500'}`}
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <item.icon className="w-5 h-5" /> {item.label}
+                                            </div>
+                                        </button>
+
+                                        {item.submenu && openSubmenu === item.id && (
+                                            <div className="ml-4 pl-4 border-l border-white/10 mt-2 space-y-2">
+                                                {item.submenu.map((sub: any) => (
+                                                    <button
+                                                        key={sub.id}
+                                                        onClick={() => {
+                                                            setActiveTab(sub.id as any);
+                                                            setIsMobileMenuOpen(false);
+                                                        }}
+                                                        className={`w-full flex items-center gap-3 p-3 rounded-lg text-[11px] font-bold uppercase tracking-wider text-left transition-all ${activeTab === sub.id ? 'text-neon-cyan bg-neon-cyan/5' : 'text-slate-500'}`}
+                                                    >
+                                                        <sub.icon className="w-4 h-4" /> {sub.label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 ))}
                             </div>
                         </motion.div>
