@@ -1,10 +1,11 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Zap, ShieldCheck, Video, Briefcase, Building2, Globe, Star, Check, Sparkles, Tv } from "lucide-react";
+import { X, Wifi, Monitor, Cpu, Briefcase, Tv, Star, Shield, ArrowRight, Smartphone, MapPin, User, CheckCircle2 } from "lucide-react";
 import { NeonButton } from "./NeonButton";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import toast from "react-hot-toast";
 
 export type PlanCategory = "Streamer" | "HomeOffice" | "Enterprise" | "TV";
 
@@ -15,128 +16,47 @@ interface CategoryModalProps {
     providerName: string;
 }
 
-const categoryData: Record<string, any> = {
-    Streamer: {
-        title: "Creator Hub",
-        tag: "Bitrate Priority",
-        icon: <Video className="w-6 h-6" />,
-        accent: "neon-magenta",
-        bgGradient: "from-magenta-600/10",
+const providerData: any = {
+    Totalplay: {
         plans: {
-            "Totalplay 1200 Megas": [
-                { name: "Pro Multi-Stream", speed: "1200 Megas", type: "XGS-PON", price: "$1,470", features: ["Bitrate 8K Garantizado", "WiFi 7 Multilink", "Prioridad en Nodos", "SLA 99.9% Stream"] },
-                { name: "Creator Essentials", speed: "500 Megas", type: "XGS-PON", price: "$999", features: ["Streaming 4K Fluido", "WiFi Pro 6E", "Cuentas Multidispositivo", "Soporte VIP"] }
+            Streamer: [
+                { name: "Plan Simétrico 150", speed: "150 MB", type: "Internet Simétrico", price: "$569", features: ["12 Meses de descuento", "Club Totalplay", "Wifi 6"] },
+                { name: "Plan Simétrico 300", speed: "300 MB", type: "Internet Simétrico", price: "$689", features: ["Ideal para 4K", "Prioridad Gamer", "Wifi 6"] },
             ],
-            "Megacable Streamers": [
-                { name: "Xview+ Creator", speed: "500 Megas", type: "Simétrico", price: "$880", features: ["Netflix Estándar Incluido", "Xview+ TV Monitoreo", "WiFi Ultra Dual", "Instalación Gold"] }
+            HomeOffice: [
+                { name: "Productividad 500", speed: "500 MB", type: "Fibra Profesional", price: "$859", features: ["Soporte Premium", "Antivirus incluido", "IP Dinámica"] },
             ],
-            "Telmex Infinitum Gamer": [
-                { name: "Infinitum 150 Sim", speed: "150 Megas", type: "Simétrico", price: "$499", features: ["IP Pública Dinámica", "Zero Lag Nodes", "Claro Video Incluido", "Antivirus McAfee"] }
+            Enterprise: [
+                { name: "Empresarial 1000", speed: "1 GB", type: "Fibra Dedicada", price: "$1,299", features: ["SLA 99.9%", "IP Fija disponible", "Soporte 24/7"] },
             ],
-            "Telcel Casa Libre 4": [
-                { name: "Mobile Streamers", speed: "50 Megas", type: "Inalámbrico", price: "$499", features: ["125GB High Speed", "Paramount+ & Claro", "Sin Instalación", "Plug & Play"] }
-            ],
-            "Cablecom / Impactel": [
-                { name: "Impactel Start", speed: "30 Megas", type: "HFC Estándar", price: "$280", features: ["TV Básica Incluida", "Soporte Local", "Sin Plazo Forzoso", "Internet Estable"] }
+            TV: [
+                { name: "Plan TV Plus", speed: "250 MB", type: "Internet + TV", price: "$729", features: ["140 Canales", "App Totalplay", "4K HDR"] },
             ]
         }
     },
-    HomeOffice: {
-        title: "Productivity Suite",
-        tag: "Encryption Ready",
-        icon: <Briefcase className="w-6 h-6" />,
-        accent: "neon-cyan",
-        bgGradient: "from-blue-600/10",
+    Megacable: {
         plans: {
-            "Totalplay Business": [
-                { name: "Business Pro", speed: "500 Megas", type: "Simétrico", price: "$680", features: ["Prioridad Conferencias 4K", "Seguridad Web Pro", "Llamadas Ilimitadas", "Cloud Storage 1TB"] }
+            Streamer: [
+                { name: "Internet Ilimitado 100", speed: "100 MB", type: "Fibra Óptica", price: "$450", features: ["Hbo Max Incluido", "Módem Dual Band"] },
+                { name: "Internet Ilimitado 200", speed: "200 MB", type: "Fibra Óptica", price: "$550", features: ["Paramount+ Incluido", "Módem Dual Band"] },
             ],
-            "Megacable Pro-Work": [
-                { name: "Pro-Work Netflix", speed: "500 Megas", type: "Simétrico", price: "$880", features: ["Canales HD Incluidos", "Netflix Premium 4K", "WiFi Ultra Mesh", "Asistencia Pro"] }
-            ],
-            "Telmex Infinitum Office": [
-                { name: "Office Premium", speed: "100 Megas", type: "Simétrico", price: "$499", features: ["Netflix & Disney+ Inc.", "HBO Max Promo", "Soporte Prioritario", "Configuración VPN"] }
-            ],
-            "Telcel Casa Freelance": [
-                { name: "Freelance 5G", speed: "50 Megas", type: "Inalámbrico", price: "$499", features: ["Portabilidad Total", "Redes Sociales Inc.", "Fácil Activación", "125GB de Datos"] }
-            ],
-            "Cablecom / Impactel": [
-                { name: "Office Lite", speed: "30 Megas", type: "Estándar", price: "$280", features: ["Económico & Estable", "Atención Teziutlán", "Soporte Presencial", "Internet + TV"] }
-            ]
-        }
-    },
-    Enterprise: {
-        title: "B2B Infrastructure",
-        tag: "SLA Guaranteed",
-        icon: <Building2 className="w-6 h-6" />,
-        accent: "white",
-        bgGradient: "from-slate-600/10",
-        plans: {
-            "Totalplay Negocios": [
-                { name: "Digital Business", speed: "250 Megas", type: "Simétrico", price: "$650", features: ["Página Web Gratis", "Tienda en Línea", "Internet Seguro Pro", "Dominio .com"] }
-            ],
-            "Telmex Negocios": [
-                { name: "Infinitum Business", speed: "150 Megas", type: "Fibra Opt.", price: "$549", features: ["Sección Amarilla Inc.", "Facturación Electrónica", "Corros Ilimitados", "Almacenaje Nube"] }
-            ],
-            "Megacable Empresas": [
-                { name: "Empresa Conectada", speed: "300 Megas", type: "Simétrico", price: "$550", features: ["Asesor Dedicado", "WiFi Inteligente", "Ciberseguridad Inc.", "Llamadas Mundiales"] }
-            ],
-            "Cablecom Empresas": [
-                { name: "Pyme Hub", speed: "300 Megas", type: "Estándar", price: "$550", features: ["TV Corporativa", "Facturación Portal", "Instalación Express", "Sin Anualidades"] }
-            ],
-            "Telcel Internet Empresa": [
-                { name: "Logística 5G", speed: "60GB High Speed", type: "Red 5G", price: "$1,219", features: ["Equipos en Campo", "Monitoreo GPS Ready", "Red Segura VPN", "Escalabilidad Total"] }
-            ],
-            "Impactel Negocios": [
-                { name: "Básico Negocio", speed: "50 Megas", type: "HFC Cable", price: "$500", features: ["Internet + TV Local", "Precio Fijo", "Atención de Fallas", "Simple & Funcional"] }
-            ]
-        }
-    },
-    TV: {
-        title: "Entertainment Bundle",
-        tag: "Double Play Certified",
-        icon: <Tv className="w-6 h-6" />,
-        accent: "neon-magenta",
-        bgGradient: "from-magenta-600/10",
-        plans: {
-            "Totalplay Doble Play": [
-                { name: "Totalplay Fun", speed: "150 Megas", type: "Simétrico", price: "$450", features: ["TV HD Pack Básico", "Velocidad Fibra", "Llamadas Inc.", "WiFi 6 Ready"] },
-                { name: "Totalplay Cinema", speed: "250 Megas", type: "Simétrico", price: "$650", features: ["TV HD Pack Cine", "Velocidad Simétrica", "Soporte Premium", "Apps TV Incluidas"] }
-            ],
-            "Megacable Doble Play": [
-                { name: "Xview+ Connect", speed: "300 Megas", type: "Simétrico", price: "$680", features: ["Xview+ HD Pack", "Netflix Estándar Inc.", "Telefonía Ilimitada", "Canales Premium Promo"] },
-                { name: "Xview+ Ultra", speed: "500 Megas", type: "Simétrico", price: "$880", features: ["Xview+ Full Pack", "Netflix Premium Inc.", "Amazon Prime Inc.", "WiFi Ultra Mesh"] }
-            ],
-            "Telmex Infinitum + TV": [
-                { name: "Infinitum Plus", speed: "80 Megas", type: "Fibra Opt.", price: "$399", features: ["Claro Video Grátis", "Netflix & Disney+ Promo", "Fija Ilimitada", "Antivirus McAfee"] },
-                { name: "Infinitum Cinema", speed: "150 Megas", type: "Fibra Opt.", price: "$549", features: ["HBO Max Inc.", "Netflix Multi-pantalla", "Soporte Infinitum", "IP Dinámica"] }
-            ],
-            "izzi 150 Megas + TV+": [
-                { name: "izzi tv+ Smart", speed: "150 Megas", type: "HFC/Fibra", price: "$720", features: ["izzi tv+ Interactive", "Canales Exclusivos izzi", "Netflix Ready", "App izzi go Inc."] }
-            ],
-            "Cablecom Estándar": [
-                { name: "Combo Pyme-Hogar", speed: "100 Megas", type: "Cable HFC", price: "$350", features: ["TV Digital 80 Canales", "Internet Estable", "Soporte Local", "Sin Plazos"] }
-            ],
-            "Impactel Básico": [
-                { name: "Impactel Home", speed: "Internet + TV", type: "Regional", price: "$280", features: ["Canales Regionales", "Navegación Básica", "Instalación Rápida", "Atención Teziutlán"] }
+            TV: [
+                { name: "Tríple Clásico", speed: "150 MB", type: "Internet + TV + Telef", price: "$650", features: ["80 Canales HD", "Xview+ Incluido"] },
             ]
         }
     }
 };
 
 export const CategoryModal = ({ isOpen, onClose, category, providerName }: CategoryModalProps) => {
-    const data = categoryData[category] || categoryData.HomeOffice;
     const [selectedPlan, setSelectedPlan] = useState(0);
 
     const getProviderPlans = () => {
-        const plans = data.plans[providerName];
+        const data = providerData[providerName] || providerData.Totalplay;
+        const plans = data.plans[category];
         if (plans) return plans;
 
-        const closeMatchKey = Object.keys(data.plans).find(key =>
-            providerName.toLowerCase().includes(key.toLowerCase()) ||
-            key.toLowerCase().includes(providerName.toLowerCase())
-        );
-
+        const allCategories = Object.keys(data.plans);
+        const closeMatchKey = allCategories.find(k => k.toLowerCase().includes(category.toLowerCase()));
         return closeMatchKey ? data.plans[closeMatchKey] : null;
     };
 
@@ -182,11 +102,22 @@ export const CategoryModal = ({ isOpen, onClose, category, providerName }: Categ
 
             if (error) throw error;
 
-            alert(`¡Registro Exitoso! Un ejecutivo de FiberGravity especializado en ${category === 'Enterprise' ? 'Empresas' : category === 'HomeOffice' ? 'Productividad' : category === 'TV' ? 'Entretenimiento' : 'Streaming'} te contactará.`);
+            toast.success(`¡Solicitud enviada! Un asesor validará tu cobertura pronto.`, {
+                icon: '🚀',
+                style: {
+                    borderRadius: '20px',
+                    background: '#020617',
+                    color: '#fff',
+                    border: '1px solid rgba(0, 243, 255, 0.2)',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    padding: '16px 24px'
+                }
+            });
             onClose();
         } catch (error: any) {
             console.error('Error submitting lead:', error);
-            alert('Hubo un error al enviar tus datos. Por favor intenta de nuevo o contacta a soporte.');
+            toast.error('Hubo un error al enviar tus datos. Por favor intenta de nuevo.');
         } finally {
             setIsSubmitting(false);
         }
@@ -208,158 +139,161 @@ export const CategoryModal = ({ isOpen, onClose, category, providerName }: Categ
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className="relative w-full max-w-5xl bg-slate-950 border border-white/10 rounded-[40px] shadow-2xl overflow-hidden"
+                        className="relative w-full max-w-5xl bg-[#020617] md:rounded-[3rem] border border-white/10 shadow-2xl shadow-neon-cyan/10 overflow-hidden"
                     >
-                        <div className="grid lg:grid-cols-[1.2fr_1fr] min-h-[600px]">
-                            {/* Left Side: Category Details */}
-                            <div className={`p-8 md:p-12 border-b lg:border-b-0 lg:border-r border-white/10 bg-gradient-to-br ${data.bgGradient} via-transparent to-transparent`}>
-                                <div className="flex items-center gap-3 mb-8">
-                                    <div className={`p-3 rounded-2xl bg-${data.accent}/10 border border-${data.accent}/20`}>
-                                        <div className={`text-${data.accent}`}>{data.icon}</div>
+                        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px]">
+                            {/* Left Side: Plan Selector */}
+                            <div className="p-8 md:p-12 border-b lg:border-b-0 lg:border-r border-white/5">
+                                <div className="flex justify-between items-start mb-8">
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <div className="w-2 h-2 rounded-full bg-neon-cyan animate-pulse" />
+                                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-neon-cyan">Plan Selection</span>
+                                        </div>
+                                        <h2 className="text-3xl md:text-4xl font-black italic tracking-tighter text-white">
+                                            {category === 'Enterprise' ? 'SOLUCIONES EMPRESARIALES' :
+                                                category === 'HomeOffice' ? 'PODER HOME OFFICE' :
+                                                    category === 'TV' ? 'ENTRETENIMIENTO TOTAL' :
+                                                        'MÁXIMO STREAMING'}
+                                        </h2>
+                                        <p className="text-slate-400 mt-2 text-sm max-w-md font-medium">
+                                            Selecciona el paquete que mejor se adapte a tus necesidades con {providerName}.
+                                        </p>
                                     </div>
-                                    <span className={`text-xs font-black uppercase tracking-[0.4em] text-${data.accent}`}>
-                                        {data.tag}
-                                    </span>
+                                    <button
+                                        onClick={onClose}
+                                        className="lg:hidden p-2 hover:bg-white/5 rounded-full transition-colors"
+                                    >
+                                        <X className="w-6 h-6 text-slate-500" />
+                                    </button>
                                 </div>
 
-                                <h2 className="text-4xl md:text-5xl font-black italic mb-6 leading-tight">
-                                    {data.title.split(' ')[0]} <br />
-                                    <span className={`text-transparent bg-clip-text bg-gradient-to-r from-${data.accent} to-white`}>
-                                        {data.title.split(' ')[1]}
-                                    </span>
-                                </h2>
-
-                                <div className="space-y-4 mb-10">
-                                    {currentPlans.map((plan: any, idx: number) => (
-                                        <button
-                                            key={idx}
-                                            onClick={() => setSelectedPlan(idx)}
-                                            className={`w-full text-left p-6 rounded-3xl border transition-all duration-300 group relative overflow-hidden ${selectedPlan === idx
-                                                ? `bg-white/5 border-${data.accent} shadow-[0_0_30px_rgba(255,255,255,0.05)]`
-                                                : "bg-white/[0.02] border-white/5 hover:border-white/20"
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-fit max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                                    {currentPlans.map((plan: any, i: number) => (
+                                        <motion.div
+                                            key={i}
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            onClick={() => setSelectedPlan(i)}
+                                            className={`relative p-6 rounded-3xl border-2 transition-all cursor-pointer group ${selectedPlan === i
+                                                ? 'bg-neon-cyan/5 border-neon-cyan shadow-xl shadow-neon-cyan/5'
+                                                : 'bg-white/[0.02] border-white/5 hover:border-white/10'
                                                 }`}
                                         >
-                                            <div className="flex justify-between items-center mb-2">
-                                                <span className={`font-black uppercase tracking-widest text-[10px] ${selectedPlan === idx ? `text-${data.accent}` : "text-slate-500"}`}>
-                                                    {plan.name}
-                                                </span>
-                                                <span className="text-2xl font-black italic">
-                                                    {plan.price}
-                                                    <span className="text-[10px] font-normal not-italic text-slate-500 ml-1 uppercase">AL MES</span>
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center gap-4">
-                                                <div className="flex items-center gap-2">
-                                                    <Zap className={`w-4 h-4 text-${data.accent}`} />
-                                                    <span className="text-sm font-bold">{plan.speed}</span>
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className={`p-3 rounded-2xl ${selectedPlan === i ? 'bg-neon-cyan/20' : 'bg-white/5 group-hover:bg-white/10'} transition-colors`}>
+                                                    {category === 'Streamer' ? <Wifi className={`w-5 h-5 ${selectedPlan === i ? 'text-neon-cyan' : 'text-slate-500'}`} /> :
+                                                        category === 'HomeOffice' ? <Monitor className={`w-5 h-5 ${selectedPlan === i ? 'text-neon-cyan' : 'text-slate-500'}`} /> :
+                                                            category === 'TV' ? <Tv className={`w-5 h-5 ${selectedPlan === i ? 'text-neon-cyan' : 'text-slate-500'}`} /> :
+                                                                <Briefcase className={`w-5 h-5 ${selectedPlan === i ? 'text-neon-cyan' : 'text-slate-500'}`} />}
                                                 </div>
-                                                <div className="w-1 h-1 rounded-full bg-slate-700" />
-                                                <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">{plan.type}</span>
+                                                <div className={`text-xl font-black italic ${selectedPlan === i ? 'text-neon-cyan' : 'text-white'}`}>
+                                                    {plan.price}
+                                                </div>
                                             </div>
-                                        </button>
-                                    ))}
-                                </div>
 
-                                <div className="space-y-4">
-                                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-4">Certificación de Servicio:</p>
-                                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        {currentPlans[selectedPlan].features.map((feature: string, i: number) => (
-                                            <li key={i} className="flex items-center gap-2 text-xs text-slate-400">
-                                                <Check className={`w-4 h-4 text-${data.accent}`} />
-                                                {feature}
-                                            </li>
-                                        ))}
-                                    </ul>
+                                            <h3 className="font-bold text-lg text-white mb-1">{plan.name}</h3>
+                                            <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">{plan.speed}</div>
+
+                                            <div className="space-y-2">
+                                                {plan.features.map((feature: string, idx: number) => (
+                                                    <div key={idx} className="flex items-center gap-2 text-[10px] text-slate-500 font-bold">
+                                                        <CheckCircle2 className={`w-3 h-3 ${selectedPlan === i ? 'text-neon-cyan' : 'text-emerald-500'}`} />
+                                                        {feature}
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            {selectedPlan === i && (
+                                                <motion.div
+                                                    layoutId="selected-indicator"
+                                                    className="absolute top-4 right-4"
+                                                    initial={{ scale: 0 }}
+                                                    animate={{ scale: 1 }}
+                                                >
+                                                    <div className="w-4 h-4 rounded-full bg-neon-cyan flex items-center justify-center">
+                                                        <div className="w-2 h-2 rounded-full bg-black" />
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </motion.div>
+                                    ))}
                                 </div>
                             </div>
 
-                            {/* Right Side: Specialized Form */}
-                            <div className="p-8 md:p-12 flex flex-col justify-center bg-black/40">
+                            {/* Right Side: Deployment Form */}
+                            <div className="bg-black/40 p-8 md:p-12 flex flex-col">
                                 <button
                                     onClick={onClose}
-                                    aria-label="Cerrar modal"
-                                    className="absolute top-8 right-8 p-3 rounded-full hover:bg-white/5 transition-colors group"
+                                    className="hidden lg:flex self-end p-2 hover:bg-white/5 rounded-full transition-colors mb-4"
                                 >
-                                    <X className="w-6 h-6 text-slate-500 group-hover:text-white" />
+                                    <X className="w-6 h-6 text-slate-500" />
                                 </button>
 
-                                <div className="mb-10 text-center lg:text-left">
-                                    <h3 className="text-2xl font-black italic mb-2 uppercase tracking-tighter">
-                                        Expediente de {category === 'Enterprise' ? 'Negocio' : 'Perfil'}
-                                    </h3>
-                                    <p className="text-sm text-slate-500">
-                                        Validación inteligente de {providerName} <span className={`text-${data.accent} font-bold italic`}>Teziutlán Zone</span>.
+                                <div className="flex-1">
+                                    <h3 className="text-xl font-black italic text-white mb-2">VALIDAR COBERTURA</h3>
+                                    <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-8">
+                                        Instalación inmediata en Teziutlán
                                     </p>
-                                </div>
 
-                                <form onSubmit={handleSubmit} className="space-y-6">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 pl-4">
-                                            {category === 'Enterprise' ? 'Razón Social / Representante' : 'Nombre Completo'}
-                                        </label>
-                                        <input
-                                            required
-                                            type="text"
-                                            value={formData.fullName}
-                                            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                                            placeholder="EJ. JUAN PÉREZ / EMPRESA S.A."
-                                            className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-white/20 focus:bg-white/[0.05] transition-all uppercase placeholder:text-slate-700 font-bold"
-                                        />
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <form onSubmit={handleSubmit} className="space-y-6">
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 pl-4">Teléfono Directo</label>
+                                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
+                                                <User className="w-3 h-3 text-neon-cyan" /> Nombre Titular
+                                            </label>
+                                            <input
+                                                required
+                                                value={formData.fullName}
+                                                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                                                placeholder="EJ. JUAN PÉREZ"
+                                                className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-neon-cyan focus:bg-white/[0.07] transition-all font-bold placeholder:text-slate-700"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
+                                                <Smartphone className="w-3 h-3 text-neon-cyan" /> Whatsapp / Celular
+                                            </label>
                                             <input
                                                 required
                                                 type="tel"
                                                 value={formData.phone}
                                                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                                placeholder="231 123 4567"
-                                                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-white/20 focus:bg-white/[0.05] transition-all placeholder:text-slate-700 font-bold"
+                                                placeholder="EJ. 231 123 4567"
+                                                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-neon-cyan focus:bg-white/[0.07] transition-all font-bold placeholder:text-slate-700"
                                             />
                                         </div>
+
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 pl-4">Ubicación</label>
+                                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
+                                                <MapPin className="w-3 h-3 text-neon-cyan" /> Barrio / Colonia
+                                            </label>
                                             <input
                                                 required
-                                                type="text"
                                                 value={formData.location}
                                                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                                placeholder="ZONA / BARRIO"
-                                                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-white/20 focus:bg-white/[0.05] transition-all placeholder:text-slate-700 uppercase font-bold"
+                                                placeholder="EJ. CENTRO, CHOWIS..."
+                                                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-neon-cyan focus:bg-white/[0.07] transition-all font-bold placeholder:text-slate-700 uppercase"
                                             />
                                         </div>
-                                    </div>
 
-                                    <div className="space-y-2 text-center p-4 rounded-2xl border border-dashed border-white/10 bg-white/[0.01]">
-                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 block mb-2">Plan Auditado</span>
-                                        <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-${data.accent}/5 border border-${data.accent}/20`}>
-                                            <ShieldCheck className={`w-3.5 h-3.5 text-${data.accent}`} />
-                                            <span className={`text-[10px] font-black text-${data.accent} uppercase tracking-widest`}>{currentPlans[selectedPlan].name}</span>
+                                        <div className="pt-4">
+                                            <NeonButton
+                                                type="submit"
+                                                disabled={isSubmitting}
+                                                className="w-full !py-5 font-black tracking-[0.3em]"
+                                                variant="cyan"
+                                            >
+                                                {isSubmitting ? "ENVIANDO..." : "SOLICITAR AHORA"}
+                                            </NeonButton>
                                         </div>
-                                    </div>
 
-                                    <NeonButton
-                                        type="submit"
-                                        disabled={isSubmitting}
-                                        variant={data.accent === 'neon-cyan' ? 'cyan' : data.accent === 'neon-magenta' ? 'magenta' : 'white'}
-                                        className="w-full !py-6 text-xs font-black tracking-[0.4em] shadow-xl active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        {isSubmitting ? "ENVIANDO..." : "VERIFICAR PACK"}
-                                    </NeonButton>
-
-                                    <div className="flex items-center justify-center gap-4 mt-6">
-                                        <div className="flex -space-x-2">
-                                            {[1, 2, 3].map(i => (
-                                                <div key={i} className="w-6 h-6 rounded-full border border-black bg-slate-800" />
-                                            ))}
-                                        </div>
-                                        <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">
-                                            +40 auditorías activas hoy
+                                        <p className="text-[9px] text-center text-slate-600 font-bold tracking-tighter mt-4">
+                                            AL ENVIAR ACEPTAS NUESTRA POLÍTICA DE PRIVACIDAD. <br />
+                                            FIBERGRAVITY ZERO DATA PROTECTION 2026.
                                         </p>
-                                    </div>
-                                </form>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </motion.div>
