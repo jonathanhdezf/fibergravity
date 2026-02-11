@@ -69,18 +69,6 @@ export const Footer = () => {
                 </div>
             </div>
 
-            {/* Floating WhatsApp Button */}
-            <motion.a
-                href="https://wa.me/yournumber"
-                target="_blank"
-                rel="noopener noreferrer"
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                whileTap={{ scale: 0.9 }}
-                className="fixed bottom-8 right-8 z-50 w-16 h-16 bg-[#25D366] rounded-full flex items-center justify-center shadow-lg shadow-green-500/20 text-white cursor-pointer"
-            >
-                <MessageCircle className="w-8 h-8 fill-current" />
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white animate-pulse" />
-            </motion.a>
         </footer>
     );
 };

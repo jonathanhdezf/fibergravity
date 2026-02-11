@@ -23,6 +23,7 @@ export const metadata: Metadata = {
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 
 import { Toaster } from "react-hot-toast";
+import { WhatsAppWidget } from "@/components/ui/WhatsAppWidget";
 
 export default function RootLayout({
   children,
@@ -49,6 +50,7 @@ export default function RootLayout({
         <AnalyticsTracker />
         <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-900 to-black overflow-hidden" />
         {children}
+        <WhatsAppWidget />
       </body>
     </html>
   );
