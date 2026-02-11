@@ -753,7 +753,7 @@ export default function PremiumAdminDashboard() {
                         {activeTab === 'overview' && (
                             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
                                 {/* Key Performance Cards */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-black">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                     {[
                                         { label: 'Visitas Totales', val: visits.length, icon: Eye, color: 'cyan', trend: '+12%' },
                                         { label: 'Nuevos Leads', val: leads.length, icon: Users, color: 'magenta', trend: '+5%' },
@@ -774,7 +774,7 @@ export default function PremiumAdminDashboard() {
                                 </div>
 
                                 {/* Charts Row */}
-                                <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 text-black">
+                                <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
                                     <GlassCard className="p-8 border-white/5 !bg-white/5 h-[450px]">
                                         <h3 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-8 flex items-center gap-2">
                                             <TrendingUp className="w-4 h-4 text-neon-cyan" /> Análisis de Tráfico e Interacción
