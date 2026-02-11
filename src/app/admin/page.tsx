@@ -43,7 +43,12 @@ import {
     FileText,
     Printer,
     FileUp,
-    Loader2
+    Loader2,
+    User,
+    Phone,
+    AtSign,
+    UserPlus,
+    UserCheck
 } from "lucide-react";
 import {
     AreaChart,
@@ -79,6 +84,17 @@ interface Lead {
     ine_reverso?: string;
     comprobante_domicilio?: string;
     referencias_hogar?: string;
+    assigned_to?: string;
+}
+
+interface Comisionista {
+    id: string;
+    full_name: string;
+    phone: string;
+    email: string;
+    active: boolean;
+    performance_score: number;
+    created_at: string;
 }
 
 interface Provider {
@@ -133,7 +149,7 @@ export default function PremiumAdminDashboard() {
     const [loading, setLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [password, setPassword] = useState("");
-    const [activeTab, setActiveTab] = useState<"overview" | "leads" | "traffic" | "inventory" | "integrations" | "logs">("overview");
+    const [activeTab, setActiveTab] = useState<"overview" | "leads" | "traffic" | "inventory" | "integrations" | "logs" | "ventas">("overview");
     const [providers, setProviders] = useState<Provider[]>([]);
     const [plans, setPlans] = useState<Plan[]>([]);
     const [logs, setLogs] = useState<SystemLog[]>([]);
@@ -141,6 +157,9 @@ export default function PremiumAdminDashboard() {
     const [lastRefresh, setLastRefresh] = useState(new Date());
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [filter, setFilter] = useState("all");
+    const [comisionistas, setComisionistas] = useState<Comisionista[]>([]);
+    const [agentSelectionModal, setAgentSelectionModal] = useState<{ isOpen: boolean, leadId: string }>({ isOpen: false, leadId: "" });
+    const [editingAgent, setEditingAgent] = useState<Comisionista | null>(null);
 
     // Print Style Fixes (Global for this page)
     useEffect(() => {
@@ -220,12 +239,13 @@ export default function PremiumAdminDashboard() {
 
     const fetchData = async () => {
         setLoading(true);
-        const [leadsRes, visitsRes, providersRes, plansRes, logsRes] = await Promise.all([
+        const [leadsRes, visitsRes, providersRes, plansRes, logsRes, agentsRes] = await Promise.all([
             supabase.from('leads').select('*').order('created_at', { ascending: false }),
             supabase.from('site_visits').select('*').order('created_at', { ascending: false }).limit(1000),
             supabase.from('providers').select('*').order('name'),
             supabase.from('plans').select('*').order('ranking_score', { ascending: false }),
-            supabase.from('system_logs').select('*').order('created_at', { ascending: false }).limit(500)
+            supabase.from('system_logs').select('*').order('created_at', { ascending: false }).limit(500),
+            supabase.from('comisionistas').select('*').order('full_name')
         ]);
 
         if (leadsRes.data) setLeads(leadsRes.data);
@@ -233,6 +253,7 @@ export default function PremiumAdminDashboard() {
         if (providersRes.data) setProviders(providersRes.data);
         if (plansRes.data) setPlans(plansRes.data);
         if (logsRes.data) setLogs(logsRes.data);
+        if (agentsRes.data) setComisionistas(agentsRes.data);
 
         setLoading(false);
         setLastRefresh(new Date());
@@ -249,25 +270,67 @@ export default function PremiumAdminDashboard() {
         });
     };
 
-    const updateStatus = async (id: string, newStatus: string, reason?: string) => {
+    const updateStatus = async (id: string, newStatus: string, reason?: string, agentId?: string) => {
+        // Validar flujo: No se puede finalizar sin haber pasado por contactando y tener agente
+        if (newStatus === 'completed') {
+            const currentLead = leads.find(l => l.id === id);
+            if (!currentLead || currentLead.status !== 'contacting' || !currentLead.assigned_to) {
+                alert("ERROR DE FLUJO: Solo los leads en estado 'Contactando' y con un agente asignado pueden ser finalizados.");
+                return;
+            }
+        }
+
+        // Si pasa a contactando y no hay agente, abrir modal de selección
+        if (newStatus === 'contacting' && !agentId) {
+            setAgentSelectionModal({ isOpen: true, leadId: id });
+            return;
+        }
+
         const updateData: any = { status: newStatus };
         if (reason) updateData.rejection_reason = reason;
+        if (agentId) updateData.assigned_to = agentId;
 
         const { error } = await supabase.from('leads').update(updateData).eq('id', id);
         if (!error) {
-            await logAction('STATUS_CHANGE', 'LEADS', id, `Cambiado status de lead a ${newStatus}${reason ? ': ' + reason : ''}`);
+            const agentName = agentId ? comisionistas.find(c => c.id === agentId)?.full_name : '';
+            await logAction('STATUS_CHANGE', 'LEADS', id, `Cambiado status de lead a ${newStatus}${agentName ? ' (Asignado a ' + agentName + ')' : ''}${reason ? ': ' + reason : ''}`);
             fetchData();
             setRejectionModal({ isOpen: false, id: "", reason: "" });
+            setAgentSelectionModal({ isOpen: false, leadId: "" });
         }
+    };
+
+    const saveAgent = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingAgent) return;
+
+        const { id, created_at, ...data } = editingAgent as any;
+        const res = id
+            ? await supabase.from('comisionistas').update(data).eq('id', id)
+            : await supabase.from('comisionistas').insert(data);
+
+        if (res.error) {
+            console.error('Error saving agent:', res.error);
+            alert(`Error al guardar agente: ${res.error.message}`);
+            return;
+        }
+
+        await logAction(id ? 'UPDATE' : 'CREATE', 'AGENTS', id || 'NEW', `${id ? 'Actualizado' : 'Creado'} el comisionista: ${data.full_name}`);
+        fetchData();
+        setEditingAgent(null);
     };
 
     const deleteLead = async (id: string) => {
         const { error } = await supabase.from('leads').delete().eq('id', id);
-        if (!error) {
-            await logAction('DELETE', 'LEADS', id, `Eliminado expediente de lead permanentemente`);
-            fetchData();
-            setDeleteConfirm(null);
+        if (error) {
+            console.error('Error deleting lead:', error);
+            alert(`Error al eliminar lead: ${error.message}`);
+            return;
         }
+
+        await logAction('DELETE', 'LEADS', id, `Eliminado expediente de lead permanentemente`);
+        fetchData();
+        setDeleteConfirm(null);
     };
 
     const updateLeadData = async (e: React.FormEvent) => {
@@ -289,19 +352,27 @@ export default function PremiumAdminDashboard() {
             })
             .eq('id', editingLead.id);
 
-        if (!error) {
-            await logAction('UPDATE', 'LEADS', editingLead.id, `Actualizados datos del lead: ${editingLead.full_name}`);
-            fetchData();
-            setEditingLead(null);
+        if (error) {
+            console.error('Error updating lead data:', error);
+            alert(`Error al actualizar lead: ${error.message}`);
+            return;
         }
+
+        await logAction('UPDATE', 'LEADS', editingLead.id, `Actualizados datos del lead: ${editingLead.full_name}`);
+        fetchData();
+        setEditingLead(null);
     };
 
     const deleteItem = async (table: string, id: string) => {
         const { error } = await supabase.from(table).delete().eq('id', id);
-        if (!error) {
-            await logAction('DELETE', table.toUpperCase(), id, `Eliminado registro de la tabla ${table}`);
-            fetchData();
+        if (error) {
+            console.error(`Error deleting from ${table}:`, error);
+            alert(`Error al eliminar: ${error.message}`);
+            return;
         }
+
+        await logAction('DELETE', table.toUpperCase(), id, `Eliminado registro de la tabla ${table}`);
+        fetchData();
     };
 
     const saveProvider = async (e: React.FormEvent) => {
@@ -313,11 +384,15 @@ export default function PremiumAdminDashboard() {
             ? await supabase.from('providers').update(data).eq('id', id)
             : await supabase.from('providers').insert(data);
 
-        if (!res.error) {
-            await logAction(id ? 'UPDATE' : 'CREATE', 'PROVIDERS', id || 'NEW', `${id ? 'Actualizado' : 'Creado'} el proveedor: ${data.name}`);
-            fetchData();
-            setEditingProvider(null);
+        if (res.error) {
+            console.error('Error saving provider:', res.error);
+            alert(`Error al guardar proveedor: ${res.error.message}`);
+            return;
         }
+
+        await logAction(id ? 'UPDATE' : 'CREATE', 'PROVIDERS', id || 'NEW', `${id ? 'Actualizado' : 'Creado'} el proveedor: ${data.name}`);
+        fetchData();
+        setEditingProvider(null);
     };
 
     const savePlan = async (e: React.FormEvent) => {
@@ -334,11 +409,15 @@ export default function PremiumAdminDashboard() {
             ? await supabase.from('plans').update(data).eq('id', id)
             : await supabase.from('plans').insert(data);
 
-        if (!res.error) {
-            await logAction(id ? 'UPDATE' : 'CREATE', 'PLANS', id || 'NEW', `${id ? 'Actualizado' : 'Creado'} el plan: ${data.name}`);
-            fetchData();
-            setEditingPlan(null);
+        if (res.error) {
+            console.error('Error saving plan:', res.error);
+            alert(`Error al guardar plan: ${res.error.message}`);
+            return;
         }
+
+        await logAction(id ? 'UPDATE' : 'CREATE', 'PLANS', id || 'NEW', `${id ? 'Actualizado' : 'Creado'} el plan: ${data.name}`);
+        fetchData();
+        setEditingPlan(null);
     };
 
     // Filtered Content
@@ -392,6 +471,17 @@ export default function PremiumAdminDashboard() {
         return Object.entries(counts).map(([name, value]) => ({ name, value }));
     }, [leads]);
 
+    const agentPerformance = useMemo(() => {
+        const stats: any = {};
+        comisionistas.forEach(a => {
+            const agentLeads = leads.filter(l => l.assigned_to === a.id);
+            const completed = agentLeads.filter(l => l.status === 'completed').length;
+            const total = agentLeads.length;
+            stats[a.id] = total > 0 ? Math.round((completed / total) * 100) : 100;
+        });
+        return stats;
+    }, [leads, comisionistas]);
+
     if (!isAuthenticated) {
         return (
             <div className="min-h-screen bg-black flex items-center justify-center p-6 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-900/20 via-black to-black">
@@ -438,7 +528,8 @@ export default function PremiumAdminDashboard() {
                                 {[
                                     { id: 'overview', icon: TrendingUp, label: 'Overview' },
                                     { id: 'leads', icon: Users, label: 'Leads Hub' },
-                                    { id: 'inventory', icon: Package, label: 'Inventario' },
+                                    { id: 'ventas', icon: UserPlus, label: 'Equipo Ventas' },
+                                    { id: 'inventory', icon: Package, label: 'Catálogo' },
                                     { id: 'traffic', icon: Globe, label: 'Live Traffic' },
                                     { id: 'integrations', icon: Settings, label: 'Sistemas' },
                                     { id: 'logs', icon: Activity, label: 'Logs' }
@@ -492,7 +583,8 @@ export default function PremiumAdminDashboard() {
                                 {[
                                     { id: 'overview', icon: TrendingUp, label: 'Overview' },
                                     { id: 'leads', icon: Users, label: 'Leads Hub' },
-                                    { id: 'inventory', icon: Package, label: 'Inventario' },
+                                    { id: 'ventas', icon: UserPlus, label: 'Equipo Ventas' },
+                                    { id: 'inventory', icon: Package, label: 'Catálogo' },
                                     { id: 'traffic', icon: Globe, label: 'Live Traffic' },
                                     { id: 'integrations', icon: Settings, label: 'Sistemas' },
                                     { id: 'logs', icon: Activity, label: 'Logs' }
@@ -689,6 +781,14 @@ export default function PremiumAdminDashboard() {
                                                                 </button>
                                                                 <div className="w-1 h-1 rounded-full bg-slate-700" />
                                                                 <span className="text-slate-400">{lead.location}</span>
+                                                                {lead.assigned_to && (
+                                                                    <>
+                                                                        <div className="w-1 h-1 rounded-full bg-emerald-500/40" />
+                                                                        <span className="text-emerald-500 font-black text-[9px] italic">
+                                                                            ATENDIDO POR: {comisionistas.find(c => c.id === lead.assigned_to)?.full_name}
+                                                                        </span>
+                                                                    </>
+                                                                )}
                                                                 {(lead.ine_anverso || lead.referencias_hogar) && (
                                                                     <>
                                                                         <div className="w-1 h-1 rounded-full bg-neon-cyan/40" />
@@ -728,11 +828,12 @@ export default function PremiumAdminDashboard() {
                                                                     <RefreshCw className="w-5 h-5" />
                                                                 </button>
                                                             )}
-                                                            {lead.status !== 'completed' && lead.status !== 'rejected' && (
+                                                            {/* Solo permitir finalizar si está en seguimiento por un agente */}
+                                                            {lead.status === 'contacting' && lead.assigned_to && (
                                                                 <button
                                                                     onClick={() => updateStatus(lead.id, 'completed')}
                                                                     className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all"
-                                                                    title="Finalizar"
+                                                                    title="Finalizar Contrato"
                                                                 >
                                                                     <CheckCircle2 className="w-5 h-5" />
                                                                 </button>
@@ -953,50 +1054,181 @@ export default function PremiumAdminDashboard() {
                             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
                                 <h2 className="text-2xl font-black italic">SISTEMAS E <span className="text-neon-magenta neon-text-magenta">INTEGRACIONES</span></h2>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {[
-                                        { name: 'WhatsApp Business', status: 'Connected', icon: Smartphone, desc: 'Notificaciones automáticas de leads y seguimiento directo de clientes.', color: 'emerald' },
-                                        { name: 'Provider APIs', status: 'Scanning', icon: RefreshCw, desc: 'Sincronización de disponibilidad y cobertura en tiempo real con carriers.', color: 'cyan' },
-                                        { name: 'Payment Gateway', status: 'Standby', icon: Shield, desc: 'Procesamiento de pagos seguro para suscripciones y servicios premium.', color: 'magenta' }
-                                    ].map((int, i) => (
-                                        <GlassCard key={i} className="p-8 border-white/5 !bg-black/40 group hover:border-white/10 transition-all text-black">
-                                            <div className="flex justify-between items-start mb-8">
-                                                <div className="p-5 rounded-2xl bg-white/5 border border-white/5 group-hover:border-white/10 transition-all">
-                                                    <int.icon className={`w-8 h-8 text-${int.color === 'emerald' ? 'emerald-500' : int.color === 'cyan' ? 'neon-cyan' : 'neon-magenta'}`} />
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-black">
+                                    <GlassCard className="p-8 border-white/5 !bg-white/5">
+                                        <div className="flex justify-between items-start mb-6">
+                                            <div className="p-3 rounded-xl bg-neon-magenta/10 text-neon-magenta">
+                                                <Database className="w-6 h-6" />
+                                            </div>
+                                            <span className="px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase">Online</span>
+                                        </div>
+                                        <h3 className="text-sm font-black italic uppercase text-white mb-2">Database Cluster</h3>
+                                        <p className="text-[10px] text-slate-500 font-bold mb-6">Supabase PostgreSQL Connection</p>
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                                                <div className="h-full w-[95%] bg-neon-magenta shadow-[0_0_10px_#ff00ff]" />
+                                            </div>
+                                            <span className="text-[9px] font-mono text-slate-500">95%</span>
+                                        </div>
+                                    </GlassCard>
+
+                                    <GlassCard className="p-8 border-white/5 !bg-white/5">
+                                        <div className="flex justify-between items-start mb-6">
+                                            <div className="p-3 rounded-xl bg-neon-cyan/10 text-neon-cyan">
+                                                <Globe className="w-6 h-6" />
+                                            </div>
+                                            <span className="px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase">Active</span>
+                                        </div>
+                                        <h3 className="text-sm font-black italic uppercase text-white mb-2">CDN Edge Nodes</h3>
+                                        <p className="text-[10px] text-slate-500 font-bold mb-6">Global Content Delivery Network</p>
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                                                <div className="h-full w-[88%] bg-neon-cyan shadow-[0_0_10px_#00f3ff]" />
+                                            </div>
+                                            <span className="text-[9px] font-mono text-slate-500">88%</span>
+                                        </div>
+                                    </GlassCard>
+
+                                    <GlassCard className="p-8 border-white/5 !bg-white/5">
+                                        <div className="flex justify-between items-start mb-6">
+                                            <div className="p-3 rounded-xl bg-white/10 text-white">
+                                                <Shield className="w-6 h-6" />
+                                            </div>
+                                            <span className="px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase">Secure</span>
+                                        </div>
+                                        <h3 className="text-sm font-black italic uppercase text-white mb-2">Auth Firewall</h3>
+                                        <p className="text-[10px] text-slate-500 font-bold mb-6">Security Layer & Authentication</p>
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                                                <div className="h-full w-[100%] bg-white shadow-[0_0_10px_#ffffff]" />
+                                            </div>
+                                            <span className="text-[9px] font-mono text-slate-500">100%</span>
+                                        </div>
+                                    </GlassCard>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {activeTab === 'ventas' && (
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-12">
+                                <div className="flex justify-between items-end">
+                                    <div>
+                                        <h2 className="text-5xl font-black italic tracking-tighter mb-2 uppercase">EQUIPO DE <span className="text-neon-cyan">VENTAS</span></h2>
+                                        <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em]">Gestión de Comisionistas y Performance</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setEditingAgent({ id: '', full_name: '', phone: '', email: '', active: true, performance_score: 100, created_at: '' })}
+                                        className="px-8 py-4 bg-neon-cyan text-black font-black italic tracking-tighter rounded-2xl hover:bg-white hover:scale-105 transition-all shadow-2xl shadow-neon-cyan/20"
+                                    >
+                                        + ALTA COMISIONISTA
+                                    </button>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                    {comisionistas.map((agent) => (
+                                        <GlassCard key={agent.id} className="p-8 border-white/5 group hover:border-neon-cyan/20 transition-all text-black">
+                                            <div className="flex justify-between items-start mb-6">
+                                                <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+                                                    <User className="w-8 h-8 text-slate-400 group-hover:text-neon-cyan transition-colors" />
                                                 </div>
-                                                <div className="flex flex-col items-end">
-                                                    <span className={`text-[9px] font-black px-3 py-1 rounded-lg bg-${int.color === 'emerald' ? 'emerald' : int.color === 'cyan' ? 'cyan' : 'red'}-500/10 text-${int.color === 'emerald' ? 'emerald' : int.color === 'cyan' ? 'cyan' : 'red'}-500 uppercase tracking-widest border border-current/20`}>
-                                                        {int.status}
-                                                    </span>
+                                                <div className="text-right">
+                                                    <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Success Rate</p>
+                                                    <p className="text-2xl font-black text-white italic">{agentPerformance[agent.id] || 0}%</p>
                                                 </div>
                                             </div>
-                                            <h4 className="text-2xl font-black italic text-white mb-2 tracking-tighter">{int.name}</h4>
-                                            <p className="text-xs text-slate-500 leading-relaxed mb-10 h-12">{int.desc}</p>
-                                            <button className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white hover:bg-white/10 hover:border-white/20 transition-all">
-                                                Configurar Protocolo
-                                            </button>
+                                            <h3 className="text-xl font-black italic uppercase mb-2 tracking-tight text-white">{agent.full_name}</h3>
+                                            <div className="space-y-2 mb-8">
+                                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                                                    <Phone className="w-3 h-3" /> {agent.phone}
+                                                </p>
+                                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                                                    <AtSign className="w-3 h-3" /> {agent.email}
+                                                </p>
+                                            </div>
+                                            <div className="flex gap-4">
+                                                <button
+                                                    onClick={() => setEditingAgent(agent)}
+                                                    className="flex-1 py-3 bg-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all text-white"
+                                                >
+                                                    EDITAR
+                                                </button>
+                                                <button
+                                                    onClick={() => deleteItem('comisionistas', agent.id)}
+                                                    className="p-3 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
                                         </GlassCard>
                                     ))}
                                 </div>
 
-                                <GlassCard className="p-10 border-white/5 !bg-red-500/5 text-black">
-                                    <div className="flex flex-col md:flex-row items-center gap-10">
-                                        <div className="p-6 rounded-3xl bg-red-500/10 border border-red-500/20 shadow-2xl shadow-red-500/10">
-                                            <Database className="w-12 h-12 text-red-500" />
-                                        </div>
-                                        <div className="flex-1 text-center md:text-left">
-                                            <h4 className="text-2xl font-black italic text-white mb-2 uppercase tracking-tighter">Bóveda de Seguridad & Backups</h4>
-                                            <p className="text-sm text-slate-500 mb-0 leading-relaxed max-w-2xl">Protección perimetral de datos y respaldos automatizados cada 24 horas en nodos regionales redundantes para asegurar la continuidad sistemática de FiberGravity.</p>
-                                        </div>
-                                        <NeonButton
-                                            onClick={() => setActiveTab("logs")}
-                                            variant="magenta"
-                                            className="py-4 px-10 text-[10px] w-full md:w-auto"
-                                        >
-                                            VER LOGS DE SEGURIDAD
-                                        </NeonButton>
+                                {/* Agent Edit Modal */}
+                                {editingAgent && (
+                                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingAgent(null)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+                                        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="relative w-full max-w-lg">
+                                            <GlassCard className="p-10 border-white/10 !bg-slate-900 shadow-2xl rounded-[2.5rem] text-white">
+                                                <form onSubmit={saveAgent} className="space-y-6">
+                                                    <div className="text-center mb-8">
+                                                        <h3 className="text-2xl font-black italic uppercase">Gestión de <span className="text-neon-cyan">Agente</span></h3>
+                                                        <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mt-2">{editingAgent.id ? 'Actualizar Expediente' : 'Nuevo Registro de Ventas'}</p>
+                                                    </div>
+                                                    <div className="space-y-4">
+                                                        <div className="space-y-1">
+                                                            <label className="text-[10PX] font-black uppercase text-slate-500 ml-2">Nombre Completo</label>
+                                                            <input
+                                                                title="Nombre Agente"
+                                                                value={editingAgent.full_name}
+                                                                onChange={e => setEditingAgent({ ...editingAgent, full_name: e.target.value })}
+                                                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:border-neon-cyan focus:outline-none uppercase"
+                                                                required
+                                                            />
+                                                        </div>
+                                                        <div className="grid grid-cols-2 gap-4">
+                                                            <div className="space-y-1">
+                                                                <label className="text-[10PX] font-black uppercase text-slate-500 ml-2">Teléfono</label>
+                                                                <input
+                                                                    title="Teléfono Agente"
+                                                                    value={editingAgent.phone}
+                                                                    onChange={e => setEditingAgent({ ...editingAgent, phone: e.target.value })}
+                                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:border-neon-cyan focus:outline-none"
+                                                                    required
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-1">
+                                                                <label className="text-[10PX] font-black uppercase text-slate-500 ml-2">Score (%)</label>
+                                                                <input
+                                                                    title="Score Agente"
+                                                                    type="number"
+                                                                    value={editingAgent.performance_score}
+                                                                    onChange={e => setEditingAgent({ ...editingAgent, performance_score: parseInt(e.target.value) || 0 })}
+                                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:border-neon-cyan focus:outline-none"
+                                                                    required
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <div className="space-y-1">
+                                                            <label className="text-[10PX] font-black uppercase text-slate-500 ml-2">Email Corporativo</label>
+                                                            <input
+                                                                title="Email Agente"
+                                                                type="email"
+                                                                value={editingAgent.email}
+                                                                onChange={e => setEditingAgent({ ...editingAgent, email: e.target.value })}
+                                                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:border-neon-cyan focus:outline-none"
+                                                                required
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex gap-4 pt-4">
+                                                        <button type="button" onClick={() => setEditingAgent(null)} className="flex-1 py-4 bg-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest">DESCARTAR</button>
+                                                        <NeonButton type="submit" className="flex-1 py-4 text-[10px]">GUARDAR AGENTE</NeonButton>
+                                                    </div>
+                                                </form>
+                                            </GlassCard>
+                                        </motion.div>
                                     </div>
-                                </GlassCard>
+                                )}
                             </motion.div>
                         )}
                         {activeTab === 'logs' && (
@@ -1533,117 +1765,191 @@ export default function PremiumAdminDashboard() {
                             </motion.div>
                         </div>
                     )}
-                </AnimatePresence>
-            </div>
+
+                    {/* 4. AGENT SELECTION MODAL */}
+                    {agentSelectionModal.isOpen && (
+                        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setAgentSelectionModal({ isOpen: false, leadId: "" })} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+                            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="relative w-full max-w-xl text-white">
+                                <GlassCard className="p-10 border-neon-cyan/20 !bg-slate-900 shadow-2xl rounded-[2.5rem]">
+                                    <div className="text-center mb-10">
+                                        <div className="w-20 h-20 bg-neon-cyan/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-neon-cyan/20">
+                                            <UserCheck className="w-10 h-10 text-neon-cyan" />
+                                        </div>
+                                        <h3 className="text-2xl font-black italic uppercase">ASIGNAR <span className="text-neon-cyan">COMISIONISTA</span></h3>
+                                        <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mt-2">Selecciona al responsable de este cierre de ventas</p>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+                                        {comisionistas.filter(c => c.active).map((agent) => (
+                                            <button
+                                                key={agent.id}
+                                                onClick={() => updateStatus(agentSelectionModal.leadId, 'contacting', undefined, agent.id)}
+                                                className="group flex items-center justify-between p-6 bg-white/5 border border-white/5 hover:border-neon-cyan/40 hover:bg-neon-cyan/5 rounded-[2rem] transition-all text-left"
+                                            >
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-neon-cyan/20 transition-all">
+                                                        <User className="w-6 h-6 text-slate-500 group-hover:text-neon-cyan" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-black italic uppercase text-white group-hover:text-neon-cyan transition-colors">{agent.full_name}</p>
+                                                        <p className="text-[10px] font-bold text-slate-500 uppercase">Score: {agent.performance_score}%</p>
+                                                    </div>
+                                                </div>
+                                                <ArrowUpRight className="w-5 h-5 text-slate-700 group-hover:text-neon-cyan group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" />
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <button
+                                        onClick={() => setAgentSelectionModal({ isOpen: false, leadId: "" })}
+                                        className="w-full mt-8 py-4 bg-white/5 hover:bg-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
+                                    >
+                                        CANCELAR ASIGNACIÓN
+                                    </button>
+                                </GlassCard>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence >
+            </div >
 
             {/* 2. PREMIUM PRINTABLE DOSSIER (Visible ONLY during print spools) */}
-            {editingLead && (
-                <div id="printable-dossier" className="hidden print-force-visible">
-                    {/* Header: High Contrast & Simple */}
-                    <div style={{ borderBottom: '4px solid black', paddingBottom: '30px', marginBottom: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <div>
-                            <h1 style={{ fontSize: '40px', fontWeight: '900', color: 'black', margin: 0 }}>FIBERGRAVITY</h1>
-                            <p style={{ fontSize: '10px', fontWeight: 'bold', color: '#666', letterSpacing: '4px', marginTop: '5px' }}>OFFICIAL LOGISTICS DOSSIER v3.0</p>
-                        </div>
-                        <div style={{ textAlign: 'right' }}>
-                            <p style={{ fontSize: '12px', fontWeight: 'bold', color: 'black', margin: 0 }}>FOLIO DE GESTIÓN</p>
-                            <p style={{ fontSize: '28px', fontWeight: '900', color: '#0284c7', margin: 0 }}>#{editingLead.id.split('-')[0].toUpperCase()}</p>
-                            <p style={{ fontSize: '10px', color: '#999' }}>{new Date().toLocaleString()}</p>
-                        </div>
-                    </div>
-
-                    {/* Section 01: Client Data */}
-                    <div style={{ marginBottom: '40px' }}>
-                        <h3 style={{ fontSize: '12px', fontWeight: '900', borderLeft: '4px solid #0284c7', paddingLeft: '15px', color: '#0284c7', marginBottom: '20px' }}>01. IDENTIFICACIÓN DEL CLIENTE</h3>
-                        <div style={{ border: '2px solid #eee', borderRadius: '15px', padding: '25px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                            <div>
-                                <p style={{ fontSize: '10px', color: '#999', margin: '0 0 5px 0' }}>NOMBRE COMPLETO</p>
-                                <p style={{ fontSize: '18px', fontWeight: 'bold', color: 'black', margin: 0 }}>{editingLead.full_name}</p>
-                            </div>
-                            <div>
-                                <p style={{ fontSize: '10px', color: '#999', margin: '0 0 5px 0' }}>TELÉFONO DE CONTACTO</p>
-                                <p style={{ fontSize: '18px', fontWeight: 'bold', color: 'black', margin: 0 }}>{editingLead.phone}</p>
-                            </div>
-                            <div style={{ gridColumn: 'span 2' }}>
-                                <p style={{ fontSize: '10px', color: '#999', margin: '0 0 5px 0' }}>UBICACIÓN REGISTRADA</p>
-                                <p style={{ fontSize: '18px', fontWeight: 'bold', color: 'black', margin: 0 }}>{editingLead.location}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Section 02: Service Details */}
-                    <div style={{ marginBottom: '40px' }}>
-                        <h3 style={{ fontSize: '12px', fontWeight: '900', borderLeft: '4px solid #0284c7', paddingLeft: '15px', color: '#0284c7', marginBottom: '20px' }}>02. DETALLES DEL SERVICIO ASIGNADO</h3>
-                        <div style={{ border: '2px solid #eee', borderRadius: '15px', padding: '25px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                            <div>
-                                <p style={{ fontSize: '10px', color: '#999', margin: '0 0 5px 0' }}>PROVEEDOR</p>
-                                <p style={{ fontSize: '18px', fontWeight: '900', color: 'black', margin: 0 }}>{editingLead.provider}</p>
-                            </div>
-                            <div>
-                                <p style={{ fontSize: '10px', color: '#999', margin: '0 0 5px 0' }}>PLAN CONTRATADO</p>
-                                <p style={{ fontSize: '18px', fontWeight: 'bold', color: 'black', margin: 0 }}>{editingLead.plan_name}</p>
-                            </div>
-                            <div>
-                                <p style={{ fontSize: '10px', color: '#999', margin: '0 0 5px 0' }}>PAGO MENSUAL</p>
-                                <p style={{ fontSize: '18px', fontWeight: 'bold', color: 'black', margin: 0 }}>{editingLead.price}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Section 03: Documents */}
-                    <div style={{ marginBottom: '40px', pageBreakInside: 'avoid' }}>
-                        <h3 style={{ fontSize: '12px', fontWeight: '900', borderLeft: '4px solid #0284c7', paddingLeft: '15px', color: '#0284c7', marginBottom: '20px' }}>03. EVIDENCIA DOCUMENTAL (INE Y DOMICILIO)</h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
-                            <div style={{ textAlign: 'center' }}>
-                                <p style={{ fontSize: '10px', color: '#666', marginBottom: '10px' }}>ANVERSO (FRONTAL)</p>
-                                <div style={{ border: '1px solid #ddd', borderRadius: '10px', overflow: 'hidden', height: '180px', background: '#fafafa' }}>
-                                    {editingLead.ine_anverso ? (
-                                        <img src={editingLead.ine_anverso} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="INE Front" />
-                                    ) : (
-                                        <p style={{ marginTop: '80px', color: '#ccc' }}>SIN IMAGEN</p>
-                                    )}
+            {
+                editingLead && (
+                    <div id="printable-dossier" className="hidden print-force-visible" style={{ position: 'relative' }}>
+                        {/* Stamp: RECHAZADO */}
+                        {editingLead.status === 'rejected' && (
+                            <div style={{
+                                position: 'absolute',
+                                top: '80px',
+                                right: '40px',
+                                border: '6px double #ef4444',
+                                borderRadius: '15px',
+                                padding: '15px 30px',
+                                color: '#ef4444',
+                                fontSize: '40px',
+                                fontWeight: '900',
+                                textTransform: 'uppercase',
+                                transform: 'rotate(-12deg)',
+                                background: 'white',
+                                boxShadow: '0 0 0 4px white, 0 0 0 6px #ef4444',
+                                opacity: 0.9,
+                                zIndex: 50,
+                                textAlign: 'center',
+                                pointerEvents: 'none',
+                                fontFamily: 'monospace'
+                            }}>
+                                RECHAZADO
+                                <div style={{ fontSize: '10px', fontWeight: 'bold', marginTop: '5px', textTransform: 'uppercase', color: '#991b1b' }}>
+                                    MOTIVO: {editingLead.rejection_reason || "PENDIENTE DE ESPECIFICAR"}
                                 </div>
                             </div>
-                            <div style={{ textAlign: 'center' }}>
-                                <p style={{ fontSize: '10px', color: '#666', marginBottom: '10px' }}>REVERSO (TRASERO)</p>
-                                <div style={{ border: '1px solid #ddd', borderRadius: '10px', overflow: 'hidden', height: '180px', background: '#fafafa' }}>
-                                    {editingLead.ine_reverso ? (
-                                        <img src={editingLead.ine_reverso} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="INE Back" />
-                                    ) : (
-                                        <p style={{ marginTop: '80px', color: '#ccc' }}>SIN IMAGEN</p>
-                                    )}
-                                </div>
+                        )}
+                        {/* Header: High Contrast & Simple */}
+                        <div style={{ borderBottom: '4px solid black', paddingBottom: '30px', marginBottom: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <div>
+                                <h1 style={{ fontSize: '40px', fontWeight: '900', color: 'black', margin: 0 }}>FIBERGRAVITY</h1>
+                                <p style={{ fontSize: '10px', fontWeight: 'bold', color: '#666', letterSpacing: '4px', marginTop: '5px' }}>OFFICIAL LOGISTICS DOSSIER v3.0</p>
                             </div>
-                            <div style={{ gridColumn: 'span 2', textAlign: 'center', marginTop: '10px' }}>
-                                <p style={{ fontSize: '10px', color: '#666', marginBottom: '10px' }}>COMPROBANTE DE DOMICILIO</p>
-                                <div style={{ border: '1px solid #ddd', borderRadius: '10px', overflow: 'hidden', height: '300px', background: '#fafafa' }}>
-                                    {editingLead.comprobante_domicilio ? (
-                                        <img src={editingLead.comprobante_domicilio} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="Proof of Residence" />
-                                    ) : (
-                                        <p style={{ marginTop: '140px', color: '#ccc' }}>SIN IMAGEN / ARCHIVO PENDIENTE</p>
-                                    )}
+                            <div style={{ textAlign: 'right' }}>
+                                <p style={{ fontSize: '12px', fontWeight: 'bold', color: 'black', margin: 0 }}>FOLIO DE GESTIÓN</p>
+                                <p style={{ fontSize: '28px', fontWeight: '900', color: '#0284c7', margin: 0 }}>#{editingLead.id.split('-')[0].toUpperCase()}</p>
+                                <p style={{ fontSize: '10px', color: '#999' }}>{new Date().toLocaleString()}</p>
+                            </div>
+                        </div>
+
+                        {/* Section 01: Client Data */}
+                        <div style={{ marginBottom: '40px' }}>
+                            <h3 style={{ fontSize: '12px', fontWeight: '900', borderLeft: '4px solid #0284c7', paddingLeft: '15px', color: '#0284c7', marginBottom: '20px' }}>01. IDENTIFICACIÓN DEL CLIENTE</h3>
+                            <div style={{ border: '2px solid #eee', borderRadius: '15px', padding: '25px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                <div>
+                                    <p style={{ fontSize: '10px', color: '#999', margin: '0 0 5px 0' }}>NOMBRE COMPLETO</p>
+                                    <p style={{ fontSize: '18px', fontWeight: 'bold', color: 'black', margin: 0 }}>{editingLead.full_name}</p>
+                                </div>
+                                <div>
+                                    <p style={{ fontSize: '10px', color: '#999', margin: '0 0 5px 0' }}>TELÉFONO DE CONTACTO</p>
+                                    <p style={{ fontSize: '18px', fontWeight: 'bold', color: 'black', margin: 0 }}>{editingLead.phone}</p>
+                                </div>
+                                <div style={{ gridColumn: 'span 2' }}>
+                                    <p style={{ fontSize: '10px', color: '#999', margin: '0 0 5px 0' }}>UBICACIÓN REGISTRADA</p>
+                                    <p style={{ fontSize: '18px', fontWeight: 'bold', color: 'black', margin: 0 }}>{editingLead.location}</p>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Section 04: References */}
-                    <div style={{ pageBreakInside: 'avoid' }}>
-                        <h3 style={{ fontSize: '12px', fontWeight: '900', borderLeft: '4px solid #0284c7', paddingLeft: '15px', color: '#0284c7', marginBottom: '20px' }}>04. REFERENCIAS DE INSTALACIÓN</h3>
-                        <div style={{ border: '2px solid #eee', borderRadius: '15px', padding: '25px', background: '#fcfcfc' }}>
-                            <p style={{ fontSize: '14px', lineHeight: '1.6', color: 'black', margin: 0 }}>
-                                {editingLead.referencias_hogar || "No se registraron referencias específicas."}
-                            </p>
+                        {/* Section 02: Service Details */}
+                        <div style={{ marginBottom: '40px' }}>
+                            <h3 style={{ fontSize: '12px', fontWeight: '900', borderLeft: '4px solid #0284c7', paddingLeft: '15px', color: '#0284c7', marginBottom: '20px' }}>02. DETALLES DEL SERVICIO ASIGNADO</h3>
+                            <div style={{ border: '2px solid #eee', borderRadius: '15px', padding: '25px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                <div>
+                                    <p style={{ fontSize: '10px', color: '#999', margin: '0 0 5px 0' }}>PROVEEDOR</p>
+                                    <p style={{ fontSize: '18px', fontWeight: '900', color: 'black', margin: 0 }}>{editingLead.provider}</p>
+                                </div>
+                                <div>
+                                    <p style={{ fontSize: '10px', color: '#999', margin: '0 0 5px 0' }}>PLAN CONTRATADO</p>
+                                    <p style={{ fontSize: '18px', fontWeight: 'bold', color: 'black', margin: 0 }}>{editingLead.plan_name}</p>
+                                </div>
+                                <div>
+                                    <p style={{ fontSize: '10px', color: '#999', margin: '0 0 5px 0' }}>PAGO MENSUAL</p>
+                                    <p style={{ fontSize: '18px', fontWeight: 'bold', color: 'black', margin: 0 }}>{editingLead.price}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Section 03: Documents */}
+                        <div style={{ marginBottom: '40px', pageBreakInside: 'avoid' }}>
+                            <h3 style={{ fontSize: '12px', fontWeight: '900', borderLeft: '4px solid #0284c7', paddingLeft: '15px', color: '#0284c7', marginBottom: '20px' }}>03. EVIDENCIA DOCUMENTAL (INE Y DOMICILIO)</h3>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+                                <div style={{ textAlign: 'center' }}>
+                                    <p style={{ fontSize: '10px', color: '#666', marginBottom: '10px' }}>ANVERSO (FRONTAL)</p>
+                                    <div style={{ border: '1px solid #ddd', borderRadius: '10px', overflow: 'hidden', height: '180px', background: '#fafafa' }}>
+                                        {editingLead.ine_anverso ? (
+                                            <img src={editingLead.ine_anverso} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="INE Front" />
+                                        ) : (
+                                            <p style={{ marginTop: '80px', color: '#ccc' }}>SIN IMAGEN</p>
+                                        )}
+                                    </div>
+                                </div>
+                                <div style={{ textAlign: 'center' }}>
+                                    <p style={{ fontSize: '10px', color: '#666', marginBottom: '10px' }}>REVERSO (TRASERO)</p>
+                                    <div style={{ border: '1px solid #ddd', borderRadius: '10px', overflow: 'hidden', height: '180px', background: '#fafafa' }}>
+                                        {editingLead.ine_reverso ? (
+                                            <img src={editingLead.ine_reverso} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="INE Back" />
+                                        ) : (
+                                            <p style={{ marginTop: '80px', color: '#ccc' }}>SIN IMAGEN</p>
+                                        )}
+                                    </div>
+                                </div>
+                                <div style={{ gridColumn: 'span 2', textAlign: 'center', marginTop: '10px' }}>
+                                    <p style={{ fontSize: '10px', color: '#666', marginBottom: '10px' }}>COMPROBANTE DE DOMICILIO</p>
+                                    <div style={{ border: '1px solid #ddd', borderRadius: '10px', overflow: 'hidden', height: '300px', background: '#fafafa' }}>
+                                        {editingLead.comprobante_domicilio ? (
+                                            <img src={editingLead.comprobante_domicilio} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="Proof of Residence" />
+                                        ) : (
+                                            <p style={{ marginTop: '140px', color: '#ccc' }}>SIN IMAGEN / ARCHIVO PENDIENTE</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Section 04: References */}
+                        <div style={{ pageBreakInside: 'avoid' }}>
+                            <h3 style={{ fontSize: '12px', fontWeight: '900', borderLeft: '4px solid #0284c7', paddingLeft: '15px', color: '#0284c7', marginBottom: '20px' }}>04. REFERENCIAS DE INSTALACIÓN</h3>
+                            <div style={{ border: '2px solid #eee', borderRadius: '15px', padding: '25px', background: '#fcfcfc' }}>
+                                <p style={{ fontSize: '14px', lineHeight: '1.6', color: 'black', margin: 0 }}>
+                                    {editingLead.referencias_hogar || "No se registraron referencias específicas."}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div style={{ borderTop: '1px solid #eee', marginTop: '60px', paddingTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <p style={{ fontSize: '9px', color: '#999' }}>© 2026 FIBERGRAVITY • DOCUMENTO DE USO CONFIDENCIAL</p>
+                            <p style={{ fontSize: '9px', fontWeight: 'bold', color: 'black' }}>NOC - INFRASTRUCTURE OPERATIONS</p>
                         </div>
                     </div>
-
-                    {/* Footer */}
-                    <div style={{ borderTop: '1px solid #eee', marginTop: '60px', paddingTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <p style={{ fontSize: '9px', color: '#999' }}>© 2026 FIBERGRAVITY • DOCUMENTO DE USO CONFIDENCIAL</p>
-                        <p style={{ fontSize: '9px', fontWeight: 'bold', color: 'black' }}>NOC - INFRASTRUCTURE OPERATIONS</p>
-                    </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }

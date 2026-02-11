@@ -85,6 +85,14 @@ export const CategoryModal = ({ isOpen, onClose, category, providerName }: Categ
         e.preventDefault();
         setIsSubmitting(true);
 
+        // Validar teléfono (exactamente 10 dígitos)
+        const cleanPhone = formData.phone.replace(/\D/g, '');
+        if (cleanPhone.length !== 10) {
+            toast.error('El número de teléfono debe tener exactamente 10 dígitos.');
+            setIsSubmitting(false);
+            return;
+        }
+
         try {
             const { error } = await supabase.from('leads').insert([
                 {
@@ -162,6 +170,7 @@ export const CategoryModal = ({ isOpen, onClose, category, providerName }: Categ
                                     </div>
                                     <button
                                         onClick={onClose}
+                                        title="Cerrar"
                                         className="lg:hidden p-2 hover:bg-white/5 rounded-full transition-colors"
                                     >
                                         <X className="w-6 h-6 text-slate-500" />
@@ -225,6 +234,7 @@ export const CategoryModal = ({ isOpen, onClose, category, providerName }: Categ
                             <div className="bg-black/40 p-8 md:p-12 flex flex-col">
                                 <button
                                     onClick={onClose}
+                                    title="Cerrar"
                                     className="hidden lg:flex self-end p-2 hover:bg-white/5 rounded-full transition-colors mb-4"
                                 >
                                     <X className="w-6 h-6 text-slate-500" />
@@ -258,10 +268,16 @@ export const CategoryModal = ({ isOpen, onClose, category, providerName }: Categ
                                                 required
                                                 type="tel"
                                                 value={formData.phone}
-                                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                                placeholder="EJ. 231 123 4567"
-                                                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-neon-cyan focus:bg-white/[0.07] transition-all font-bold placeholder:text-slate-700"
+                                                onChange={(e) => {
+                                                    const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                                                    setFormData({ ...formData, phone: val });
+                                                }}
+                                                placeholder="10 DÍGITOS (EJ. 2311234567)"
+                                                className={`w-full bg-white/[0.03] border ${formData.phone.length > 0 && formData.phone.length < 10 ? 'border-red-500/50' : 'border-white/5'} rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-neon-cyan focus:bg-white/[0.07] transition-all font-bold placeholder:text-slate-700`}
                                             />
+                                            {formData.phone.length > 0 && formData.phone.length < 10 && (
+                                                <p className="text-[9px] text-red-500 font-bold ml-2 mt-1">FALTAN {10 - formData.phone.length} DÍGITOS</p>
+                                            )}
                                         </div>
 
                                         <div className="space-y-2">

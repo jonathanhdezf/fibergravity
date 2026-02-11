@@ -76,6 +76,14 @@ export const TelmexGamerModal = ({ isOpen, onClose }: TelmexGamerModalProps) => 
         e.preventDefault();
         setIsSubmitting(true);
 
+        // Validar teléfono (exactamente 10 dígitos)
+        const cleanPhone = formData.phone.replace(/\D/g, '');
+        if (cleanPhone.length !== 10) {
+            toast.error('El número de teléfono debe tener exactamente 10 dígitos.');
+            setIsSubmitting(false);
+            return;
+        }
+
         try {
             const { error } = await supabase.from('leads').insert([
                 {
@@ -239,10 +247,16 @@ export const TelmexGamerModal = ({ isOpen, onClose }: TelmexGamerModalProps) => 
                                                 required
                                                 type="tel"
                                                 value={formData.phone}
-                                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                                placeholder="231 123 4567"
-                                                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-neon-cyan/50 focus:bg-white/[0.05] transition-all placeholder:text-slate-700"
+                                                onChange={(e) => {
+                                                    const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                                                    setFormData({ ...formData, phone: val });
+                                                }}
+                                                placeholder="10 DÍGITOS"
+                                                className={`w-full bg-white/[0.03] border ${formData.phone.length > 0 && formData.phone.length < 10 ? 'border-red-500/50' : 'border-white/5'} rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-neon-cyan/50 focus:bg-white/[0.05] transition-all placeholder:text-slate-700`}
                                             />
+                                            {formData.phone.length > 0 && formData.phone.length < 10 && (
+                                                <p className="text-[9px] text-red-500 font-bold ml-2 mt-1">FALTAN {10 - formData.phone.length} DÍGITOS</p>
+                                            )}
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 pl-4">Código Postal</label>
