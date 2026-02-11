@@ -721,7 +721,11 @@ export default function PremiumAdminDashboard() {
                                                         : 'bg-white/5 border-white/10 text-slate-500 hover:text-white'
                                                         }`}
                                                 >
-                                                    {s}
+                                                    {s === 'all' ? 'TODOS' :
+                                                        s === 'pending' ? 'PENDIENTES' :
+                                                            s === 'contacting' ? 'EN PROCESO' :
+                                                                s === 'completed' ? 'FINALIZADOS' :
+                                                                    'RECHAZADOS'}
                                                 </button>
                                             ))}
                                         </div>
@@ -768,7 +772,11 @@ export default function PremiumAdminDashboard() {
                                                                         lead.status === 'contacting' ? 'bg-neon-cyan/10 border-neon-cyan/20 text-neon-cyan' :
                                                                             'bg-slate-500/10 border-white/10 text-slate-400'
                                                                     }`}>
-                                                                    {lead.status}
+                                                                    {lead.status === 'rejected' ? 'RECHAZADO' :
+                                                                        lead.status === 'completed' ? 'FINALIZADO' :
+                                                                            lead.status === 'contacting' ? 'EN PROCESO' :
+                                                                                'PENDIENTE'
+                                                                    }
                                                                 </span>
                                                             </div>
                                                             <div className="flex items-center gap-3 text-xs text-slate-500 font-bold uppercase tracking-widest">
@@ -1030,7 +1038,7 @@ export default function PremiumAdminDashboard() {
                             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
                                 <GlassCard className="p-8 border-white/5 !bg-black/40 h-[600px] overflow-hidden flex flex-col text-black">
                                     <h3 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-8 flex items-center gap-2">
-                                        <Activity className="w-4 h-4 text-emerald-500" /> Real-time Node Monitoring
+                                        <Activity className="w-4 h-4 text-emerald-500" /> Monitoreo de Nodos en Tiempo Real
                                     </h3>
                                     <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
                                         {visits.map((visit, i) => (
@@ -1064,9 +1072,9 @@ export default function PremiumAdminDashboard() {
                                             <div className="p-3 rounded-xl bg-neon-magenta/10 text-neon-magenta">
                                                 <Database className="w-6 h-6" />
                                             </div>
-                                            <span className="px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase">Online</span>
+                                            <span className="px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase">En Línea</span>
                                         </div>
-                                        <h3 className="text-sm font-black italic uppercase text-white mb-2">Database Cluster</h3>
+                                        <h3 className="text-sm font-black italic uppercase text-white mb-2">Cluster de Base de Datos</h3>
                                         <p className="text-[10px] text-slate-500 font-bold mb-6">Supabase PostgreSQL Connection</p>
                                         <div className="flex items-center gap-2">
                                             <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
@@ -1081,9 +1089,9 @@ export default function PremiumAdminDashboard() {
                                             <div className="p-3 rounded-xl bg-neon-cyan/10 text-neon-cyan">
                                                 <Globe className="w-6 h-6" />
                                             </div>
-                                            <span className="px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase">Active</span>
+                                            <span className="px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase">Activo</span>
                                         </div>
-                                        <h3 className="text-sm font-black italic uppercase text-white mb-2">CDN Edge Nodes</h3>
+                                        <h3 className="text-sm font-black italic uppercase text-white mb-2">Nodos CDN Edge</h3>
                                         <p className="text-[10px] text-slate-500 font-bold mb-6">Global Content Delivery Network</p>
                                         <div className="flex items-center gap-2">
                                             <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
@@ -1098,9 +1106,9 @@ export default function PremiumAdminDashboard() {
                                             <div className="p-3 rounded-xl bg-white/10 text-white">
                                                 <Shield className="w-6 h-6" />
                                             </div>
-                                            <span className="px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase">Secure</span>
+                                            <span className="px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase">Seguro</span>
                                         </div>
-                                        <h3 className="text-sm font-black italic uppercase text-white mb-2">Auth Firewall</h3>
+                                        <h3 className="text-sm font-black italic uppercase text-white mb-2">Firewall de Autenticación</h3>
                                         <p className="text-[10px] text-slate-500 font-bold mb-6">Security Layer & Authentication</p>
                                         <div className="flex items-center gap-2">
                                             <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
@@ -1136,7 +1144,7 @@ export default function PremiumAdminDashboard() {
                                                     <User className="w-8 h-8 text-slate-400 group-hover:text-neon-cyan transition-colors" />
                                                 </div>
                                                 <div className="text-right">
-                                                    <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Success Rate</p>
+                                                    <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Tasa de Éxito</p>
                                                     <p className="text-2xl font-black text-white italic">{agentPerformance[agent.id] || 0}%</p>
                                                 </div>
                                             </div>
