@@ -14,16 +14,23 @@ export default function LoginPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const res = await signIn("credentials", {
-            username,
-            password,
-            redirect: false,
-        });
+        setError("");
 
-        if (res?.error) {
-            setError("Credenciales inválidas");
-        } else {
-            router.push("/admin"); // Redirect to admin or user dashboard based on role? (For now, Admin)
+        try {
+            const res = await signIn("credentials", {
+                username,
+                password,
+                redirect: false,
+            });
+
+            if (res?.error) {
+                setError("Credenciales inválidas. Verifica tu usuario y contraseña.");
+            } else if (res?.ok) {
+                router.push("/admin");
+                router.refresh();
+            }
+        } catch (err) {
+            setError("Ocurrió un error al intentar iniciar sesión.");
         }
     };
 
