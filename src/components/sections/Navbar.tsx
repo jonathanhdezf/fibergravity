@@ -16,7 +16,6 @@ const navLinks = [
         submenu: [
             { name: "Gamer", href: "#gamer" },
             { name: "Streamer", href: "#streamer" },
-            { name: "Música Gratis", href: "/musica-gratis" },
             { name: "Home Office", href: "#home-office" },
             { name: "Empresas", href: "#empresas" },
         ]

@@ -3,6 +3,8 @@
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import {
     Users,
     Clock,
@@ -51,7 +53,9 @@ import {
     Phone,
     AtSign,
     UserPlus,
-    UserCheck
+    UserCheck,
+    Camera,
+    BookOpen
 } from "lucide-react";
 import {
     AreaChart,
@@ -144,6 +148,15 @@ interface SystemLog {
     admin_name: string;
 }
 
+interface Technician {
+    id: string;
+    created_at: string;
+    full_name: string;
+    phone: string;
+    specialty: string;
+    active: boolean;
+}
+
 interface SupportTicket {
     id: string;
     created_at: string;
@@ -152,6 +165,32 @@ interface SupportTicket {
     type: string;
     description: string;
     status: 'pending' | 'in_progress' | 'resolved' | 'closed';
+    assigned_to?: string;
+    technician_id?: string;
+    evidence_photo?: string;
+    speed_test_photo?: string;
+    client_signature?: string;
+    technical_notes?: string;
+}
+
+interface BlogPost {
+    id: string;
+    created_at: string;
+    title: string;
+    slug: string;
+    content: string;
+    excerpt?: string;
+    cover_image?: string;
+    published: boolean;
+    views: number;
+    category_id?: string;
+    author_name: string;
+}
+
+interface BlogCategory {
+    id: string;
+    name: string;
+    slug: string;
 }
 
 const COLORS = ['#00f3ff', '#ff00ff', '#ffffff', '#3b82f6', '#10b981'];
@@ -159,11 +198,13 @@ const COLORS = ['#00f3ff', '#ff00ff', '#ffffff', '#3b82f6', '#10b981'];
 export default function PremiumAdminDashboard() {
     const [leads, setLeads] = useState<Lead[]>([]);
     const [visits, setVisits] = useState<Visit[]>([]);
+    const { data: session, status } = useSession();
+    const router = useRouter();
     const [loading, setLoading] = useState(true);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [password, setPassword] = useState("");
-    const [activeTab, setActiveTab] = useState<"overview" | "leads" | "tickets" | "ventas" | "inventory" | "traffic" | "integrations" | "logs">("overview");
+    const [activeTab, setActiveTab] = useState<"overview" | "leads" | "tickets" | "technicians" | "ventas" | "inventory" | "traffic" | "integrations" | "logs" | "blog">("overview");
     const [tickets, setTickets] = useState<SupportTicket[]>([]);
+    const [technicians, setTechnicians] = useState<Technician[]>([]);
+    const [editingTechnician, setEditingTechnician] = useState<Technician | null>(null);
     const [providers, setProviders] = useState<Provider[]>([]);
     const [plans, setPlans] = useState<Plan[]>([]);
     const [logs, setLogs] = useState<SystemLog[]>([]);
@@ -172,8 +213,11 @@ export default function PremiumAdminDashboard() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [filter, setFilter] = useState("all");
     const [comisionistas, setComisionistas] = useState<Comisionista[]>([]);
-    const [agentSelectionModal, setAgentSelectionModal] = useState<{ isOpen: boolean, leadId: string }>({ isOpen: false, leadId: "" });
+    const [agentSelectionModal, setAgentSelectionModal] = useState<{ isOpen: boolean, leadId?: string, ticketId?: string }>({ isOpen: false });
     const [editingAgent, setEditingAgent] = useState<Comisionista | null>(null);
+    const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+    const [blogCategories, setBlogCategories] = useState<BlogCategory[]>([]);
+    const [editingBlogPost, setEditingBlogPost] = useState<Partial<BlogPost> | null>(null);
 
     // Print Style Fixes (Global for this page)
     useEffect(() => {
@@ -204,6 +248,7 @@ export default function PremiumAdminDashboard() {
 
     // New States for Lead Management
     const [editingLead, setEditingLead] = useState<Lead | null>(null);
+    const [editingTicket, setEditingTicket] = useState<SupportTicket | null>(null);
     const [editingProvider, setEditingProvider] = useState<Provider | null>(null);
     const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
     const [rejectionModal, setRejectionModal] = useState<{ isOpen: boolean, id: string, reason: string }>({ isOpen: false, id: "", reason: "" });
@@ -212,17 +257,21 @@ export default function PremiumAdminDashboard() {
 
     const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, field: string) => {
         const file = event.target.files?.[0];
-        if (!file || !editingLead) return;
+        if (!file || (!editingLead && !editingTicket)) return;
 
         setUploading(field);
 
         try {
+            const id = editingLead?.id || editingTicket?.id;
+            const folder = editingLead ? 'leads' : 'tickets';
+            const bucket = editingLead ? 'leads-documentation' : 'tickets-documentation';
+
             const fileExt = file.name.split('.').pop();
-            const fileName = `${editingLead.id}-${field}-${Date.now()}.${fileExt}`;
-            const filePath = `leads/${editingLead.id}/${fileName}`;
+            const fileName = `${id}-${field}-${Date.now()}.${fileExt}`;
+            const filePath = `${folder}/${id}/${fileName}`;
 
             const { error: uploadError } = await supabase.storage
-                .from('leads-documentation')
+                .from(bucket)
                 .upload(filePath, file, {
                     upsert: true,
                     cacheControl: '3600'
@@ -231,13 +280,17 @@ export default function PremiumAdminDashboard() {
             if (uploadError) throw uploadError;
 
             const { data: { publicUrl } } = supabase.storage
-                .from('leads-documentation')
+                .from(bucket)
                 .getPublicUrl(filePath);
 
-            setEditingLead({ ...editingLead, [field]: publicUrl } as any);
+            if (editingLead) {
+                setEditingLead({ ...editingLead, [field]: publicUrl } as any);
+            } else if (editingTicket) {
+                setEditingTicket({ ...editingTicket, [field]: publicUrl } as any);
+            }
         } catch (error) {
             console.error('Error uploading file:', error);
-            alert('Error al subir el archivo. Asegúrate de que el bucket "leads-documentation" exista en Supabase.');
+            alert(`Error al subir el archivo. Asegúrate de que el bucket "${editingLead ? 'leads-documentation' : 'tickets-documentation'}" exista en Supabase.`);
         } finally {
             setUploading(null);
         }
@@ -253,26 +306,54 @@ export default function PremiumAdminDashboard() {
 
     const fetchData = async () => {
         setLoading(true);
-        const [leadsRes, visitsRes, providersRes, plansRes, logsRes, agentsRes, ticketsRes] = await Promise.all([
-            supabase.from('leads').select('*').order('created_at', { ascending: false }),
-            supabase.from('site_visits').select('*').order('created_at', { ascending: false }).limit(1000),
-            supabase.from('providers').select('*').order('name'),
-            supabase.from('plans').select('*').order('ranking_score', { ascending: false }),
-            supabase.from('system_logs').select('*').order('created_at', { ascending: false }).limit(500),
-            supabase.from('comisionistas').select('*').order('full_name'),
-            supabase.from('support_tickets').select('*').order('created_at', { ascending: false })
-        ]);
+        try {
+            const [leadsRes, visitsRes, providersRes, plansRes, logsRes, agentsRes, ticketsRes, techsRes, blogRes, blogCatsRes] = await Promise.all([
+                supabase.from('leads').select('*').order('created_at', { ascending: false }),
+                supabase.from('site_visits').select('*').order('created_at', { ascending: false }).limit(1000),
+                supabase.from('providers').select('*').order('name'),
+                supabase.from('plans').select('*').order('ranking_score', { ascending: false }),
+                supabase.from('system_logs').select('*').order('created_at', { ascending: false }).limit(500),
+                supabase.from('comisionistas').select('*').order('full_name'),
+                supabase.from('support_tickets').select('*').order('created_at', { ascending: false }),
+                supabase.from('technicians').select('*').order('full_name'),
+                supabase.from('blog_posts').select('*').order('created_at', { ascending: false }),
+                supabase.from('blog_categories').select('*').order('name')
+            ]);
 
-        if (leadsRes.data) setLeads(leadsRes.data);
-        if (visitsRes.data) setVisits(visitsRes.data);
-        if (providersRes.data) setProviders(providersRes.data);
-        if (plansRes.data) setPlans(plansRes.data);
-        if (logsRes.data) setLogs(logsRes.data);
-        if (agentsRes.data) setComisionistas(agentsRes.data);
-        if (ticketsRes.data) setTickets(ticketsRes.data);
+            // Check for specific table errors
+            const errors = [
+                { name: 'leads', error: leadsRes.error },
+                { name: 'visits', error: visitsRes.error },
+                { name: 'providers', error: providersRes.error },
+                { name: 'plans', error: plansRes.error },
+                { name: 'logs', error: logsRes.error },
+                { name: 'agents', error: agentsRes.error },
+                { name: 'tickets', error: ticketsRes.error },
+                { name: 'technicians', error: techsRes.error },
+                { name: 'blog_posts', error: blogRes.error },
+                { name: 'blog_categories', error: blogCatsRes.error }
+            ].filter(e => e.error);
 
-        setLoading(false);
-        setLastRefresh(new Date());
+            if (errors.length > 0) {
+                console.error('Data Fetch Errors:', errors);
+            }
+
+            if (leadsRes.data) setLeads(leadsRes.data);
+            if (visitsRes.data) setVisits(visitsRes.data);
+            if (providersRes.data) setProviders(providersRes.data);
+            if (plansRes.data) setPlans(plansRes.data);
+            if (logsRes.data) setLogs(logsRes.data);
+            if (agentsRes.data) setComisionistas(agentsRes.data);
+            if (ticketsRes.data) setTickets(ticketsRes.data);
+            if (techsRes.data) setTechnicians(techsRes.data);
+            if (blogRes.data) setBlogPosts(blogRes.data);
+            if (blogCatsRes.data) setBlogCategories(blogCatsRes.data);
+        } catch (error) {
+            console.error('Fetch Error:', error);
+        } finally {
+            setLoading(false);
+            setLastRefresh(new Date());
+        }
     };
 
     const logAction = async (action: string, entity_type: string, entity_id: string | null, details: string, severity: string = 'info') => {
@@ -316,12 +397,62 @@ export default function PremiumAdminDashboard() {
         }
     };
 
-    const updateTicketStatus = async (id: string, newStatus: string) => {
-        const { error } = await supabase.from('support_tickets').update({ status: newStatus }).eq('id', id);
-        if (!error) {
-            await logAction('TICKET_STATUS', 'TICKETS', id, `Ticket cambiado a ${newStatus}`);
-            fetchData();
+    const updateTicketStatus = async (id: string, newStatus: string, agentId?: string) => {
+        if (!id) return;
+        const ticket = tickets.find(t => t.id === id);
+        if (!ticket) {
+            console.error('Ticket not found for ID:', id);
+            return;
         }
+
+        // Validation for resolution
+        if (newStatus === 'resolved') {
+            if (!ticket.technical_notes || !ticket.evidence_photo) {
+                alert("Para resolver el ticket, el técnico debe completar el expediente (Notas y Foto de Evidencia).");
+                setEditingTicket(ticket);
+                return;
+            }
+        }
+
+        // Assignment logic mirroring leads
+        if (newStatus === 'in_progress' && !agentId && !ticket.technician_id) {
+            setAgentSelectionModal({ isOpen: true, ticketId: id, leadId: undefined });
+            return;
+        }
+
+        const updateData: any = { status: newStatus };
+        if (agentId) updateData.technician_id = agentId;
+
+        const { error } = await supabase.from('support_tickets').update(updateData).eq('id', id);
+        if (!error) {
+            const agentName = agentId ? technicians.find(t => t.id === agentId)?.full_name : '';
+            await logAction('TICKET_STATUS', 'TICKETS', id, `Ticket cambiado a ${newStatus}${agentName ? ' (Asignado a ' + agentName + ')' : ''}`);
+            await fetchData();
+            setAgentSelectionModal({ isOpen: false, ticketId: undefined, leadId: undefined });
+        } else {
+            console.error('Error updating ticket status:', error);
+            alert(`Error al actualizar el ticket: ${error.message}`);
+        }
+    };
+
+    const saveTechnician = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingTechnician) return;
+
+        const { id, created_at, ...data } = editingTechnician as any;
+        const res = id
+            ? await supabase.from('technicians').update(data).eq('id', id)
+            : await supabase.from('technicians').insert(data);
+
+        if (res.error) {
+            console.error('Error saving technician:', res.error);
+            alert(`Error al guardar técnico: ${res.error.message}`);
+            return;
+        }
+
+        await logAction(id ? 'UPDATE' : 'CREATE', 'TECHNICIANS', id || 'NEW', `${id ? 'Actualizado' : 'Creado'} el técnico: ${data.full_name}`);
+        fetchData();
+        setEditingTechnician(null);
     };
 
     const saveAgent = async (e: React.FormEvent) => {
@@ -453,11 +584,7 @@ export default function PremiumAdminDashboard() {
         );
     }, [plans, searchQuery, providers]);
 
-    const handleLogin = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (password === "fiber2026") setIsAuthenticated(true);
-        else alert("Acceso Denegado.");
-    };
+    // Simplified without local login handler
 
     // Data Processing for Charts
     const chartData = useMemo(() => {
@@ -506,32 +633,17 @@ export default function PremiumAdminDashboard() {
         return stats;
     }, [leads, comisionistas]);
 
-    if (!isAuthenticated) {
+    if (status === "loading") {
         return (
-            <div className="min-h-screen bg-black flex items-center justify-center p-6 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-900/20 via-black to-black">
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                    <GlassCard className="p-12 border-white/5 text-center max-w-md">
-                        <div className="w-24 h-24 bg-gradient-to-tr from-cyan-500 to-magenta-500 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-cyan-500/20 rotate-12">
-                            <Activity className="w-12 h-12 text-white -rotate-12" />
-                        </div>
-                        <h1 className="text-4xl font-black italic mb-2 tracking-tighter">FIBER<span className="text-neon-cyan neon-text-cyan">OS</span></h1>
-                        <p className="text-slate-500 text-xs font-black uppercase tracking-[0.3em] mb-12">Command Center v3.0</p>
-
-                        <form onSubmit={handleLogin} className="space-y-6">
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="ENTER KEY"
-                                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-5 text-center tracking-[0.5em] text-white focus:outline-none focus:border-neon-cyan focus:bg-white/[0.07] transition-all font-black text-lg"
-                                autoFocus
-                            />
-                            <NeonButton type="submit" className="w-full py-5 text-sm">INITIALIZE SYSTEM</NeonButton>
-                        </form>
-                    </GlassCard>
-                </motion.div>
+            <div className="min-h-screen bg-black flex items-center justify-center">
+                <div className="w-12 h-12 border-4 border-neon-cyan/20 border-t-neon-cyan rounded-full animate-spin" />
             </div>
         );
+    }
+
+    if (status === "unauthenticated") {
+        router.push("/auth/login");
+        return null;
     }
 
     return (
@@ -552,12 +664,14 @@ export default function PremiumAdminDashboard() {
                                 {[
                                     { id: 'overview', icon: TrendingUp, label: 'Vista General' },
                                     { id: 'leads', icon: Users, label: 'Leads' },
-                                    { id: 'tickets', icon: LifeBuoy, label: 'Tickets' },
-                                    { id: 'ventas', icon: UserPlus, label: 'Equipo Ventas' },
+                                    { id: 'tickets', icon: LifeBuoy, label: 'Soporte' },
+                                    { id: 'technicians', icon: Wrench, label: 'Técnicos' },
+                                    { id: 'ventas', icon: UserPlus, label: 'Vendedores' },
                                     { id: 'inventory', icon: Package, label: 'Catálogo' },
-                                    { id: 'traffic', icon: Globe, label: 'Tráfico en Vivo' },
+                                    { id: 'blog', icon: BookOpen, label: 'Blog' },
+                                    { id: 'traffic', icon: Globe, label: 'Tráfico' },
                                     { id: 'integrations', icon: Settings, label: 'Sistemas' },
-                                    { id: 'logs', icon: Activity, label: 'Historial' }
+                                    { id: 'logs', icon: Activity, label: 'Log' }
                                 ].map((tab) => (
                                     <button
                                         key={tab.id}
@@ -588,7 +702,7 @@ export default function PremiumAdminDashboard() {
                                 {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                             </button>
 
-                            <button onClick={() => setIsAuthenticated(false)} title="Cerrar Sesión" className="p-3 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all">
+                            <button onClick={() => signOut()} title="Cerrar Sesión" className="p-3 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all">
                                 <LogOut className="w-5 h-5" />
                             </button>
                         </div>
@@ -608,12 +722,14 @@ export default function PremiumAdminDashboard() {
                                 {[
                                     { id: 'overview', icon: TrendingUp, label: 'Vista General' },
                                     { id: 'leads', icon: Users, label: 'Leads' },
-                                    { id: 'tickets', icon: LifeBuoy, label: 'Tickets' },
-                                    { id: 'ventas', icon: UserPlus, label: 'Equipo Ventas' },
+                                    { id: 'tickets', icon: LifeBuoy, label: 'Soporte' },
+                                    { id: 'technicians', icon: Wrench, label: 'Técnicos' },
+                                    { id: 'ventas', icon: UserPlus, label: 'Vendedores' },
                                     { id: 'inventory', icon: Package, label: 'Catálogo' },
-                                    { id: 'traffic', icon: Globe, label: 'Tráfico en Vivo' },
+                                    { id: 'blog', icon: BookOpen, label: 'Blog' },
+                                    { id: 'traffic', icon: Globe, label: 'Tráfico' },
                                     { id: 'integrations', icon: Settings, label: 'Sistemas' },
-                                    { id: 'logs', icon: Activity, label: 'Historial' }
+                                    { id: 'logs', icon: Activity, label: 'Log' }
                                 ].map((tab) => (
                                     <button
                                         key={tab.id}
@@ -913,98 +1029,238 @@ export default function PremiumAdminDashboard() {
                             </motion.div>
                         )}
                         {activeTab === 'tickets' && (
-                            <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="space-y-8">
-                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                                    <h2 className="text-2xl font-black italic">TICKETS DE <span className="text-neon-cyan neon-text-cyan">SOPORTE</span></h2>
-                                    <div className="flex gap-2">
-                                        <NeonButton className="py-3 px-6 text-[10px]" onClick={fetchData}>
-                                            <RefreshCw className="w-4 h-4 mr-2" /> ACTUALIZAR
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="space-y-6">
+                                {/* Header with Stats Summary */}
+                                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
+                                    <div className="space-y-1">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-neon-cyan/10 rounded-2xl flex items-center justify-center border border-neon-cyan/20">
+                                                <Wrench className="w-5 h-5 text-neon-cyan" />
+                                            </div>
+                                            <h2 className="text-3xl font-black italic tracking-tighter uppercase">CENTRAL DE <span className="text-neon-cyan neon-text-cyan">SOPORTE</span></h2>
+                                        </div>
+                                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] ml-14">Gestión de incidencias y mantenimiento</p>
+                                    </div>
+                                    <div className="flex flex-wrap gap-4 w-full lg:w-auto">
+                                        <div className="flex-1 lg:flex-none flex gap-4 px-6 py-3 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-md">
+                                            <div className="text-center">
+                                                <p className="text-[8px] font-black text-slate-500 uppercase">Pendientes</p>
+                                                <p className="text-lg font-black text-amber-500">{tickets.filter(t => t.status === 'pending').length}</p>
+                                            </div>
+                                            <div className="w-px h-8 bg-white/10" />
+                                            <div className="text-center">
+                                                <p className="text-[8px] font-black text-slate-500 uppercase">En Curso</p>
+                                                <p className="text-lg font-black text-blue-500">{tickets.filter(t => t.status === 'in_progress').length}</p>
+                                            </div>
+                                            <div className="w-px h-8 bg-white/10" />
+                                            <div className="text-center">
+                                                <p className="text-[8px] font-black text-slate-500 uppercase">Cerrados</p>
+                                                <p className="text-lg font-black text-slate-400">{tickets.filter(t => t.status === 'closed' || t.status === 'resolved').length}</p>
+                                            </div>
+                                        </div>
+                                        <NeonButton className="py-4 px-8 text-[10px] font-black tracking-widest whitespace-nowrap !rounded-3xl" onClick={fetchData}>
+                                            <RefreshCw className="w-4 h-4 mr-2" /> REFRESCAR SISTEMA
                                         </NeonButton>
                                     </div>
                                 </div>
 
-                                <GlassCard className="p-0 overflow-hidden border-white/5 !bg-black/20">
-                                    <div className="overflow-x-auto custom-scrollbar">
-                                        <table className="w-full text-left border-collapse">
-                                            <thead>
-                                                <tr className="bg-white/5 border-b border-white/10">
-                                                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-slate-500">Folio / Fecha</th>
-                                                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-slate-500">Cliente</th>
-                                                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-slate-500">Tipo / Problema</th>
-                                                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-slate-500">Estado</th>
-                                                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-slate-500 text-right">Acciones</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-white/5">
-                                                {tickets.length === 0 ? (
-                                                    <tr>
-                                                        <td colSpan={5} className="px-6 py-20 text-center text-slate-600 font-bold italic">No hay tickets registrados</td>
+                                {/* DESKTOP VERSION (Table) */}
+                                <div className="hidden md:block">
+                                    <GlassCard className="!p-0 border-white/5 !bg-slate-950/40 overflow-hidden shadow-2xl rounded-[2.5rem]">
+                                        <div className="overflow-x-auto custom-scrollbar">
+                                            <table className="w-full text-left border-collapse">
+                                                <thead>
+                                                    <tr className="bg-white/[0.03] border-b border-white/10">
+                                                        <th className="pl-8 pr-4 py-6 text-[9px] font-black uppercase tracking-widest text-slate-500">IDENTIFICACIÓN</th>
+                                                        <th className="px-4 py-6 text-[9px] font-black uppercase tracking-widest text-slate-500">CLIENTE Y CONTACTO</th>
+                                                        <th className="px-4 py-6 text-[9px] font-black uppercase tracking-widest text-slate-500">INCIDENCIA TÉCNICA</th>
+                                                        <th className="px-4 py-6 text-[9px] font-black uppercase tracking-widest text-slate-500">TÉCNICO ASIGNADO</th>
+                                                        <th className="px-4 py-6 text-[9px] font-black uppercase tracking-widest text-slate-500">ESTADO OPERATIVO</th>
+                                                        <th className="pl-4 pr-8 py-6 text-[9px] font-black uppercase tracking-widest text-slate-500 text-right">ACCIONES</th>
                                                     </tr>
-                                                ) : (
-                                                    tickets.map((ticket) => (
-                                                        <tr key={ticket.id} className="group hover:bg-white/[0.02] transition-colors">
-                                                            <td className="px-6 py-5">
-                                                                <div className="flex flex-col">
-                                                                    <span className="text-[10px] font-black font-mono text-neon-cyan mb-1">#{ticket.id.split('-')[0].toUpperCase()}</span>
-                                                                    <span className="text-[9px] font-bold text-slate-500">{new Date(ticket.created_at).toLocaleString()}</span>
-                                                                </div>
-                                                            </td>
-                                                            <td className="px-6 py-5">
-                                                                <div className="flex flex-col">
-                                                                    <span className="text-xs font-black uppercase text-white">{ticket.full_name}</span>
-                                                                    <span className="text-[10px] font-bold text-slate-500">{ticket.phone}</span>
-                                                                </div>
-                                                            </td>
-                                                            <td className="px-6 py-5">
-                                                                <div className="flex flex-col max-w-xs">
-                                                                    <span className="text-[10px] font-black text-neon-magenta uppercase mb-1">{ticket.type}</span>
-                                                                    <span className="text-xs text-slate-400 line-clamp-2">{ticket.description}</span>
-                                                                </div>
-                                                            </td>
-                                                            <td className="px-6 py-5">
-                                                                <select
-                                                                    title="Estado del Ticket"
-                                                                    value={ticket.status}
-                                                                    onChange={(e) => updateTicketStatus(ticket.id, e.target.value)}
-                                                                    className={`text-[9px] font-black px-3 py-1.5 rounded-full border border-white/10 bg-black uppercase tracking-widest focus:outline-none transition-all ${ticket.status === 'pending' ? 'text-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.2)]' :
-                                                                        ticket.status === 'in_progress' ? 'text-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.2)]' :
-                                                                            ticket.status === 'resolved' ? 'text-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.2)]' :
-                                                                                'text-slate-500'
-                                                                        }`}
-                                                                >
-                                                                    <option value="pending">PENDIENTE</option>
-                                                                    <option value="in_progress">EN CURSO</option>
-                                                                    <option value="resolved">RESUELTO</option>
-                                                                    <option value="closed">CERRADO</option>
-                                                                </select>
-                                                            </td>
-                                                            <td className="px-6 py-5 text-right">
-                                                                <div className="flex justify-end gap-2">
-                                                                    <a
-                                                                        href={`https://wa.me/52${ticket.phone}?text=Hola%20${ticket.full_name},%20te%20contacto%20de%20soporte%20FiberGravity%20sobre%20tu%20ticket%20%23${ticket.id.split('-')[0].toUpperCase()}.`}
-                                                                        target="_blank"
-                                                                        rel="noopener noreferrer"
-                                                                        className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all"
-                                                                        title="WhatsApp Cliente"
-                                                                    >
-                                                                        <MessageSquare className="w-5 h-5" />
-                                                                    </a>
-                                                                    <button
-                                                                        onClick={() => deleteItem('support_tickets', ticket.id)}
-                                                                        className="p-3 rounded-xl bg-red-900/10 text-red-700 hover:bg-red-600 hover:text-white transition-all"
-                                                                        title="Eliminar Ticket"
-                                                                    >
-                                                                        <Trash2 className="w-5 h-5" />
-                                                                    </button>
-                                                                </div>
+                                                </thead>
+                                                <tbody className="divide-y divide-white/5">
+                                                    {tickets.length === 0 ? (
+                                                        <tr>
+                                                            <td colSpan={6} className="px-8 py-32 text-center text-slate-600 font-bold italic uppercase tracking-widest opacity-50">
+                                                                No se encontraron registros activos en el sistema centralizado
                                                             </td>
                                                         </tr>
-                                                    ))
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </GlassCard>
+                                                    ) : (
+                                                        tickets.map((ticket) => (
+                                                            <tr key={ticket.id} className="group hover:bg-white/[0.015] transition-all duration-300">
+                                                                <td className="pl-8 pr-4 py-6">
+                                                                    <div className="flex flex-col">
+                                                                        <span className="text-[10px] font-black font-mono text-neon-cyan mb-1 group-hover:scale-105 transition-transform origin-left">
+                                                                            ID-{ticket.id.split('-')[0].toUpperCase()}
+                                                                        </span>
+                                                                        <div className="flex items-center gap-1.5 opacity-60">
+                                                                            <Clock className="w-3 h-3 text-slate-500" />
+                                                                            <span className="text-[9px] font-bold text-slate-500">{new Date(ticket.created_at).toLocaleDateString()}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-4 py-6">
+                                                                    <div className="flex items-center gap-4">
+                                                                        <div className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center border border-white/5">
+                                                                            <User className="w-4 h-4 text-slate-400" />
+                                                                        </div>
+                                                                        <div className="flex flex-col">
+                                                                            <span className="text-xs font-black uppercase text-white mb-0.5 tracking-tight">{ticket.full_name}</span>
+                                                                            <span className="text-[10px] font-bold text-slate-500 flex items-center gap-1">
+                                                                                <Smartphone className="w-3 h-3 opacity-50" /> {ticket.phone}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-4 py-6">
+                                                                    <div className="flex flex-col max-w-xs">
+                                                                        <div className="flex items-center gap-2 mb-2">
+                                                                            <span className={`w-1.5 h-1.5 rounded-full ${ticket.type.toLowerCase().includes('falla') ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-neon-magenta shadow-[0_0_8px_rgba(255,0,255,0.5)]'}`} />
+                                                                            <span className="text-[10px] font-black text-neon-magenta uppercase tracking-tighter">{ticket.type}</span>
+                                                                        </div>
+                                                                        <span className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed font-medium italic">"{ticket.description}"</span>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-4 py-6">
+                                                                    <div className="flex flex-col">
+                                                                        {ticket.technician_id ? (
+                                                                            <div className="space-y-1.5">
+                                                                                <div className="flex items-center gap-2">
+                                                                                    <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                                                                                    <span className="text-[10px] font-black text-white uppercase tracking-tight">
+                                                                                        {technicians.find(t => t.id === ticket.technician_id)?.full_name || 'Agente Externo'}
+                                                                                    </span>
+                                                                                </div>
+                                                                                <button
+                                                                                    onClick={() => setAgentSelectionModal({ isOpen: true, ticketId: ticket.id })}
+                                                                                    className="px-3 py-1 bg-white/5 hover:bg-neon-cyan/10 text-neon-cyan text-[8px] font-black uppercase rounded-lg border border-white/5 transition-all w-fit"
+                                                                                >
+                                                                                    RE-ASIGNAR
+                                                                                </button>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <button
+                                                                                onClick={() => setAgentSelectionModal({ isOpen: true, ticketId: ticket.id })}
+                                                                                className="flex flex-col items-center gap-2 px-4 py-3 bg-red-500/5 hover:bg-neon-cyan/10 text-red-500 hover:text-neon-cyan rounded-2xl border border-red-500/10 hover:border-neon-cyan/20 transition-all group/btn"
+                                                                            >
+                                                                                <UserPlus className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
+                                                                                <span className="text-[9px] font-black uppercase tracking-widest">SIN TÉCNICO</span>
+                                                                            </button>
+                                                                        )}
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-4 py-6">
+                                                                    <div className="relative w-full min-w-[140px]">
+                                                                        <div className={`absolute left-3 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full z-10 ${ticket.status === 'pending' ? 'bg-amber-500 shadow-[0_0_8px_#f59e0b]' :
+                                                                            ticket.status === 'in_progress' ? 'bg-blue-500 shadow-[0_0_8px_#3b82f6]' :
+                                                                                ticket.status === 'resolved' ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' :
+                                                                                    'bg-slate-500 shadow-[0_0_8px_#64748b]'
+                                                                            }`} />
+                                                                        <select
+                                                                            title="Estado del Ticket"
+                                                                            value={ticket.status}
+                                                                            onChange={(e) => updateTicketStatus(ticket.id, e.target.value)}
+                                                                            className={`w-full pl-8 pr-3 py-2.5 text-[10px] font-black rounded-2xl border border-white/5 bg-white/5 uppercase tracking-widest focus:outline-none transition-all cursor-pointer hover:bg-white/[0.08] ${ticket.status === 'pending' ? 'text-amber-500' :
+                                                                                ticket.status === 'in_progress' ? 'text-blue-500' :
+                                                                                    ticket.status === 'resolved' ? 'text-emerald-500' :
+                                                                                        'text-slate-500'
+                                                                                }`}
+                                                                        >
+                                                                            <option value="pending" className="bg-slate-900">PENDIENTE</option>
+                                                                            <option value="in_progress" className="bg-slate-900">EN CURSO</option>
+                                                                            <option value="resolved" className="bg-slate-900">RESUELTO</option>
+                                                                            <option value="closed" className="bg-slate-900">CERRADO</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="pl-4 pr-8 py-6 text-right">
+                                                                    <div className="flex justify-end gap-2">
+                                                                        <button
+                                                                            onClick={() => setEditingTicket(ticket)}
+                                                                            className="w-10 h-10 flex items-center justify-center rounded-2xl bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white border border-blue-500/20 shadow-lg shadow-blue-500/5 transition-all group/action"
+                                                                            title="Expediente Técnico"
+                                                                        >
+                                                                            <FileText className="w-5 h-5 group-hover/action:scale-110" />
+                                                                        </button>
+                                                                        <a
+                                                                            href={`https://wa.me/52${ticket.phone}?text=Hola%20${ticket.full_name},%20soy%20${ticket.technician_id ? technicians.find(t => t.id === ticket.technician_id)?.full_name : 'tu%20técnico'}%20de%20soporte%20FiberGravity%20sobre%20tu%20ticket%20%23${ticket.id.split('-')[0].toUpperCase()}.`}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="w-10 h-10 flex items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white border border-emerald-500/20 shadow-lg shadow-emerald-500/5 transition-all group/action"
+                                                                            title="WhatsApp Cliente"
+                                                                        >
+                                                                            <MessageSquare className="w-5 h-5 group-hover/action:scale-110" />
+                                                                        </a>
+                                                                        <button
+                                                                            onClick={() => deleteItem('support_tickets', ticket.id)}
+                                                                            className="w-10 h-10 flex items-center justify-center rounded-2xl bg-red-900/10 text-red-700 hover:bg-red-600 hover:text-white border border-red-500/20 transition-all group/action"
+                                                                            title="Eliminar Permanente"
+                                                                        >
+                                                                            <Trash2 className="w-5 h-5 group-hover/action:scale-110" />
+                                                                        </button>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </GlassCard>
+                                </div>
+
+                                {/* MOBILE VERSION (Cards) */}
+                                <div className="grid md:hidden grid-cols-1 gap-4">
+                                    {tickets.length === 0 ? (
+                                        <div className="py-20 text-center opacity-50 italic uppercase font-black text-xs">Sin tickets activos</div>
+                                    ) : (
+                                        tickets.map((ticket) => (
+                                            <GlassCard key={ticket.id} className="p-6 border-white/5 space-y-4 rounded-[2rem] !bg-slate-900/40">
+                                                <div className="flex justify-between items-start">
+                                                    <div className="space-y-1">
+                                                        <span className="text-[10px] font-black font-mono text-neon-cyan tracking-wider">ID-{ticket.id.split('-')[0].toUpperCase()}</span>
+                                                        <h3 className="text-sm font-black text-white uppercase tracking-tight">{ticket.full_name}</h3>
+                                                        <p className="text-[10px] font-bold text-slate-500 tracking-widest">{ticket.phone}</p>
+                                                    </div>
+                                                    <div className={`px-4 py-2 rounded-xl text-[9px] font-black border border-white/5 uppercase tracking-[0.2em] shadow-xl ${ticket.status === 'pending' ? 'bg-amber-500/10 text-amber-500 shadow-amber-500/10' :
+                                                        ticket.status === 'in_progress' ? 'bg-blue-500/10 text-blue-500 shadow-blue-500/10' :
+                                                            ticket.status === 'resolved' ? 'bg-emerald-500/10 text-emerald-500 shadow-emerald-500/10' :
+                                                                'bg-slate-500/10 text-slate-400'
+                                                        }`}>
+                                                        {ticket.status === 'pending' ? 'PENDIENTE' : ticket.status === 'in_progress' ? 'EN CURSO' : ticket.status === 'resolved' ? 'RESUELTO' : 'CERRADO'}
+                                                    </div>
+                                                </div>
+
+                                                <div className="p-4 bg-white/5 rounded-2xl border border-white/5 space-y-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-neon-magenta shadow-[0_0_8px_#ff00ff]" />
+                                                        <span className="text-[9px] font-black text-neon-magenta uppercase tracking-widest">{ticket.type}</span>
+                                                    </div>
+                                                    <p className="text-[11px] text-slate-400 font-medium italic leading-relaxed">"{ticket.description}"</p>
+                                                </div>
+
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <button onClick={() => setEditingTicket(ticket)} className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-blue-500/10 text-blue-500 border border-blue-500/20 text-[9px] font-black uppercase tracking-widest">
+                                                        <FileText className="w-4 h-4" /> REPORTE
+                                                    </button>
+                                                    <a href={`https://wa.me/52${ticket.phone}`} target="_blank" className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[9px] font-black uppercase tracking-widest">
+                                                        <MessageSquare className="w-4 h-4" /> CHAT
+                                                    </a>
+                                                    <div className="col-span-2">
+                                                        <button
+                                                            onClick={() => setAgentSelectionModal({ isOpen: true, ticketId: ticket.id })}
+                                                            className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-white/5 text-neon-cyan border border-white/10 text-[9px] font-black uppercase tracking-widest"
+                                                        >
+                                                            <UserPlus className="w-4 h-4" />
+                                                            {ticket.technician_id ? technicians.find(t => t.id === ticket.technician_id)?.full_name : 'ASIGNAR TÉCNICO'}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </GlassCard>
+                                        ))
+                                    )}
+                                </div>
                             </motion.div>
                         )}
 
@@ -1312,27 +1568,158 @@ export default function PremiumAdminDashboard() {
                                             </div>
                                         </GlassCard>
                                     ))}
+                                    <AnimatePresence>
+                                        {editingAgent && (
+                                            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingAgent(null)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+                                                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="relative w-full max-w-lg">
+                                                    <GlassCard className="p-10 border-white/10 !bg-slate-900 shadow-2xl rounded-[2.5rem] text-white">
+                                                        <form onSubmit={saveAgent} className="space-y-6">
+                                                            <div className="text-center mb-8">
+                                                                <h3 className="text-2xl font-black italic uppercase">Gestión de <span className="text-neon-cyan">Agente</span></h3>
+                                                                <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mt-2">{editingAgent.id ? 'Actualizar Expediente' : 'Nuevo Registro de Ventas'}</p>
+                                                            </div>
+                                                            <div className="space-y-4">
+                                                                <div className="space-y-1">
+                                                                    <label className="text-[10PX] font-black uppercase text-slate-500 ml-2">Nombre Completo</label>
+                                                                    <input
+                                                                        title="Nombre Agente"
+                                                                        value={editingAgent.full_name}
+                                                                        onChange={e => setEditingAgent({ ...editingAgent, full_name: e.target.value })}
+                                                                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:border-neon-cyan focus:outline-none uppercase"
+                                                                        required
+                                                                    />
+                                                                </div>
+                                                                <div className="grid grid-cols-2 gap-4">
+                                                                    <div className="space-y-1">
+                                                                        <label className="text-[10PX] font-black uppercase text-slate-500 ml-2">Teléfono</label>
+                                                                        <input
+                                                                            title="Teléfono"
+                                                                            value={editingAgent.phone}
+                                                                            onChange={e => setEditingAgent({ ...editingAgent, phone: e.target.value })}
+                                                                            className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:border-neon-cyan focus:outline-none"
+                                                                            required
+                                                                        />
+                                                                    </div>
+                                                                    <div className="space-y-1">
+                                                                        <label className="text-[10PX] font-black uppercase text-slate-500 ml-2">Score (%)</label>
+                                                                        <input
+                                                                            title="Score"
+                                                                            type="number"
+                                                                            value={editingAgent.performance_score}
+                                                                            onChange={e => setEditingAgent({ ...editingAgent, performance_score: parseInt(e.target.value) || 0 })}
+                                                                            className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:border-neon-cyan focus:outline-none"
+                                                                            required
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                                <div className="space-y-1">
+                                                                    <label className="text-[10PX] font-black uppercase text-slate-500 ml-2">Email</label>
+                                                                    <input
+                                                                        title="Email"
+                                                                        type="email"
+                                                                        value={editingAgent.email}
+                                                                        onChange={e => setEditingAgent({ ...editingAgent, email: e.target.value })}
+                                                                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:border-neon-cyan focus:outline-none"
+                                                                        required
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex gap-4 pt-4">
+                                                                <button type="button" onClick={() => setEditingAgent(null)} className="flex-1 py-4 bg-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest">DESCARTAR</button>
+                                                                <NeonButton type="submit" className="flex-1 py-4 text-[10px]">GUARDAR AGENTE</NeonButton>
+                                                            </div>
+                                                        </form>
+                                                    </GlassCard>
+                                                </motion.div>
+                                            </div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {activeTab === 'technicians' && (
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                    <div>
+                                        <h2 className="text-2xl font-black italic">EQUIPO DE <span className="text-neon-cyan neon-text-cyan">TÉCNICOS</span></h2>
+                                        <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mt-1">Gestión de personal de campo e infraestructura</p>
+                                    </div>
+                                    <NeonButton className="py-4 px-8 text-[10px]" onClick={() => setEditingTechnician({ id: '', created_at: '', full_name: '', phone: '', specialty: 'Fibra Óptica', active: true })}>
+                                        <Plus className="w-4 h-4 mr-2" /> REGISTRAR TÉCNICO
+                                    </NeonButton>
                                 </div>
 
-                                {/* Agent Edit Modal */}
-                                {editingAgent && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {technicians.length === 0 ? (
+                                        <GlassCard className="col-span-full p-12 text-center border-dashed border-white/10">
+                                            <Wrench className="w-12 h-12 text-slate-700 mx-auto mb-4" />
+                                            <p className="text-xs font-black uppercase text-slate-600 tracking-widest">No hay técnicos registrados en la base de datos.</p>
+                                        </GlassCard>
+                                    ) : (
+                                        technicians.map((tech) => (
+                                            <GlassCard key={tech.id} className="p-8 border-white/5 !bg-white/5 group relative overflow-hidden text-black">
+                                                <div className="absolute top-0 right-0 p-4">
+                                                    <div className={`w-2 h-2 rounded-full ${tech.active ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+                                                </div>
+                                                <div className="flex items-center gap-6 mb-8">
+                                                    <div className="w-14 h-14 rounded-2xl bg-neon-cyan/10 flex items-center justify-center border border-neon-cyan/20">
+                                                        <User className="w-7 h-7 text-neon-cyan" />
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-lg font-black italic uppercase text-white tracking-tight">{tech.full_name}</h4>
+                                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{tech.specialty}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-3 mb-8">
+                                                    <div className="flex items-center gap-3 text-slate-400">
+                                                        <Phone className="w-4 h-4 text-neon-cyan" />
+                                                        <span className="text-xs font-bold font-mono text-white">{tech.phone}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-3 text-slate-400">
+                                                        <Briefcase className="w-4 h-4 text-neon-cyan" />
+                                                        <span className="text-xs font-bold uppercase text-white">Activo: {tech.active ? 'SÍ' : 'NO'}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => setEditingTechnician(tech)}
+                                                        className="flex-1 py-3 bg-white/5 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-white/10 transition-all text-white"
+                                                    >
+                                                        EDITAR
+                                                    </button>
+                                                    <button
+                                                        onClick={() => deleteItem('technicians', tech.id)}
+                                                        className="p-3 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </GlassCard>
+                                        ))
+                                    )}
+                                </div>
+
+                                {/* Technician Edit Modal */}
+                                {editingTechnician && (
                                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingAgent(null)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+                                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingTechnician(null)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
                                         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="relative w-full max-w-lg">
                                             <GlassCard className="p-10 border-white/10 !bg-slate-900 shadow-2xl rounded-[2.5rem] text-white">
-                                                <form onSubmit={saveAgent} className="space-y-6">
+                                                <form onSubmit={saveTechnician} className="space-y-6">
                                                     <div className="text-center mb-8">
-                                                        <h3 className="text-2xl font-black italic uppercase">Gestión de <span className="text-neon-cyan">Agente</span></h3>
-                                                        <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mt-2">{editingAgent.id ? 'Actualizar Expediente' : 'Nuevo Registro de Ventas'}</p>
+                                                        <h3 className="text-2xl font-black italic uppercase text-white">Gestión de <span className="text-neon-cyan">Técnico</span></h3>
+                                                        <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mt-2">{editingTechnician.id ? 'Actualizar Expediente' : 'Nuevo Alta de Técnico'}</p>
                                                     </div>
-                                                    <div className="space-y-4">
+                                                    <div className="space-y-4 text-black">
                                                         <div className="space-y-1">
                                                             <label className="text-[10PX] font-black uppercase text-slate-500 ml-2">Nombre Completo</label>
                                                             <input
-                                                                title="Nombre Agente"
-                                                                value={editingAgent.full_name}
-                                                                onChange={e => setEditingAgent({ ...editingAgent, full_name: e.target.value })}
-                                                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:border-neon-cyan focus:outline-none uppercase"
+                                                                title="Nombre"
+                                                                value={editingTechnician.full_name}
+                                                                onChange={e => setEditingTechnician({ ...editingTechnician, full_name: e.target.value })}
+                                                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:border-neon-cyan focus:outline-none uppercase text-white"
                                                                 required
                                                             />
                                                         </div>
@@ -1340,40 +1727,42 @@ export default function PremiumAdminDashboard() {
                                                             <div className="space-y-1">
                                                                 <label className="text-[10PX] font-black uppercase text-slate-500 ml-2">Teléfono</label>
                                                                 <input
-                                                                    title="Teléfono Agente"
-                                                                    value={editingAgent.phone}
-                                                                    onChange={e => setEditingAgent({ ...editingAgent, phone: e.target.value })}
-                                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:border-neon-cyan focus:outline-none"
+                                                                    title="Teléfono"
+                                                                    value={editingTechnician.phone}
+                                                                    onChange={e => setEditingTechnician({ ...editingTechnician, phone: e.target.value })}
+                                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:border-neon-cyan focus:outline-none text-white"
                                                                     required
                                                                 />
                                                             </div>
                                                             <div className="space-y-1">
-                                                                <label className="text-[10PX] font-black uppercase text-slate-500 ml-2">Score (%)</label>
-                                                                <input
-                                                                    title="Score Agente"
-                                                                    type="number"
-                                                                    value={editingAgent.performance_score}
-                                                                    onChange={e => setEditingAgent({ ...editingAgent, performance_score: parseInt(e.target.value) || 0 })}
-                                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:border-neon-cyan focus:outline-none"
-                                                                    required
-                                                                />
+                                                                <label className="text-[10PX] font-black uppercase text-slate-500 ml-2">Especialidad</label>
+                                                                <select
+                                                                    title="Especialidad"
+                                                                    value={editingTechnician.specialty}
+                                                                    onChange={e => setEditingTechnician({ ...editingTechnician, specialty: e.target.value })}
+                                                                    className="w-full bg-slate-800 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:border-neon-cyan focus:outline-none uppercase text-white"
+                                                                >
+                                                                    <option value="Fibra Óptica">Fibra Óptica</option>
+                                                                    <option value="Soporte Redes">Soporte Redes</option>
+                                                                    <option value="Instalaciones">Instalaciones</option>
+                                                                    <option value="Torrero">Torrero</option>
+                                                                </select>
                                                             </div>
                                                         </div>
-                                                        <div className="space-y-1">
-                                                            <label className="text-[10PX] font-black uppercase text-slate-500 ml-2">Email Corporativo</label>
+                                                        <div className="flex items-center gap-3 p-4 bg-white/5 rounded-2xl">
                                                             <input
-                                                                title="Email Agente"
-                                                                type="email"
-                                                                value={editingAgent.email}
-                                                                onChange={e => setEditingAgent({ ...editingAgent, email: e.target.value })}
-                                                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:border-neon-cyan focus:outline-none"
-                                                                required
+                                                                type="checkbox"
+                                                                id="techActive"
+                                                                checked={editingTechnician.active}
+                                                                onChange={e => setEditingTechnician({ ...editingTechnician, active: e.target.checked })}
+                                                                className="w-5 h-5 accent-neon-cyan"
                                                             />
+                                                            <label htmlFor="techActive" className="text-[10px] font-black uppercase text-slate-400">Técnico Activo / Disponible</label>
                                                         </div>
                                                     </div>
                                                     <div className="flex gap-4 pt-4">
-                                                        <button type="button" onClick={() => setEditingAgent(null)} className="flex-1 py-4 bg-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest">DESCARTAR</button>
-                                                        <NeonButton type="submit" className="flex-1 py-4 text-[10px]">GUARDAR AGENTE</NeonButton>
+                                                        <button type="button" onClick={() => setEditingTechnician(null)} className="flex-1 py-4 bg-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white">DESCARTAR</button>
+                                                        <NeonButton type="submit" className="flex-1 py-4 text-[10px]">GUARDAR TÉCNICO</NeonButton>
                                                     </div>
                                                 </form>
                                             </GlassCard>
@@ -1463,6 +1852,87 @@ export default function PremiumAdminDashboard() {
                                 </GlassCard>
                             </motion.div>
                         )}
+
+                        {activeTab === 'blog' && (
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <h2 className="text-2xl font-black italic">GESTIÓN DE <span className="text-neon-cyan neon-text-cyan">BLOG</span></h2>
+                                        <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mt-1">Control de Contenido y Publicaciones</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setEditingBlogPost({ title: '', slug: '', excerpt: '', content: '', published: false, cover_image: '' })}
+                                        className="relative group px-8 py-3 bg-neon-cyan text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,243,255,0.3)] hover:shadow-[0_0_40px_rgba(0,243,255,0.5)] active:scale-95 flex items-center gap-2"
+                                    >
+                                        <Plus className="w-4 h-4 mr-2" /> NUEVA PUBLICACIÓN
+                                    </button>
+                                </div>
+
+                                <div className="grid grid-cols-1 gap-4">
+                                    {blogPosts.map((post) => (
+                                        <GlassCard key={post.id} className="p-6 rounded-3xl border-white/5 hover:border-neon-cyan/20 transition-all group flex items-center justify-between">
+                                            <div className="flex items-center gap-6">
+                                                <div className="w-20 h-20 rounded-2xl bg-slate-900 border border-white/10 overflow-hidden relative shadow-lg">
+                                                    {post.cover_image ? (
+                                                        <img src={post.cover_image} alt="Cover" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity cursor-pointer group-hover:scale-110 duration-700" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center bg-white/5"><BookOpen className="w-8 h-8 text-white/10" /></div>
+                                                    )}
+                                                </div>
+                                                <div className="flex flex-col gap-2">
+                                                    <h3 className="text-lg font-black italic text-white group-hover:text-neon-cyan transition-colors cursor-pointer uppercase tracking-tight" onClick={() => setEditingBlogPost(post)}>
+                                                        {post.title}
+                                                    </h3>
+                                                    <div className="flex items-center gap-4">
+                                                        <span className={`px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-widest ${post.published ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20'}`}>
+                                                            {post.published ? 'PUBLICADO' : 'BORRADOR'}
+                                                        </span>
+                                                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest flex items-center gap-2">
+                                                            <Calendar className="w-3 h-3" /> {new Date(post.created_at).toLocaleDateString()}
+                                                        </span>
+                                                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest flex items-center gap-2">
+                                                            <Eye className="w-3 h-3" /> {post.views} VISTAS
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
+                                                <a href={`/blog/${post.slug}`} target="_blank" className="p-3 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-xl transition-all" title="Ver Publicación">
+                                                    <ArrowUpRight className="w-4 h-4" />
+                                                </a>
+                                                <button
+                                                    onClick={() => setEditingBlogPost(post)}
+                                                    className="p-3 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-xl transition-all"
+                                                    title="Editar"
+                                                >
+                                                    <Edit2 className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={async () => {
+                                                        if (confirm('¿Eliminar esta publicación de forma permanente?')) {
+                                                            await supabase.from('blog_posts').delete().eq('id', post.id);
+                                                            const { data } = await supabase.from('blog_posts').select('*').order('created_at', { ascending: false });
+                                                            if (data) setBlogPosts(data);
+                                                        }
+                                                    }}
+                                                    className="p-3 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all"
+                                                    title="Eliminar"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </GlassCard>
+                                    ))}
+                                    {blogPosts.length === 0 && (
+                                        <div className="text-center py-20 bg-white/5 rounded-[3rem] border border-white/5 border-dashed">
+                                            <p className="text-slate-500 font-black uppercase tracking-widest text-xs">No hay publicaciones activas</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </motion.div>
+                        )}
+
                     </AnimatePresence>
                 </main>
 
@@ -1558,410 +2028,499 @@ export default function PremiumAdminDashboard() {
                                                 />
                                             </div>
 
-                                            {editingLead.status === 'rejected' && editingLead.rejection_reason && (
-                                                <div className="md:col-span-2 p-6 rounded-[2rem] bg-red-500/5 border border-red-500/10">
-                                                    <label className="text-[9px] font-black uppercase text-red-500/60 ml-1">Motivo de Rechazo</label>
-                                                    <p className="text-sm font-bold text-red-500/90 mt-1 italic uppercase underline decoration-red-500/20 underline-offset-4">
-                                                        {editingLead.rejection_reason}
-                                                    </p>
-                                                </div>
-                                            )}
+                                            {/* DOCUMENTATION SECTION */}
+                                            <div className="md:col-span-2 mt-4 space-y-6">
+                                                <h3 className="text-xs font-black uppercase text-neon-cyan tracking-[0.2em] flex items-center gap-2">
+                                                    <FileUp className="w-4 h-4" /> RECAUDACIÓN DE DOCUMENTACIÓN
+                                                </h3>
 
-                                            {/* DOCUMENTACIÓN DINÁMICA */}
-                                            {(editingLead.status === 'contacting' || editingLead.status === 'completed' || editingLead.ine_anverso) && (
-                                                <div className="md:col-span-2 space-y-8 pt-8 border-t border-white/5">
-                                                    <div className="flex items-center justify-between">
-                                                        <h3 className="text-xs font-black text-neon-cyan flex items-center gap-3">
-                                                            <Shield className="w-5 h-5" /> ARCHIVO OFICIAL DEL CLIENTE
-                                                        </h3>
-                                                        <span className="text-[8px] font-black bg-neon-cyan/10 text-neon-cyan px-2 py-1 rounded border border-neon-cyan/20">Fase: GESTIÓN</span>
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                                    {/* INE ANVERSO */}
+                                                    <div className="space-y-3">
+                                                        <p className="text-[10px] font-black uppercase text-slate-500 ml-2">INE ANVERSO (FRONTAL)</p>
+                                                        <div className="relative aspect-[3/2] bg-white/5 border border-white/10 rounded-2xl overflow-hidden group">
+                                                            {editingLead.ine_anverso ? (
+                                                                <img src={editingLead.ine_anverso} alt="INE Front" className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <div className="w-full h-full flex flex-col items-center justify-center text-slate-600">
+                                                                    <User className="w-8 h-8 mb-2 opacity-20" />
+                                                                    <span className="text-[9px] font-black uppercase">PENDIENTE</span>
+                                                                </div>
+                                                            )}
+                                                            <label className="absolute inset-0 cursor-pointer flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'ine_anverso')} />
+                                                                <div className="flex flex-col items-center gap-2 text-white">
+                                                                    {uploading === 'ine_anverso' ? <Loader2 className="w-6 h-6 animate-spin text-neon-cyan" /> : <Plus className="w-6 h-6" />}
+                                                                    <span className="text-[9px] font-black uppercase">{editingLead.ine_anverso ? 'REEMPLAZAR' : 'SUBIR IMAGEN'}</span>
+                                                                </div>
+                                                            </label>
+                                                        </div>
                                                     </div>
 
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                        {/* INE ANVERSO */}
-                                                        <div className="space-y-4">
-                                                            <label className="text-[10px] font-black uppercase text-slate-400 ml-2">INE (Anverso)</label>
-                                                            <div className="relative group">
-                                                                {editingLead.ine_anverso ? (
-                                                                    <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 bg-black/40">
-                                                                        <img src={editingLead.ine_anverso} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" alt="INE Anverso" />
-                                                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all bg-black/40 gap-4">
-                                                                            <label className="p-3 bg-neon-cyan/20 border border-neon-cyan/40 rounded-2xl text-neon-cyan hover:bg-neon-cyan hover:text-black transition-all cursor-pointer">
-                                                                                <FileUp className="w-5 h-5" />
-                                                                                <input title="Cambiar Foto Anverso" type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'ine_anverso')} />
-                                                                            </label>
-                                                                            <button
-                                                                                type="button"
-                                                                                title="Eliminar Foto"
-                                                                                onClick={() => setEditingLead({ ...editingLead, ine_anverso: "" })}
-                                                                                className="p-3 bg-red-500/20 border border-red-500/40 rounded-2xl text-red-500 hover:bg-red-500 hover:text-white transition-all"
-                                                                            >
-                                                                                <Trash2 className="w-5 h-5" />
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
-                                                                ) : (
-                                                                    <label className="aspect-video rounded-3xl border-2 border-dashed border-white/5 bg-white/[0.02] flex flex-col items-center justify-center gap-3 hover:border-neon-cyan/30 transition-all cursor-pointer">
-                                                                        {uploading === 'ine_anverso' ? (
-                                                                            <Loader2 className="w-8 h-8 text-neon-cyan animate-spin" />
-                                                                        ) : (
-                                                                            <FileUp className="w-8 h-8 text-slate-700" />
-                                                                        )}
-                                                                        <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest text-center px-4">Seleccionar Imagen Anverso</p>
-                                                                        <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'ine_anverso')} />
-                                                                    </label>
-                                                                )}
-                                                                <div className="mt-4 flex gap-2">
-                                                                    <input
-                                                                        title="INE Anverso URL"
-                                                                        placeholder="O ingresa URL manual..."
-                                                                        value={editingLead.ine_anverso || ""}
-                                                                        onChange={(e) => setEditingLead({ ...editingLead, ine_anverso: e.target.value })}
-                                                                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-[10px] focus:border-neon-cyan focus:outline-none placeholder:text-slate-700"
-                                                                    />
+                                                    {/* INE REVERSO */}
+                                                    <div className="space-y-3">
+                                                        <p className="text-[10px] font-black uppercase text-slate-500 ml-2">INE REVERSO (TRASERO)</p>
+                                                        <div className="relative aspect-[3/2] bg-white/5 border border-white/10 rounded-2xl overflow-hidden group">
+                                                            {editingLead.ine_reverso ? (
+                                                                <img src={editingLead.ine_reverso} alt="INE Back" className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <div className="w-full h-full flex flex-col items-center justify-center text-slate-600">
+                                                                    <User className="w-8 h-8 mb-2 opacity-20" />
+                                                                    <span className="text-[9px] font-black uppercase">PENDIENTE</span>
                                                                 </div>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* INE REVERSO */}
-                                                        <div className="space-y-4">
-                                                            <label className="text-[10px] font-black uppercase text-slate-400 ml-2">INE (Reverso)</label>
-                                                            <div className="relative group">
-                                                                {editingLead.ine_reverso ? (
-                                                                    <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 bg-black/40">
-                                                                        <img src={editingLead.ine_reverso} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" alt="INE Reverso" />
-                                                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all bg-black/40 gap-4">
-                                                                            <label className="p-3 bg-neon-magenta/20 border border-neon-magenta/40 rounded-2xl text-neon-magenta hover:bg-neon-magenta hover:text-white transition-all cursor-pointer">
-                                                                                <FileUp className="w-5 h-5" />
-                                                                                <input title="Cambiar Foto Reverso" type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'ine_reverso')} />
-                                                                            </label>
-                                                                            <button
-                                                                                type="button"
-                                                                                title="Eliminar Foto"
-                                                                                onClick={() => setEditingLead({ ...editingLead, ine_reverso: "" })}
-                                                                                className="p-3 bg-red-500/20 border border-red-500/40 rounded-2xl text-red-500 hover:bg-red-500 hover:text-white transition-all"
-                                                                            >
-                                                                                <Trash2 className="w-5 h-5" />
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
-                                                                ) : (
-                                                                    <label className="aspect-video rounded-3xl border-2 border-dashed border-white/5 bg-white/[0.02] flex flex-col items-center justify-center gap-3 hover:border-neon-magenta/30 transition-all cursor-pointer">
-                                                                        {uploading === 'ine_reverso' ? (
-                                                                            <Loader2 className="w-8 h-8 text-neon-magenta animate-spin" />
-                                                                        ) : (
-                                                                            <FileUp className="w-8 h-8 text-slate-700" />
-                                                                        )}
-                                                                        <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest text-center px-4">Seleccionar Imagen Reverso</p>
-                                                                        <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'ine_reverso')} />
-                                                                    </label>
-                                                                )}
-                                                                <div className="mt-4 flex gap-2">
-                                                                    <input
-                                                                        title="INE Reverso URL"
-                                                                        placeholder="O ingresa URL manual..."
-                                                                        value={editingLead.ine_reverso || ""}
-                                                                        onChange={(e) => setEditingLead({ ...editingLead, ine_reverso: e.target.value })}
-                                                                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-[10px] focus:border-neon-magenta focus:outline-none placeholder:text-slate-700"
-                                                                    />
+                                                            )}
+                                                            <label className="absolute inset-0 cursor-pointer flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'ine_reverso')} />
+                                                                <div className="flex flex-col items-center gap-2 text-white">
+                                                                    {uploading === 'ine_reverso' ? <Loader2 className="w-6 h-6 animate-spin text-neon-cyan" /> : <Plus className="w-6 h-6" />}
+                                                                    <span className="text-[9px] font-black uppercase">{editingLead.ine_reverso ? 'REEMPLAZAR' : 'SUBIR IMAGEN'}</span>
                                                                 </div>
-                                                            </div>
+                                                            </label>
                                                         </div>
+                                                    </div>
 
-                                                        {/* COMPROBANTE DOMICILIO */}
-                                                        <div className="space-y-2 md:col-span-2">
-                                                            <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Comprobante de Domicilio</label>
-                                                            <div className="flex gap-4">
-                                                                <label className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 cursor-pointer hover:bg-white/10 transition-all">
-                                                                    {uploading === 'comprobante_domicilio' ? (
-                                                                        <Loader2 className="w-6 h-6 text-neon-cyan animate-spin" />
-                                                                    ) : (
-                                                                        <FileUp className="w-6 h-6 text-slate-500" />
-                                                                    )}
-                                                                    <input type="file" className="hidden" accept="image/*,application/pdf" onChange={(e) => handleFileUpload(e, 'comprobante_domicilio')} />
-                                                                </label>
-                                                                <input
-                                                                    title="Comprobante Domicilio"
-                                                                    placeholder="URL del documento o usa el botón de subir..."
-                                                                    value={editingLead.comprobante_domicilio || ""}
-                                                                    onChange={(e) => setEditingLead({ ...editingLead, comprobante_domicilio: e.target.value })}
-                                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-neon-cyan focus:outline-none transition-all"
-                                                                />
-                                                            </div>
-                                                        </div>
-
-                                                        {/* REFERENCIAS */}
-                                                        <div className="space-y-2 md:col-span-2">
-                                                            <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Notas y Referencias del Hogar</label>
-                                                            <textarea
-                                                                title="Referencias del Hogar"
-                                                                placeholder="Describe detalladamente la fachada, puntos de referencia, entre qué calles se encuentra..."
-                                                                value={editingLead.referencias_hogar || ""}
-                                                                onChange={(e) => setEditingLead({ ...editingLead, referencias_hogar: e.target.value })}
-                                                                rows={3}
-                                                                className="w-full bg-white/5 border border-white/10 rounded-3xl px-6 py-5 text-sm focus:border-neon-cyan focus:outline-none transition-all resize-none uppercase leading-relaxed font-bold tracking-tight bg-gradient-to-br from-white/[0.02] to-transparent"
-                                                            />
+                                                    {/* COMPROBANTE DOMICILIO */}
+                                                    <div className="space-y-3">
+                                                        <p className="text-[10px] font-black uppercase text-slate-500 ml-2">COMPROBANTE DOMICILIO</p>
+                                                        <div className="relative aspect-[3/2] bg-white/5 border border-white/10 rounded-2xl overflow-hidden group">
+                                                            {editingLead.comprobante_domicilio ? (
+                                                                <img src={editingLead.comprobante_domicilio} alt="Proof" className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <div className="w-full h-full flex flex-col items-center justify-center text-slate-600">
+                                                                    <Building2 className="w-8 h-8 mb-2 opacity-20" />
+                                                                    <span className="text-[9px] font-black uppercase">PENDIENTE</span>
+                                                                </div>
+                                                            )}
+                                                            <label className="absolute inset-0 cursor-pointer flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'comprobante_domicilio')} />
+                                                                <div className="flex flex-col items-center gap-2 text-white">
+                                                                    {uploading === 'comprobante_domicilio' ? <Loader2 className="w-6 h-6 animate-spin text-neon-cyan" /> : <Plus className="w-6 h-6" />}
+                                                                    <span className="text-[9px] font-black uppercase">{editingLead.comprobante_domicilio ? 'REEMPLAZAR' : 'SUBIR IMAGEN'}</span>
+                                                                </div>
+                                                            </label>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            )}
+                                            </div>
+
+                                            <div className="space-y-2 md:col-span-2 mt-4">
+                                                <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Referencias Visuales de Instalación</label>
+                                                <textarea
+                                                    title="Referencias"
+                                                    placeholder="Describe color de la casa, entre qué calles se encuentra, portón, etc."
+                                                    value={editingLead.referencias_hogar || ''}
+                                                    onChange={(e) => setEditingLead({ ...editingLead, referencias_hogar: e.target.value })}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-neon-cyan focus:outline-none transition-all uppercase resize-none h-32"
+                                                />
+                                            </div>
                                         </div>
 
-                                        {/* FIXED FOOTER */}
-                                        <div className="mt-12 sticky bottom-0 bg-slate-950/80 backdrop-blur-md pt-6 pb-2 border-t border-white/5 -mx-8 -mb-8 px-8">
-                                            <NeonButton type="submit" className="w-full py-5 !tracking-[0.5em] text-xs font-black italic">
-                                                SINCRONIZAR CAMBIOS DE EXPEDIENTE
-                                            </NeonButton>
-                                        </div>
+                                        <NeonButton type="submit" className="w-full mt-10 py-5">ACTUALIZAR EXPEDIENTE</NeonButton>
                                     </form>
                                 </GlassCard>
                             </motion.div>
                         </div>
                     )}
 
-                    {/* 1b. PROVIDER MODAL (Add/Edit) */}
-                    {editingProvider && (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingProvider(null)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
-                            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-md">
-                                <GlassCard className="p-10 border-white/10 !bg-slate-900 shadow-2xl">
-                                    <div className="flex justify-between items-center mb-10">
-                                        <h2 className="text-xl font-black italic">{editingProvider.id ? 'EDITAR' : 'NUEVO'} <span className="text-neon-cyan">PROVEEDOR</span></h2>
-                                        <button onClick={() => setEditingProvider(null)} title="Cerrar" className="p-2 hover:bg-white/5 rounded-lg transition-all"><X className="w-6 h-6" /></button>
-                                    </div>
-                                    <form onSubmit={saveProvider} className="space-y-6">
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Nombre Comercial</label>
-                                            <input
-                                                required
-                                                title="Nombre del Proveedor"
-                                                placeholder="Ej. Totalplay"
-                                                value={editingProvider.name}
-                                                onChange={(e) => setEditingProvider({ ...editingProvider, name: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
-                                            />
+                    {/* TICKET DOSSIER MODAL */}
+                    {editingTicket && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingTicket(null)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                                className="relative w-full max-w-3xl max-h-[90vh] flex flex-col"
+                            >
+                                <GlassCard className="border-white/10 !bg-slate-950/90 shadow-2xl flex flex-col overflow-hidden p-0 rounded-[2.5rem]">
+                                    {/* FIXED HEADER */}
+                                    <div className="p-8 pb-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                                        <div>
+                                            <h2 className="text-2xl font-black italic mb-1 uppercase tracking-tighter">
+                                                EXPEDIENTE <span className="text-blue-500 neon-text-blue">TÉCNICO</span>
+                                            </h2>
+                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">TICKET: {editingTicket.id.split('-')[0]}</p>
                                         </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] font-black uppercase text-slate-500 ml-2">URL del Logo (PNG/SVG)</label>
-                                            <input
-                                                required
-                                                title="URL del Logo"
-                                                placeholder="https://..."
-                                                value={editingProvider.logo_url}
-                                                onChange={(e) => setEditingProvider({ ...editingProvider, logo_url: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
-                                            />
-                                        </div>
-                                        <NeonButton type="submit" className="w-full py-4">GUARDAR PROVEEDOR</NeonButton>
-                                    </form>
-                                </GlassCard>
-                            </motion.div>
-                        </div>
-                    )}
-
-                    {/* 1c. PLAN MODAL (Add/Edit) */}
-                    {editingPlan && (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingPlan(null)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
-                            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-2xl">
-                                <GlassCard className="p-10 border-white/10 !bg-slate-900 shadow-2xl h-[80vh] overflow-y-auto custom-scrollbar">
-                                    <div className="flex justify-between items-center mb-10">
-                                        <h2 className="text-xl font-black italic">{editingPlan.id ? 'EDITAR' : 'NUEVO'} <span className="text-neon-magenta">PLAN</span></h2>
-                                        <button onClick={() => setEditingPlan(null)} title="Cerrar" className="p-2 hover:bg-white/5 rounded-lg transition-all"><X className="w-6 h-6" /></button>
-                                    </div>
-                                    <form onSubmit={savePlan} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Proveedor</label>
-                                            <select
-                                                title="Seleccionar Proveedor"
-                                                value={editingPlan.provider_id}
-                                                onChange={(e) => setEditingPlan({ ...editingPlan, provider_id: e.target.value })}
-                                                className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
-                                            >
-                                                {providers.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                                            </select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Nombre del Plan</label>
-                                            <input
-                                                required
-                                                title="Nombre del Plan"
-                                                placeholder="Ej. Plan Ultra 500"
-                                                value={editingPlan.name}
-                                                onChange={(e) => setEditingPlan({ ...editingPlan, name: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Tipo</label>
-                                            <select
-                                                title="Tipo de Plan"
-                                                value={editingPlan.type}
-                                                onChange={(e) => setEditingPlan({ ...editingPlan, type: e.target.value })}
-                                                className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
-                                            >
-                                                <option value="Gamer">Gamer</option>
-                                                <option value="Streamer">Streamer</option>
-                                                <option value="Home Office">Home Office</option>
-                                                <option value="Empresas">Empresas</option>
-                                                <option value="Television">Television</option>
-                                            </select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Velocidad</label>
-                                            <input
-                                                title="Velocidad del Plan"
-                                                placeholder="Ej. 500 MB"
-                                                value={editingPlan.speed}
-                                                onChange={(e) => setEditingPlan({ ...editingPlan, speed: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Precio</label>
-                                            <input
-                                                title="Precio Mensual"
-                                                placeholder="Ej. $499"
-                                                value={editingPlan.price}
-                                                onChange={(e) => setEditingPlan({ ...editingPlan, price: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Ranking (0-100)</label>
-                                            <input
-                                                type="number"
-                                                title="Puntuación de Ranking"
-                                                placeholder="95"
-                                                value={editingPlan.ranking_score}
-                                                onChange={(e) => setEditingPlan({ ...editingPlan, ranking_score: parseInt(e.target.value) })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
-                                            />
-                                        </div>
-                                        <div className="space-y-2 md:col-span-2">
-                                            <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Características (Separadas por coma)</label>
-                                            <textarea
-                                                title="Características del Plan"
-                                                placeholder="WIFI 6, Instalación Gratis, App Premium"
-                                                value={Array.isArray(editingPlan.features) ? editingPlan.features.join(', ') : editingPlan.features}
-                                                onChange={(e) => setEditingPlan({ ...editingPlan, features: e.target.value as any })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all h-24"
-                                            />
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <NeonButton variant="magenta" type="submit" className="w-full py-4">GUARDAR PLAN</NeonButton>
-                                        </div>
-                                    </form>
-                                </GlassCard>
-                            </motion.div>
-                        </div>
-                    )}
-
-                    {/* 2. REJECTION MODAL */}
-                    {rejectionModal.isOpen && (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setRejectionModal({ isOpen: false, id: "", reason: "" })} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
-                            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-md">
-                                <GlassCard className="p-8 border-red-500/20 !bg-slate-900 shadow-2xl shadow-red-500/10">
-                                    <div className="text-center mb-8">
-                                        <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/20">
-                                            <XCircle className="w-8 h-8 text-red-500" />
-                                        </div>
-                                        <h3 className="text-xl font-black italic">RECHAZAR <span className="text-red-500">CLIENTE</span></h3>
-                                        <p className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em] mt-2">Justifica la cancelación del lead</p>
-                                    </div>
-                                    <div className="space-y-6">
-                                        <textarea
-                                            placeholder="Ej. Fuera de cobertura, No responde llamadas, Plan no viable..."
-                                            value={rejectionModal.reason}
-                                            onChange={(e) => setRejectionModal({ ...rejectionModal, reason: e.target.value })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:border-red-500 focus:outline-none transition-all h-32 uppercase font-bold"
-                                            autoFocus
-                                        />
                                         <div className="flex gap-4">
                                             <button
-                                                onClick={() => setRejectionModal({ isOpen: false, id: "", reason: "" })}
-                                                className="flex-1 py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition-all"
+                                                onClick={() => window.print()}
+                                                title="Imprimir Reporte"
+                                                className="p-3 bg-white/5 hover:bg-white/10 rounded-2xl text-slate-400 hover:text-white transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"
                                             >
-                                                CANCELAR
+                                                <Printer className="w-5 h-5" /> REPORTE
                                             </button>
-                                            <button
-                                                onClick={() => updateStatus(rejectionModal.id, 'rejected', rejectionModal.reason)}
-                                                disabled={!rejectionModal.reason}
-                                                className="flex-1 py-4 rounded-2xl bg-red-500 text-white text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50"
-                                            >
-                                                RECHAZAR LEAD
-                                            </button>
+                                            <button onClick={() => setEditingTicket(null)} title="Cerrar" className="p-3 hover:bg-white/5 rounded-2xl transition-all text-slate-500 hover:text-white border border-transparent hover:border-white/10"><X className="w-6 h-6" /></button>
                                         </div>
                                     </div>
-                                </GlassCard>
-                            </motion.div>
-                        </div>
-                    )}
 
-                    {/* 3. DELETE CONFIRMATION */}
-                    {deleteConfirm && (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDeleteConfirm(null)} className="absolute inset-0 bg-red-950/40 backdrop-blur-xl" />
-                            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-sm text-center">
-                                <GlassCard className="p-8 border-red-500/50 !bg-black">
-                                    <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                                        <Trash2 className="w-10 h-10 text-red-500 animate-bounce" />
-                                    </div>
-                                    <h3 className="text-2xl font-black italic mb-2">¿ELIMINAR <span className="text-red-500">LEAD?</span></h3>
-                                    <p className="text-slate-400 text-xs mb-8">Esta acción es irreversible y eliminará el expediente de la base de datos centralizada.</p>
-                                    <div className="flex gap-4">
-                                        <button onClick={() => setDeleteConfirm(null)} className="flex-1 py-4 rounded-xl bg-white/5 hover:bg-white/10 font-bold transition-all">NO, VOLVER</button>
-                                        <button onClick={() => deleteLead(deleteConfirm)} className="flex-1 py-4 rounded-xl bg-red-600 hover:bg-red-700 font-bold transition-all shadow-xl shadow-red-600/20">SÍ, ELIMINAR</button>
-                                    </div>
-                                </GlassCard>
-                            </motion.div>
-                        </div>
-                    )}
+                                    {/* SCROLLABLE BODY */}
+                                    <div className="flex-1 overflow-y-auto custom-scrollbar p-8 text-white">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                            <div className="space-y-6">
+                                                <div className="space-y-2">
+                                                    <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Notas Técnicas de Resolución</label>
+                                                    <textarea
+                                                        title="Notas Técnicas"
+                                                        placeholder="Describe detalladamente los trabajos realizados, fallas encontradas y solución aplicada..."
+                                                        value={editingTicket.technical_notes || ''}
+                                                        onChange={(e) => setEditingTicket({ ...editingTicket, technical_notes: e.target.value })}
+                                                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-neon-cyan focus:outline-none transition-all uppercase resize-none h-64"
+                                                    />
+                                                </div>
+                                            </div>
 
-                    {/* 4. AGENT SELECTION MODAL */}
-                    {agentSelectionModal.isOpen && (
-                        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setAgentSelectionModal({ isOpen: false, leadId: "" })} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
-                            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="relative w-full max-w-xl text-white">
-                                <GlassCard className="p-10 border-neon-cyan/20 !bg-slate-900 shadow-2xl rounded-[2.5rem]">
-                                    <div className="text-center mb-10">
-                                        <div className="w-20 h-20 bg-neon-cyan/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-neon-cyan/20">
-                                            <UserCheck className="w-10 h-10 text-neon-cyan" />
-                                        </div>
-                                        <h3 className="text-2xl font-black italic uppercase">ASIGNAR <span className="text-neon-cyan">COMISIONISTA</span></h3>
-                                        <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mt-2">Selecciona al responsable de este cierre de ventas</p>
-                                    </div>
-                                    <div className="grid grid-cols-1 gap-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
-                                        {comisionistas.filter(c => c.active).map((agent) => (
-                                            <button
-                                                key={agent.id}
-                                                onClick={() => updateStatus(agentSelectionModal.leadId, 'contacting', undefined, agent.id)}
-                                                className="group flex items-center justify-between p-6 bg-white/5 border border-white/5 hover:border-neon-cyan/40 hover:bg-neon-cyan/5 rounded-[2rem] transition-all text-left"
-                                            >
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-neon-cyan/20 transition-all">
-                                                        <User className="w-6 h-6 text-slate-500 group-hover:text-neon-cyan" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-black italic uppercase text-white group-hover:text-neon-cyan transition-colors">{agent.full_name}</p>
-                                                        <p className="text-[10px] font-bold text-slate-500 uppercase">Score: {agent.performance_score}%</p>
+                                            <div className="space-y-6">
+                                                {/* EVIDENCIA FOTOGRÁFICA */}
+                                                <div className="space-y-3">
+                                                    <p className="text-[10px] font-black uppercase text-slate-500 ml-2">Foto de Evidencia de Trabajo</p>
+                                                    <div className="relative aspect-video bg-white/5 border border-white/10 rounded-2xl overflow-hidden group">
+                                                        {editingTicket.evidence_photo ? (
+                                                            <img src={editingTicket.evidence_photo} alt="Evidence" className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <div className="w-full h-full flex flex-col items-center justify-center text-slate-600">
+                                                                <Camera className="w-8 h-8 mb-2 opacity-20" />
+                                                                <span className="text-[9px] font-black uppercase">SIN EVIDENCIA</span>
+                                                            </div>
+                                                        )}
+                                                        <label className="absolute inset-0 cursor-pointer flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'evidence_photo')} />
+                                                            <div className="flex flex-col items-center gap-2 text-white">
+                                                                {uploading === 'evidence_photo' ? <Loader2 className="w-6 h-6 animate-spin text-neon-cyan" /> : <Plus className="w-6 h-6" />}
+                                                                <span className="text-[9px] font-black uppercase">{editingTicket.evidence_photo ? 'REEMPLAZAR' : 'CAPTURAR EVIDENCIA'}</span>
+                                                            </div>
+                                                        </label>
                                                     </div>
                                                 </div>
-                                                <ArrowUpRight className="w-5 h-5 text-slate-700 group-hover:text-neon-cyan group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" />
-                                            </button>
-                                        ))}
+
+                                                {/* SPEEDTEST */}
+                                                <div className="space-y-3">
+                                                    <p className="text-[10px] font-black uppercase text-slate-500 ml-2">Captura de SpeedTest (Opcional)</p>
+                                                    <div className="relative aspect-video bg-white/5 border border-white/10 rounded-2xl overflow-hidden group">
+                                                        {editingTicket.speed_test_photo ? (
+                                                            <img src={editingTicket.speed_test_photo} alt="Speedtest" className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <div className="w-full h-full flex flex-col items-center justify-center text-slate-600">
+                                                                <Activity className="w-8 h-8 mb-2 opacity-20" />
+                                                                <span className="text-[9px] font-black uppercase">SIN SPEEDTEST</span>
+                                                            </div>
+                                                        )}
+                                                        <label className="absolute inset-0 cursor-pointer flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'speed_test_photo')} />
+                                                            <div className="flex flex-col items-center gap-2 text-white">
+                                                                {uploading === 'speed_test_photo' ? <Loader2 className="w-6 h-6 animate-spin text-neon-cyan" /> : <Plus className="w-6 h-6" />}
+                                                                <span className="text-[9px] font-black uppercase">{editingTicket.speed_test_photo ? 'REEMPLAZAR' : 'SUBIR SPEEDTEST'}</span>
+                                                            </div>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex gap-4 mt-10">
+                                            <NeonButton
+                                                onClick={async () => {
+                                                    const { error } = await supabase.from('support_tickets').update({
+                                                        technical_notes: editingTicket.technical_notes,
+                                                        evidence_photo: editingTicket.evidence_photo,
+                                                        speed_test_photo: editingTicket.speed_test_photo
+                                                    }).eq('id', editingTicket.id);
+
+                                                    if (!error) {
+                                                        await logAction('UPDATE', 'TICKETS', editingTicket.id, `Actualizado expediente técnico del ticket`);
+                                                        fetchData();
+                                                        setEditingTicket(null);
+                                                    }
+                                                }}
+                                                className="flex-1 py-5"
+                                            >
+                                                ACTUALIZAR REPORTE
+                                            </NeonButton>
+
+                                            {editingTicket.technical_notes && editingTicket.evidence_photo && (
+                                                <NeonButton
+                                                    onClick={() => updateTicketStatus(editingTicket.id, 'resolved')}
+                                                    variant="emerald"
+                                                    className="flex-1 py-5"
+                                                >
+                                                    RESOLVER TICKET AHORA
+                                                </NeonButton>
+                                            )}
+                                        </div>
                                     </div>
-                                    <button
-                                        onClick={() => setAgentSelectionModal({ isOpen: false, leadId: "" })}
-                                        className="w-full mt-8 py-4 bg-white/5 hover:bg-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
-                                    >
-                                        CANCELAR ASIGNACIÓN
-                                    </button>
                                 </GlassCard>
                             </motion.div>
                         </div>
-                    )}
+                    )
+                    }
+
+                    {/* 1b. PROVIDER MODAL (Add/Edit) */}
+                    {
+                        editingProvider && (
+                            <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingProvider(null)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+                                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-md">
+                                    <GlassCard className="p-10 border-white/10 !bg-slate-900 shadow-2xl">
+                                        <div className="flex justify-between items-center mb-10">
+                                            <h2 className="text-xl font-black italic">{editingProvider.id ? 'EDITAR' : 'NUEVO'} <span className="text-neon-cyan">PROVEEDOR</span></h2>
+                                            <button onClick={() => setEditingProvider(null)} title="Cerrar" className="p-2 hover:bg-white/5 rounded-lg transition-all"><X className="w-6 h-6" /></button>
+                                        </div>
+                                        <form onSubmit={saveProvider} className="space-y-6">
+                                            <div className="space-y-2">
+                                                <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Nombre Comercial</label>
+                                                <input
+                                                    required
+                                                    title="Nombre del Proveedor"
+                                                    placeholder="Ej. Totalplay"
+                                                    value={editingProvider.name}
+                                                    onChange={(e) => setEditingProvider({ ...editingProvider, name: e.target.value })}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[9px] font-black uppercase text-slate-500 ml-2">URL del Logo (PNG/SVG)</label>
+                                                <input
+                                                    required
+                                                    title="URL del Logo"
+                                                    placeholder="https://..."
+                                                    value={editingProvider.logo_url}
+                                                    onChange={(e) => setEditingProvider({ ...editingProvider, logo_url: e.target.value })}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                                />
+                                            </div>
+                                            <NeonButton type="submit" className="w-full py-4">GUARDAR PROVEEDOR</NeonButton>
+                                        </form>
+                                    </GlassCard>
+                                </motion.div>
+                            </div>
+                        )
+                    }
+
+                    {/* 1c. PLAN MODAL (Add/Edit) */}
+                    {
+                        editingPlan && (
+                            <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingPlan(null)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+                                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-2xl">
+                                    <GlassCard className="p-10 border-white/10 !bg-slate-900 shadow-2xl h-[80vh] overflow-y-auto custom-scrollbar">
+                                        <div className="flex justify-between items-center mb-10">
+                                            <h2 className="text-xl font-black italic">{editingPlan.id ? 'EDITAR' : 'NUEVO'} <span className="text-neon-magenta">PLAN</span></h2>
+                                            <button onClick={() => setEditingPlan(null)} title="Cerrar" className="p-2 hover:bg-white/5 rounded-lg transition-all"><X className="w-6 h-6" /></button>
+                                        </div>
+                                        <form onSubmit={savePlan} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Proveedor</label>
+                                                <select
+                                                    title="Seleccionar Proveedor"
+                                                    value={editingPlan.provider_id}
+                                                    onChange={(e) => setEditingPlan({ ...editingPlan, provider_id: e.target.value })}
+                                                    className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                                >
+                                                    {providers.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                                                </select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Nombre del Plan</label>
+                                                <input
+                                                    required
+                                                    title="Nombre del Plan"
+                                                    placeholder="Ej. Plan Ultra 500"
+                                                    value={editingPlan.name}
+                                                    onChange={(e) => setEditingPlan({ ...editingPlan, name: e.target.value })}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Tipo</label>
+                                                <select
+                                                    title="Tipo de Plan"
+                                                    value={editingPlan.type}
+                                                    onChange={(e) => setEditingPlan({ ...editingPlan, type: e.target.value })}
+                                                    className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                                >
+                                                    <option value="Gamer">Gamer</option>
+                                                    <option value="Streamer">Streamer</option>
+                                                    <option value="Home Office">Home Office</option>
+                                                    <option value="Empresas">Empresas</option>
+                                                    <option value="Television">Television</option>
+                                                </select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Velocidad</label>
+                                                <input
+                                                    title="Velocidad del Plan"
+                                                    placeholder="Ej. 500 MB"
+                                                    value={editingPlan.speed}
+                                                    onChange={(e) => setEditingPlan({ ...editingPlan, speed: e.target.value })}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Precio</label>
+                                                <input
+                                                    title="Precio Mensual"
+                                                    placeholder="Ej. $499"
+                                                    value={editingPlan.price}
+                                                    onChange={(e) => setEditingPlan({ ...editingPlan, price: e.target.value })}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Ranking (0-100)</label>
+                                                <input
+                                                    type="number"
+                                                    title="Puntuación de Ranking"
+                                                    placeholder="95"
+                                                    value={editingPlan.ranking_score}
+                                                    onChange={(e) => setEditingPlan({ ...editingPlan, ranking_score: parseInt(e.target.value) })}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                                />
+                                            </div>
+                                            <div className="space-y-2 md:col-span-2">
+                                                <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Características (Separadas por coma)</label>
+                                                <textarea
+                                                    title="Características del Plan"
+                                                    placeholder="WIFI 6, Instalación Gratis, App Premium"
+                                                    value={Array.isArray(editingPlan.features) ? editingPlan.features.join(', ') : editingPlan.features}
+                                                    onChange={(e) => setEditingPlan({ ...editingPlan, features: e.target.value as any })}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all h-24"
+                                                />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <NeonButton variant="magenta" type="submit" className="w-full py-4">GUARDAR PLAN</NeonButton>
+                                            </div>
+                                        </form>
+                                    </GlassCard>
+                                </motion.div>
+                            </div>
+                        )
+                    }
+
+                    {/* 2. REJECTION MODAL */}
+                    {
+                        rejectionModal.isOpen && (
+                            <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setRejectionModal({ isOpen: false, id: "", reason: "" })} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+                                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-md">
+                                    <GlassCard className="p-8 border-red-500/20 !bg-slate-900 shadow-2xl shadow-red-500/10">
+                                        <div className="text-center mb-8">
+                                            <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/20">
+                                                <XCircle className="w-8 h-8 text-red-500" />
+                                            </div>
+                                            <h3 className="text-xl font-black italic">RECHAZAR <span className="text-red-500">CLIENTE</span></h3>
+                                            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em] mt-2">Justifica la cancelación del lead</p>
+                                        </div>
+                                        <div className="space-y-6">
+                                            <textarea
+                                                placeholder="Ej. Fuera de cobertura, No responde llamadas, Plan no viable..."
+                                                value={rejectionModal.reason}
+                                                onChange={(e) => setRejectionModal({ ...rejectionModal, reason: e.target.value })}
+                                                className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:border-red-500 focus:outline-none transition-all h-32 uppercase font-bold"
+                                                autoFocus
+                                            />
+                                            <div className="flex gap-4">
+                                                <button
+                                                    onClick={() => setRejectionModal({ isOpen: false, id: "", reason: "" })}
+                                                    className="flex-1 py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition-all"
+                                                >
+                                                    CANCELAR
+                                                </button>
+                                                <button
+                                                    onClick={() => updateStatus(rejectionModal.id, 'rejected', rejectionModal.reason)}
+                                                    disabled={!rejectionModal.reason}
+                                                    className="flex-1 py-4 rounded-2xl bg-red-500 text-white text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50"
+                                                >
+                                                    RECHAZAR LEAD
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </GlassCard>
+                                </motion.div>
+                            </div>
+                        )
+                    }
+
+                    {/* 3. DELETE CONFIRMATION */}
+                    {
+                        deleteConfirm && (
+                            <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDeleteConfirm(null)} className="absolute inset-0 bg-red-950/40 backdrop-blur-xl" />
+                                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-sm text-center">
+                                    <GlassCard className="p-8 border-red-500/50 !bg-black">
+                                        <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                                            <Trash2 className="w-10 h-10 text-red-500 animate-bounce" />
+                                        </div>
+                                        <h3 className="text-2xl font-black italic mb-2">¿ELIMINAR <span className="text-red-500">LEAD?</span></h3>
+                                        <p className="text-slate-400 text-xs mb-8">Esta acción es irreversible y eliminará el expediente de la base de datos centralizada.</p>
+                                        <div className="flex gap-4">
+                                            <button onClick={() => setDeleteConfirm(null)} className="flex-1 py-4 rounded-xl bg-white/5 hover:bg-white/10 font-bold transition-all">NO, VOLVER</button>
+                                            <button onClick={() => deleteLead(deleteConfirm)} className="flex-1 py-4 rounded-xl bg-red-600 hover:bg-red-700 font-bold transition-all shadow-xl shadow-red-600/20">SÍ, ELIMINAR</button>
+                                        </div>
+                                    </GlassCard>
+                                </motion.div>
+                            </div>
+                        )
+                    }
+
+                    {/* 4. AGENT SELECTION MODAL */}
+                    {
+                        agentSelectionModal.isOpen && (
+                            <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
+                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setAgentSelectionModal({ isOpen: false })} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+                                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="relative w-full max-w-xl text-white">
+                                    <GlassCard className="p-10 border-neon-cyan/20 !bg-slate-900 shadow-2xl rounded-[2.5rem]">
+                                        <div className="text-center mb-10">
+                                            <div className="w-20 h-20 bg-neon-cyan/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-neon-cyan/20">
+                                                <UserCheck className="w-10 h-10 text-neon-cyan" />
+                                            </div>
+                                            <h3 className="text-2xl font-black italic uppercase">
+                                                ASIGNAR <span className="text-neon-cyan">{agentSelectionModal.ticketId ? 'TÉCNICO' : 'COMISIONISTA'}</span>
+                                            </h3>
+                                            <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mt-2">
+                                                {agentSelectionModal.ticketId ? 'Selecciona al responsable de resolver este ticket' : 'Selecciona al responsable de este cierre de ventas'}
+                                            </p>
+                                        </div>
+                                        <div className="grid grid-cols-1 gap-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+                                            {(agentSelectionModal.ticketId ? technicians : comisionistas).filter(c => (c as any).active).map((person: any) => (
+                                                <button
+                                                    key={person.id}
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        if (agentSelectionModal.leadId) {
+                                                            updateStatus(agentSelectionModal.leadId, 'contacting', undefined, person.id);
+                                                        } else if (agentSelectionModal.ticketId) {
+                                                            updateTicketStatus(agentSelectionModal.ticketId, 'in_progress', person.id);
+                                                        }
+                                                    }}
+                                                    className="group flex items-center justify-between p-6 bg-white/5 border border-white/5 hover:border-neon-cyan/40 hover:bg-neon-cyan/5 rounded-[2rem] transition-all text-left w-full"
+                                                >
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-neon-cyan/20 transition-all">
+                                                            <User className="w-6 h-6 text-slate-500 group-hover:text-neon-cyan" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-black italic uppercase text-white group-hover:text-neon-cyan transition-colors">{person.full_name}</p>
+                                                            <p className="text-[10px] font-bold text-slate-500 uppercase">
+                                                                {agentSelectionModal.ticketId ? person.specialty : `Score: ${person.performance_score}%`}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <ArrowUpRight className="w-5 h-5 text-slate-700 group-hover:text-neon-cyan group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" />
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <button
+                                            onClick={() => setAgentSelectionModal({ isOpen: false, leadId: undefined, ticketId: undefined })}
+                                            className="w-full mt-8 py-4 bg-white/5 hover:bg-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
+                                        >
+                                            CANCELAR ASIGNACIÓN
+                                        </button>
+                                    </GlassCard>
+                                </motion.div>
+                            </div>
+                        )
+                    }
                 </AnimatePresence >
             </div >
 
@@ -2084,6 +2643,222 @@ export default function PremiumAdminDashboard() {
                     </div>
                 )
             }
+
+            {/* NEW: TECHNICAL SUPPORT DOSSIER (Printable) */}
+            {
+                editingTicket && (
+                    <div id="printable-dossier" className="hidden print-force-visible dossier-root">
+                        <div className="dossier-header">
+                            <div>
+                                <h1 className="dossier-header-title text-blue-600">FIBERGRAVITY</h1>
+                                <p className="dossier-header-subtitle">REPORTE TÉCNICO DE CAMPO v1.0</p>
+                            </div>
+                            <div>
+                                <p className="dossier-folio-label">TICKET ID</p>
+                                <p className="dossier-folio-value">#{editingTicket.id.split('-')[0].toUpperCase()}</p>
+                                <p className="dossier-timestamp">{new Date().toLocaleString()}</p>
+                            </div>
+                        </div>
+
+                        <div className="dossier-section">
+                            <h3 className="dossier-section-title">01. INFORMACIÓN DEL SERVICIO</h3>
+                            <div className="dossier-grid-card">
+                                <div>
+                                    <p className="dossier-field-label">CLIENTE</p>
+                                    <p className="dossier-field-value">{editingTicket.full_name}</p>
+                                </div>
+                                <div>
+                                    <p className="dossier-field-label">TIPO DE FALLA</p>
+                                    <p className="dossier-field-value uppercase">{editingTicket.type}</p>
+                                </div>
+                                <div className="col-span-2">
+                                    <p className="dossier-field-label">REPORTE INICIAL</p>
+                                    <p className="dossier-field-value italic">"{editingTicket.description}"</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="dossier-section">
+                            <h3 className="dossier-section-title">02. RESOLUCIÓN TÉCNICA</h3>
+                            <div className="dossier-references-box">
+                                <p className="dossier-references-text uppercase">
+                                    {editingTicket.technical_notes || "SIN NOTAS REGISTRADAS"}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="dossier-section !page-break-inside-avoid">
+                            <h3 className="dossier-section-title">03. EVIDENCIAS FOTOGRÁFICAS</h3>
+                            <div className="dossier-doc-grid">
+                                <div className="dossier-doc-container">
+                                    <p className="dossier-doc-label">TRABAJO REALIZADO / FIRMA</p>
+                                    <div className="dossier-image-frame">
+                                        {editingTicket.evidence_photo ? (
+                                            <img src={editingTicket.evidence_photo} className="dossier-img" alt="Work Evidence" />
+                                        ) : (
+                                            <p className="dossier-no-image">SIN IMAGEN</p>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="dossier-doc-container">
+                                    <p className="dossier-doc-label">SPEEDTEST DE CIERRE</p>
+                                    <div className="dossier-image-frame">
+                                        {editingTicket.speed_test_photo ? (
+                                            <img src={editingTicket.speed_test_photo} className="dossier-img" alt="Speedtest" />
+                                        ) : (
+                                            <p className="dossier-no-image">SIN IMAGEN</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="dossier-footer">
+                            <p className="dossier-footer-text">ASIGNADO A: {editingTicket.technician_id ? technicians.find(t => t.id === editingTicket.technician_id)?.full_name : 'SIN ASIGNAR'}</p>
+                            <p className="dossier-footer-tag">CENTER OPS - FIBERGRAVITY SUPPORT</p>
+                        </div>
+                    </div>
+                )
+            }
+
+            <AnimatePresence>
+                {editingBlogPost && (
+                    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingBlogPost(null)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative w-full max-w-4xl h-[90vh] flex flex-col">
+                            <GlassCard className="flex-1 flex flex-col p-8 border-neon-cyan/20 !bg-slate-900 shadow-2xl rounded-[2rem] overflow-hidden text-white relative">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-2xl font-black italic uppercase">
+                                        EDITOR DE <span className="text-neon-cyan">CONTENIDO</span>
+                                    </h3>
+                                    <button onClick={() => setEditingBlogPost(null)} className="p-2 hover:bg-white/10 rounded-full transition-all">
+                                        <X className="w-6 h-6 text-slate-400" />
+                                    </button>
+                                </div>
+
+                                <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Título del Artículo</label>
+                                            <input
+                                                value={editingBlogPost.title}
+                                                onChange={e => setEditingBlogPost({ ...editingBlogPost, title: e.target.value, slug: e.target.value.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '') })}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none font-bold"
+                                                placeholder="Escribe un título impactante..."
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Slug (URL)</label>
+                                            <input
+                                                value={editingBlogPost.slug}
+                                                onChange={e => setEditingBlogPost({ ...editingBlogPost, slug: e.target.value })}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none font-mono text-slate-400"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Extracto (Resumen)</label>
+                                        <textarea
+                                            value={editingBlogPost.excerpt || ''}
+                                            onChange={e => setEditingBlogPost({ ...editingBlogPost, excerpt: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none h-20 resize-none"
+                                            placeholder="Breve descripción para SEO y previsualización..."
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Contenido (Markdown Compatible)</label>
+                                        <div className="relative h-[400px]">
+                                            <textarea
+                                                value={editingBlogPost.content || ''}
+                                                onChange={e => setEditingBlogPost({ ...editingBlogPost, content: e.target.value })}
+                                                className="w-full h-full bg-white/5 border border-white/10 rounded-xl p-6 text-sm focus:border-neon-cyan focus:outline-none resize-none font-mono leading-relaxed"
+                                                placeholder="# Escribe tu artículo aquí..."
+                                            />
+                                            <div className="absolute top-4 right-4 text-[10px] font-black uppercase text-slate-600 bg-black/50 px-2 py-1 rounded">MARKDOWN SUPPORTED</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Imagen de Portada (URL)</label>
+                                            <input
+                                                value={editingBlogPost.cover_image || ''}
+                                                onChange={e => setEditingBlogPost({ ...editingBlogPost, cover_image: e.target.value })}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none"
+                                                placeholder="https://..."
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Categoría</label>
+                                            <select
+                                                value={editingBlogPost.category_id || ''}
+                                                onChange={e => setEditingBlogPost({ ...editingBlogPost, category_id: e.target.value })}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none text-slate-400"
+                                            >
+                                                <option value="">Seleccionar Categoría...</option>
+                                                {blogCategories.map(cat => (
+                                                    <option key={cat.id} value={cat.id} className="bg-slate-900 text-white">{cat.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/5">
+                                        <label className="flex items-center gap-3 cursor-pointer">
+                                            <div className={`w-12 h-6 rounded-full p-1 transition-all ${editingBlogPost.published ? 'bg-emerald-500' : 'bg-slate-600'}`}>
+                                                <div className={`w-4 h-4 bg-white rounded-full shadow-md transition-all ${editingBlogPost.published ? 'translate-x-6' : 'translate-x-0'}`} />
+                                            </div>
+                                            <input
+                                                type="checkbox"
+                                                checked={editingBlogPost.published || false}
+                                                onChange={e => setEditingBlogPost({ ...editingBlogPost, published: e.target.checked })}
+                                                className="hidden"
+                                            />
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-white">
+                                                {editingBlogPost.published ? 'ESTADO: PÚBLICO (VISIBLE)' : 'ESTADO: BORRADOR (OCULTO)'}
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div className="mt-8 pt-6 border-t border-white/10 flex justify-end gap-4">
+                                    <button onClick={() => setEditingBlogPost(null)} className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition-all">Cancelar</button>
+                                    <NeonButton
+                                        onClick={async () => {
+                                            if (!editingBlogPost.title || !editingBlogPost.slug) return alert('Título y Slug requeridos');
+
+                                            // Ensure we are sending only the fields that exist in the database table
+                                            const postData = {
+                                                title: editingBlogPost.title,
+                                                slug: editingBlogPost.slug,
+                                                content: editingBlogPost.content,
+                                                excerpt: editingBlogPost.excerpt,
+                                                cover_image: editingBlogPost.cover_image,
+                                                published: editingBlogPost.published,
+                                                category_id: editingBlogPost.category_id,
+                                                author_name: 'Admin FiberGravity' // Explicitly set author
+                                            };
+
+                                            if ((editingBlogPost as any).id) {
+                                                await supabase.from('blog_posts').update(postData).eq('id', (editingBlogPost as any).id);
+                                            } else {
+                                                await supabase.from('blog_posts').insert([postData]);
+                                            }
+                                            fetchData();
+                                            setEditingBlogPost(null);
+                                        }}
+                                        className="py-3 px-8 text-[10px]"
+                                    >
+                                        <Save className="w-4 h-4 mr-2" /> GUARDAR PUBLICACIÓN
+                                    </NeonButton>
+                                </div>
+                            </GlassCard>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div >
     );
 }
