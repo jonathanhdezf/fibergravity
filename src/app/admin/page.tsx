@@ -142,6 +142,33 @@ export default function PremiumAdminDashboard() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [filter, setFilter] = useState("all");
 
+    // Print Style Fixes (Global for this page)
+    useEffect(() => {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @media print {
+                html, body { 
+                    background: white !important; 
+                    color: black !important;
+                    height: auto !important;
+                    overflow: visible !important;
+                }
+                .print-hidden-important { display: none !important; }
+                .print-force-visible { display: block !important; }
+                #printable-dossier { 
+                    display: block !important;
+                    position: static !important;
+                    width: 100% !important;
+                    background: white !important;
+                    padding: 40px !important;
+                }
+                @page { size: auto; margin: 15mm; }
+            }
+        `;
+        document.head.appendChild(style);
+        return () => { document.head.removeChild(style); };
+    }, []);
+
     // New States for Lead Management
     const [editingLead, setEditingLead] = useState<Lead | null>(null);
     const [editingProvider, setEditingProvider] = useState<Provider | null>(null);
@@ -396,7 +423,7 @@ export default function PremiumAdminDashboard() {
     return (
         <div className="relative min-h-screen bg-[#020617] text-white selection:bg-neon-cyan/30">
             {/* 1. ADMINISTRATION INTERFACE (Hidden when printing) */}
-            <div className="print:hidden">
+            <div className="print-hidden-important">
                 {/* Sidebar / Top Nav */}
                 <nav className="fixed top-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-2xl border-b border-white/5 px-6 md:px-12 py-4">
                     <div className="flex justify-between items-center">
@@ -1509,153 +1536,101 @@ export default function PremiumAdminDashboard() {
                 </AnimatePresence>
             </div>
 
-            {/* 2. PREMIUM PRINTABLE DOSSIER (Only visible when printing) */}
+            {/* 2. PREMIUM PRINTABLE DOSSIER (Visible ONLY during print spools) */}
             {editingLead && (
-                <div id="printable-dossier" className="hidden print:block fixed inset-0 bg-white text-slate-900 z-[-1] p-12 overflow-visible" style={{ WebkitPrintColorAdjust: 'exact', colorAdjust: 'exact' } as any}>
-                    {/* Branded Header */}
-                    <div className="flex justify-between items-start border-b-[8px] border-slate-900 pb-10 mb-12">
-                        <div className="space-y-2">
-                            <h1 className="text-6xl font-black italic tracking-tighter text-slate-950 font-sans">
-                                FIBER<span className="text-cyan-600">GRAVITY</span>
-                            </h1>
-                            <div className="flex items-center gap-4">
-                                <span className="h-6 w-1 bg-cyan-600"></span>
-                                <p className="text-xs font-black uppercase tracking-[0.5em] text-cyan-600">Infrastructure Logistics Portal</p>
-                            </div>
+                <div id="printable-dossier" className="hidden print-force-visible">
+                    {/* Header: High Contrast & Simple */}
+                    <div style={{ borderBottom: '4px solid black', paddingBottom: '30px', marginBottom: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div>
+                            <h1 style={{ fontSize: '40px', fontWeight: '900', color: 'black', margin: 0 }}>FIBERGRAVITY</h1>
+                            <p style={{ fontSize: '10px', fontWeight: 'bold', color: '#666', letterSpacing: '4px', marginTop: '5px' }}>OFFICIAL LOGISTICS DOSSIER v3.0</p>
                         </div>
-                        <div className="text-right">
-                            <p className="text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2">Internal Management Folio</p>
-                            <p className="text-4xl font-black text-slate-950 italic tracking-tighter">#{editingLead.id.split('-')[0].toUpperCase()}</p>
-                            <div className="mt-4 px-3 py-1 bg-slate-100 rounded-lg inline-block border border-slate-200">
-                                <p className="text-[10px] font-bold text-slate-900 uppercase italic">Authorized Report: {new Date().toLocaleDateString()}</p>
+                        <div style={{ textAlign: 'right' }}>
+                            <p style={{ fontSize: '12px', fontWeight: 'bold', color: 'black', margin: 0 }}>FOLIO DE GESTIÓN</p>
+                            <p style={{ fontSize: '28px', fontWeight: '900', color: '#0284c7', margin: 0 }}>#{editingLead.id.split('-')[0].toUpperCase()}</p>
+                            <p style={{ fontSize: '10px', color: '#999' }}>{new Date().toLocaleString()}</p>
+                        </div>
+                    </div>
+
+                    {/* Section 01: Client Data */}
+                    <div style={{ marginBottom: '40px' }}>
+                        <h3 style={{ fontSize: '12px', fontWeight: '900', borderLeft: '4px solid #0284c7', paddingLeft: '15px', color: '#0284c7', marginBottom: '20px' }}>01. IDENTIFICACIÓN DEL CLIENTE</h3>
+                        <div style={{ border: '2px solid #eee', borderRadius: '15px', padding: '25px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                            <div>
+                                <p style={{ fontSize: '10px', color: '#999', margin: '0 0 5px 0' }}>NOMBRE COMPLETO</p>
+                                <p style={{ fontSize: '18px', fontWeight: 'bold', color: 'black', margin: 0 }}>{editingLead.full_name}</p>
+                            </div>
+                            <div>
+                                <p style={{ fontSize: '10px', color: '#999', margin: '0 0 5px 0' }}>TELÉFONO DE CONTACTO</p>
+                                <p style={{ fontSize: '18px', fontWeight: 'bold', color: 'black', margin: 0 }}>{editingLead.phone}</p>
+                            </div>
+                            <div style={{ gridColumn: 'span 2' }}>
+                                <p style={{ fontSize: '10px', color: '#999', margin: '0 0 5px 0' }}>UBICACIÓN REGISTRADA</p>
+                                <p style={{ fontSize: '18px', fontWeight: 'bold', color: 'black', margin: 0 }}>{editingLead.location}</p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Technical & Commercial Sections */}
-                    <div className="grid grid-cols-2 gap-16 mb-16">
-                        <div className="space-y-10">
+                    {/* Section 02: Service Details */}
+                    <div style={{ marginBottom: '40px' }}>
+                        <h3 style={{ fontSize: '12px', fontWeight: '900', borderLeft: '4px solid #0284c7', paddingLeft: '15px', color: '#0284c7', marginBottom: '20px' }}>02. DETALLES DEL SERVICIO ASIGNADO</h3>
+                        <div style={{ border: '2px solid #eee', borderRadius: '15px', padding: '25px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                             <div>
-                                <h3 className="text-[10px] font-black uppercase tracking-widest text-cyan-600 mb-6 flex items-center gap-2">
-                                    <span className="w-8 h-[2px] bg-cyan-600/30"></span> 01. Client Identity
-                                </h3>
-                                <div className="space-y-6">
-                                    <div className="p-8 bg-slate-50 border border-slate-200 rounded-[2rem] shadow-sm">
-                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">Legal Entity Name</p>
-                                        <p className="text-3xl font-black text-slate-950 uppercase italic leading-none">{editingLead.full_name}</p>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-6">
-                                        <div className="p-6 bg-white border border-slate-100 rounded-2xl">
-                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Direct Contact</p>
-                                            <p className="text-lg font-black text-slate-900">{editingLead.phone}</p>
-                                        </div>
-                                        <div className="p-6 bg-white border border-slate-100 rounded-2xl">
-                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Registered Sector</p>
-                                            <p className="text-lg font-black text-slate-900 uppercase">{editingLead.location}</p>
-                                        </div>
-                                    </div>
-                                </div>
+                                <p style={{ fontSize: '10px', color: '#999', margin: '0 0 5px 0' }}>PROVEEDOR</p>
+                                <p style={{ fontSize: '18px', fontWeight: '900', color: 'black', margin: 0 }}>{editingLead.provider}</p>
                             </div>
-                        </div>
-
-                        <div className="space-y-10">
                             <div>
-                                <h3 className="text-[10px] font-black uppercase tracking-widest text-cyan-600 mb-6 flex items-center gap-2">
-                                    <span className="w-8 h-[2px] bg-cyan-600/30"></span> 02. Network Architecture
-                                </h3>
-                                <div className="space-y-6">
-                                    <div className="p-8 bg-slate-900 rounded-[2rem] shadow-xl" style={{ backgroundColor: '#0f172a' }}>
-                                        <p className="text-[9px] font-black text-cyan-400 uppercase tracking-widest mb-3">Provisioning Partner</p>
-                                        <p className="text-3xl font-black italic text-white uppercase">{editingLead.provider}</p>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-6">
-                                        <div className="p-6 bg-cyan-50 border border-cyan-100 rounded-2xl">
-                                            <p className="text-[9px] font-black text-cyan-600 uppercase tracking-widest mb-2">Service Package</p>
-                                            <p className="text-lg font-black text-slate-900 uppercase">{editingLead.plan_name}</p>
-                                        </div>
-                                        <div className="p-6 bg-slate-50 border border-slate-200 rounded-2xl text-center">
-                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Monthly Committed Rate</p>
-                                            <p className="text-xl font-black text-slate-950">{editingLead.price}</p>
-                                        </div>
-                                    </div>
-                                </div>
+                                <p style={{ fontSize: '10px', color: '#999', margin: '0 0 5px 0' }}>PLAN CONTRATADO</p>
+                                <p style={{ fontSize: '18px', fontWeight: 'bold', color: 'black', margin: 0 }}>{editingLead.plan_name}</p>
+                            </div>
+                            <div>
+                                <p style={{ fontSize: '10px', color: '#999', margin: '0 0 5px 0' }}>PAGO MENSUAL</p>
+                                <p style={{ fontSize: '18px', fontWeight: 'bold', color: 'black', margin: 0 }}>{editingLead.price}</p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Document Verification Gallery */}
-                    <div className="space-y-10 mb-16">
-                        <h3 className="text-[10px] font-black uppercase tracking-widest text-cyan-600 mb-8 flex items-center gap-2">
-                            <span className="w-8 h-[2px] bg-cyan-600/30"></span> 03. Identity Validation (Government ID)
-                        </h3>
-                        <div className="grid grid-cols-2 gap-12">
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center px-4">
-                                    <p className="text-[9px] font-black uppercase text-slate-400 italic">Front Capture (A)</p>
-                                    <p className="text-[8px] font-bold text-slate-300">ISO-ID-V1</p>
-                                </div>
-                                <div className="aspect-[1.58] rounded-[2rem] border-2 border-slate-100 bg-slate-50 overflow-hidden shadow-inner flex items-center justify-center">
+                    {/* Section 03: Documents */}
+                    <div style={{ marginBottom: '40px', pageBreakInside: 'avoid' }}>
+                        <h3 style={{ fontSize: '12px', fontWeight: '900', borderLeft: '4px solid #0284c7', paddingLeft: '15px', color: '#0284c7', marginBottom: '20px' }}>03. EVIDENCIA DOCUMENTAL (INE)</h3>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+                            <div style={{ textAlign: 'center' }}>
+                                <p style={{ fontSize: '10px', color: '#666', marginBottom: '10px' }}>ANVERSO (FRONTAL)</p>
+                                <div style={{ border: '1px solid #ddd', borderRadius: '10px', overflow: 'hidden', height: '200px', background: '#fafafa' }}>
                                     {editingLead.ine_anverso ? (
-                                        <img src={editingLead.ine_anverso} className="w-full h-full object-cover" alt="ID FRONT" />
+                                        <img src={editingLead.ine_anverso} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="INE Front" />
                                     ) : (
-                                        <div className="text-slate-200 font-black italic text-[12px] uppercase">Image Evidence Pending</div>
+                                        <p style={{ marginTop: '90px', color: '#ccc' }}>SIN IMAGEN</p>
                                     )}
                                 </div>
                             </div>
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center px-4">
-                                    <p className="text-[9px] font-black uppercase text-slate-400 italic">Reverse Capture (B)</p>
-                                    <p className="text-[8px] font-bold text-slate-300">ISO-ID-V2</p>
-                                </div>
-                                <div className="aspect-[1.58] rounded-[2rem] border-2 border-slate-100 bg-slate-50 overflow-hidden shadow-inner flex items-center justify-center">
+                            <div style={{ textAlign: 'center' }}>
+                                <p style={{ fontSize: '10px', color: '#666', marginBottom: '10px' }}>REVERSO (TRASERO)</p>
+                                <div style={{ border: '1px solid #ddd', borderRadius: '10px', overflow: 'hidden', height: '200px', background: '#fafafa' }}>
                                     {editingLead.ine_reverso ? (
-                                        <img src={editingLead.ine_reverso} className="w-full h-full object-cover" alt="ID BACK" />
+                                        <img src={editingLead.ine_reverso} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="INE Back" />
                                     ) : (
-                                        <div className="text-slate-200 font-black italic text-[12px] uppercase">Image Evidence Pending</div>
+                                        <p style={{ marginTop: '90px', color: '#ccc' }}>SIN IMAGEN</p>
                                     )}
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Infrastructure Deployment Notes */}
-                    <div className="space-y-8">
-                        <h3 className="text-[10px] font-black uppercase tracking-widest text-cyan-600 mb-6 flex items-center gap-2">
-                            <span className="w-8 h-[2px] bg-cyan-600/30"></span> 04. Tactical Deployment Notes
-                        </h3>
-                        <div className="p-10 rounded-[3rem] bg-slate-50 border-2 border-slate-100 relative overflow-hidden">
-                            <div className="absolute top-0 right-10 flex gap-1">
-                                <div className="w-1 h-6 bg-cyan-600/10"></div>
-                                <div className="w-1 h-10 bg-cyan-600/20"></div>
-                                <div className="w-1 h-4 bg-cyan-600/10"></div>
-                            </div>
-                            <p className="text-[13px] font-bold text-slate-800 uppercase italic leading-loose whitespace-pre-wrap tracking-tight">
-                                {editingLead.referencias_hogar || "No technical perimeter references documented for this installation site."}
+                    {/* Section 04: References */}
+                    <div style={{ pageBreakInside: 'avoid' }}>
+                        <h3 style={{ fontSize: '12px', fontWeight: '900', borderLeft: '4px solid #0284c7', paddingLeft: '15px', color: '#0284c7', marginBottom: '20px' }}>04. REFERENCIAS DE INSTALACIÓN</h3>
+                        <div style={{ border: '2px solid #eee', borderRadius: '15px', padding: '25px', background: '#fcfcfc' }}>
+                            <p style={{ fontSize: '14px', lineHeight: '1.6', color: 'black', margin: 0 }}>
+                                {editingLead.referencias_hogar || "No se registraron referencias específicas."}
                             </p>
                         </div>
                     </div>
 
-                    {/* Footer Certification */}
-                    <div className="absolute bottom-12 left-12 right-12 border-t border-slate-100 pt-10 flex justify-between items-end text-slate-400">
-                        <div className="space-y-4">
-                            <p className="text-[8px] font-black uppercase tracking-[0.3em] text-slate-300">Cryptographically Signed Log</p>
-                            <p className="text-[7px] font-mono break-all max-w-sm opacity-30 uppercase font-black tracking-tighter">
-                                {Buffer.from(editingLead.id + editingLead.full_name).toString('hex').slice(0, 128)}
-                            </p>
-                            <div className="flex items-center gap-4 mt-8">
-                                <div className="uppercase text-[10px] font-black text-slate-900 border-b-2 border-slate-900 pb-1 italic">
-                                    FiberGravity Network Certification
-                                </div>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <div className="w-32 h-32 border border-slate-100 rounded-full flex flex-col items-center justify-center mb-6 opacity-30">
-                                <span className="text-[8px] font-black uppercase">Authentication</span>
-                                <div className="w-16 h-[1px] bg-slate-200 my-1"></div>
-                                <span className="text-[10px] font-black text-slate-200 rotate-12">SECURED</span>
-                            </div>
-                            <p className="text-[9px] font-black uppercase tracking-widest">Document Status: <span className="text-cyan-600">CERTIFIED</span></p>
-                        </div>
+                    {/* Footer */}
+                    <div style={{ borderTop: '1px solid #eee', marginTop: '60px', paddingTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <p style={{ fontSize: '9px', color: '#999' }}>© 2026 FIBERGRAVITY • DOCUMENTO DE USO CONFIDENCIAL</p>
+                        <p style={{ fontSize: '9px', fontWeight: 'bold', color: 'black' }}>NOC - INFRASTRUCTURE OPERATIONS</p>
                     </div>
                 </div>
             )}
