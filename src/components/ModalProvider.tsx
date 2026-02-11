@@ -8,6 +8,8 @@ import { TelmexGamerModal } from "./ui/TelmexGamerModal";
 import { ProviderGamerModal } from "./ui/ProviderGamerModal";
 import { CategoryModal, PlanCategory } from "./ui/CategoryModal";
 
+import { RealTimeSpeedTestModal } from "./ui/RealTimeSpeedTestModal";
+
 interface ModalContextType {
     openModal: (planName?: string) => void;
     openSupportModal: () => void;
@@ -15,6 +17,7 @@ interface ModalContextType {
     openGamerModal: () => void;
     openProviderGamerModal: (provider: "Totalplay" | "Megacable" | "Telcel" | "Impactel/Cablecom") => void;
     openCategoryModal: (category: PlanCategory, providerName: string) => void;
+    openSpeedTestModal: () => void;
     closeModal: () => void;
 }
 
@@ -28,6 +31,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
     const [isProviderGamerOpen, setIsProviderGamerOpen] = useState(false);
     const [selectedProvider, setSelectedProvider] = useState<"Totalplay" | "Megacable" | "Telcel" | "Impactel/Cablecom" | undefined>(undefined);
     const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+    const [isSpeedTestOpen, setIsSpeedTestOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<PlanCategory | undefined>(undefined);
     const [selectedProviderName, setSelectedProviderName] = useState<string | undefined>(undefined);
 
@@ -35,7 +39,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
     const [planName, setPlanName] = useState<string | undefined>(undefined);
     const [playerData, setPlayerData] = useState<{ name: string, url: string } | undefined>(undefined);
 
-    const isAnyModalOpen = isContractOpen || isSupportOpen || isPlayerOpen || isGamerOpen || isProviderGamerOpen || isCategoryOpen;
+    const isAnyModalOpen = isContractOpen || isSupportOpen || isPlayerOpen || isGamerOpen || isProviderGamerOpen || isCategoryOpen || isSpeedTestOpen;
 
     const openModal = (plan?: string) => {
         setPlanName(plan);
@@ -72,11 +76,13 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
         window.history.pushState({ modal: "category-modal" }, "");
     };
 
+    const openSpeedTestModal = () => {
+        setIsSpeedTestOpen(true);
+        window.history.pushState({ modal: "speedtest" }, "");
+    };
+
     const closeModal = () => {
         if (isAnyModalOpen) {
-            // If the modal was closed via UI (not back button), we need to go back in history
-            // to remove the modal state we pushed, so the user doesn't have an extra "back" to click.
-            // Check if there is a state in history for the modal
             if (window.history.state && window.history.state.modal) {
                 window.history.back();
             }
@@ -87,6 +93,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
         setIsGamerOpen(false);
         setIsProviderGamerOpen(false);
         setIsCategoryOpen(false);
+        setIsSpeedTestOpen(false);
     };
 
     // Handle browser back button (popstate)
@@ -99,6 +106,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
             setIsGamerOpen(false);
             setIsProviderGamerOpen(false);
             setIsCategoryOpen(false);
+            setIsSpeedTestOpen(false);
         };
 
         window.addEventListener("popstate", handlePopState);
@@ -106,7 +114,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     return (
-        <ModalContext.Provider value={{ openModal, openSupportModal, openPlayerModal, openGamerModal, openProviderGamerModal, openCategoryModal, closeModal }}>
+        <ModalContext.Provider value={{ openModal, openSupportModal, openPlayerModal, openGamerModal, openProviderGamerModal, openCategoryModal, openSpeedTestModal, closeModal }}>
             {children}
             <ContractModal isOpen={isContractOpen} onClose={closeModal} planName={planName} />
             <SupportTicketModal isOpen={isSupportOpen} onClose={closeModal} />
@@ -132,6 +140,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
                     providerName={selectedProviderName}
                 />
             )}
+            <RealTimeSpeedTestModal isOpen={isSpeedTestOpen} onClose={closeModal} />
         </ModalContext.Provider>
     );
 };

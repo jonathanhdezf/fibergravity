@@ -3,9 +3,11 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { GlassCard } from "../ui/GlassCard";
-import { Gauge, ArrowUpRight } from "lucide-react";
+import { Gauge, ArrowUpRight, RefreshCw } from "lucide-react";
+import { useModal } from "../ModalProvider";
 
 export const SpeedTest = () => {
+    const { openSpeedTestModal } = useModal();
     const [speed, setSpeed] = useState(0);
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true });
@@ -59,6 +61,15 @@ export const SpeedTest = () => {
                         <p className="text-slate-400 text-lg mb-8">
                             Mide el rendimiento real de tu proovedor actual. Como broker neutral, te ayudamos a auditar si estás recibiendo lo que pagas para recomendarte una alternativa superior si es necesario.
                         </p>
+                        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                            <button
+                                onClick={() => openSpeedTestModal()}
+                                className="px-8 py-4 rounded-2xl bg-neon-cyan/10 border border-neon-cyan/30 text-neon-cyan font-black italic uppercase tracking-widest hover:bg-neon-cyan hover:text-black transition-all shadow-[0_0_20px_rgba(0,243,255,0.1)] active:scale-95 flex items-center justify-center gap-3"
+                            >
+                                <RefreshCw className="w-5 h-5" />
+                                Iniciar Auditoría Live
+                            </button>
+                        </div>
                         <div className="flex flex-col gap-4">
                             <div className="flex items-center gap-3">
                                 <ArrowUpRight className="text-neon-cyan" />
