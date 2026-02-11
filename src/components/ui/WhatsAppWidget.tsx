@@ -3,12 +3,16 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, User, ShieldCheck, Zap } from "lucide-react";
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { GlassCard } from "./GlassCard";
 
 export const WhatsAppWidget = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [showBadge, setShowBadge] = useState(false);
     const [showTooltip, setShowTooltip] = useState(false);
+    const pathname = usePathname();
+
+    const isAdminPage = pathname?.startsWith('/admin');
 
     const phoneNumber = "2311024672";
     const message = encodeURIComponent("Este es un mensaje enviado desde el boton *mensaje directo* de tu sitio web");
@@ -37,6 +41,8 @@ export const WhatsAppWidget = () => {
         setShowBadge(false);
         setShowTooltip(false);
     };
+
+    if (isAdminPage) return null;
 
     return (
         <div className="fixed bottom-8 right-8 z-[10000] flex flex-col items-end gap-4">
@@ -158,8 +164,8 @@ export const WhatsAppWidget = () => {
                 onClick={toggleChat}
                 title={isOpen ? "Cerrar menú de contacto" : "Contactar por WhatsApp"}
                 className={`relative w-16 h-16 rounded-3xl flex items-center justify-center shadow-2xl transition-all duration-500 ${isOpen
-                        ? "bg-slate-900 border border-white/10 text-white shadow-white/5"
-                        : "bg-green-500 text-white shadow-green-500/20 hover:shadow-green-500/40"
+                    ? "bg-slate-900 border border-white/10 text-white shadow-white/5"
+                    : "bg-green-500 text-white shadow-green-500/20 hover:shadow-green-500/40"
                     }`}
             >
                 <AnimatePresence mode="wait">

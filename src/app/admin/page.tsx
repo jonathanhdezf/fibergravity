@@ -772,16 +772,9 @@ export default function PremiumAdminDashboard() {
                                                                 </span>
                                                             </div>
                                                             <div className="flex items-center gap-3 text-xs text-slate-500 font-bold uppercase tracking-widest">
-                                                                <button
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        window.open(`https://wa.me/52${lead.phone.replace(/\D/g, '')}`, '_blank');
-                                                                    }}
-                                                                    className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/10 hover:bg-emerald-500 hover:text-white transition-all group"
-                                                                >
-                                                                    <MessageCircle className="w-3 h-3" />
-                                                                    <span>{lead.phone}</span>
-                                                                </button>
+                                                                <span className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-500/5 text-emerald-600/60 border border-white/5 font-mono">
+                                                                    {lead.phone}
+                                                                </span>
                                                                 <div className="w-1 h-1 rounded-full bg-slate-700" />
                                                                 <span className="text-slate-400">{lead.location}</span>
                                                                 {lead.assigned_to && (
