@@ -38,7 +38,11 @@ import {
     Plus,
     Check,
     Shield,
-    Download
+    Download,
+    MessageCircle,
+    FileText,
+    Printer,
+    FileUp
 } from "lucide-react";
 import {
     AreaChart,
@@ -609,7 +613,16 @@ export default function PremiumAdminDashboard() {
                                                             </span>
                                                         </div>
                                                         <div className="flex items-center gap-3 text-xs text-slate-500 font-bold uppercase tracking-widest">
-                                                            <span>{lead.phone}</span>
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    window.open(`https://wa.me/52${lead.phone.replace(/\D/g, '')}`, '_blank');
+                                                                }}
+                                                                className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/10 hover:bg-emerald-500 hover:text-white transition-all group"
+                                                            >
+                                                                <MessageCircle className="w-3 h-3" />
+                                                                <span>{lead.phone}</span>
+                                                            </button>
                                                             <div className="w-1 h-1 rounded-full bg-slate-700" />
                                                             <span className="text-slate-400">{lead.location}</span>
                                                             {(lead.ine_anverso || lead.referencias_hogar) && (
@@ -1008,131 +1021,217 @@ export default function PremiumAdminDashboard() {
 
             {/* MODALS SECTION */}
             <AnimatePresence>
-                {/* 1. EDIT LEAD MODAL */}
                 {editingLead && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingLead(null)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
-                        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-2xl">
-                            <GlassCard className="p-10 border-white/10 !bg-slate-900 shadow-2xl">
-                                <div className="flex justify-between items-center mb-10">
-                                    <h2 className="text-2xl font-black italic">MODIFICAR <span className="text-neon-cyan neon-text-cyan underline decoration-white/10 underline-offset-8">EXPEDIENTE</span></h2>
-                                    <button onClick={() => setEditingLead(null)} title="Cerrar" className="p-2 hover:bg-white/5 rounded-lg transition-all"><X className="w-6 h-6" /></button>
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="relative w-full max-w-3xl max-h-[90vh] flex flex-col"
+                        >
+                            <GlassCard className="border-white/10 !bg-slate-950/90 shadow-2xl flex flex-col overflow-hidden p-0 rounded-[2.5rem]">
+                                {/* FIXED HEADER */}
+                                <div className="p-8 pb-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                                    <div>
+                                        <h2 className="text-2xl font-black italic mb-1 uppercase tracking-tighter">
+                                            MODIFICAR <span className="text-neon-cyan neon-text-cyan">EXPEDIENTE</span>
+                                        </h2>
+                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">ID: {editingLead.id.split('-')[0]}</p>
+                                    </div>
+                                    <div className="flex gap-4">
+                                        <button
+                                            onClick={() => window.print()}
+                                            title="Descargar Dossier"
+                                            className="p-3 bg-white/5 hover:bg-white/10 rounded-2xl text-slate-400 hover:text-white transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"
+                                        >
+                                            <Printer className="w-5 h-5" /> EXPEDIENTE
+                                        </button>
+                                        <button onClick={() => setEditingLead(null)} title="Cerrar" className="p-3 hover:bg-white/5 rounded-2xl transition-all text-slate-500 hover:text-white border border-transparent hover:border-white/10"><X className="w-6 h-6" /></button>
+                                    </div>
                                 </div>
-                                <form onSubmit={updateLeadData} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {/* ... content already there ... */}
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Nombre Completo</label>
-                                        <input
-                                            title="Nombre Completo"
-                                            placeholder="Nombre del Cliente"
-                                            value={editingLead.full_name}
-                                            onChange={(e) => setEditingLead({ ...editingLead, full_name: e.target.value })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all uppercase"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Teléfono</label>
-                                        <input
-                                            title="Teléfono"
-                                            placeholder="Número de contacto"
-                                            value={editingLead.phone}
-                                            onChange={(e) => setEditingLead({ ...editingLead, phone: e.target.value })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
-                                        />
-                                    </div>
-                                    <div className="space-y-2 md:col-span-2">
-                                        <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Ubicación / Barrio</label>
-                                        <input
-                                            title="Ubicación"
-                                            placeholder="Ciudad o Barrio"
-                                            value={editingLead.location}
-                                            onChange={(e) => setEditingLead({ ...editingLead, location: e.target.value })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all uppercase"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Plan Seleccionado</label>
-                                        <input
-                                            title="Nombre del Plan"
-                                            placeholder="Ej. Gamer 500MB"
-                                            value={editingLead.plan_name}
-                                            onChange={(e) => setEditingLead({ ...editingLead, plan_name: e.target.value })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all uppercase"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Precio</label>
-                                        <input
-                                            title="Precio"
-                                            placeholder="Costo mensual"
-                                            value={editingLead.price}
-                                            onChange={(e) => setEditingLead({ ...editingLead, price: e.target.value })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
-                                        />
-                                    </div>
-                                    {editingLead.status === 'rejected' && editingLead.rejection_reason && (
-                                        <div className="md:col-span-2 p-4 rounded-2xl bg-red-500/5 border border-red-500/10">
-                                            <label className="text-[9px] font-black uppercase text-red-500/60 ml-1">Motivo de Rechazo</label>
-                                            <p className="text-sm font-bold text-red-500/90 mt-1 italic uppercase">
-                                                {editingLead.rejection_reason}
-                                            </p>
-                                        </div>
-                                    )}
 
-                                    {/* SECCIÓN DE GESTIÓN (CONTACTANDO / COMPLETADO) */}
-                                    {(editingLead.status === 'contacting' || editingLead.status === 'completed' || editingLead.ine_anverso) && (
-                                        <div className="md:col-span-2 space-y-6 pt-6 border-t border-white/5">
-                                            <h3 className="text-xs font-black text-neon-cyan flex items-center gap-2">
-                                                <Shield className="w-4 h-4" /> DOCUMENTACIÓN OFICIAL
-                                            </h3>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div className="space-y-2">
-                                                    <label className="text-[9px] font-black uppercase text-slate-500 ml-2">INE (Anverso - URL)</label>
-                                                    <input
-                                                        title="INE Anverso"
-                                                        placeholder="URL de la imagen o archivo"
-                                                        value={editingLead.ine_anverso || ""}
-                                                        onChange={(e) => setEditingLead({ ...editingLead, ine_anverso: e.target.value })}
-                                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
-                                                    />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <label className="text-[9px] font-black uppercase text-slate-500 ml-2">INE (Reverso - URL)</label>
-                                                    <input
-                                                        title="INE Reverso"
-                                                        placeholder="URL de la imagen o archivo"
-                                                        value={editingLead.ine_reverso || ""}
-                                                        onChange={(e) => setEditingLead({ ...editingLead, ine_reverso: e.target.value })}
-                                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
-                                                    />
-                                                </div>
-                                                <div className="space-y-2 md:col-span-2">
-                                                    <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Comprobante de Domicilio (URL)</label>
-                                                    <input
-                                                        title="Comprobante Domicilio"
-                                                        placeholder="URL del comprobante"
-                                                        value={editingLead.comprobante_domicilio || ""}
-                                                        onChange={(e) => setEditingLead({ ...editingLead, comprobante_domicilio: e.target.value })}
-                                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
-                                                    />
-                                                </div>
-                                                <div className="space-y-2 md:col-span-2">
-                                                    <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Referencias del Hogar / Casa</label>
-                                                    <textarea
-                                                        title="Referencias del Hogar"
-                                                        placeholder="Ej. Casa azul con portón negro, frente al parque..."
-                                                        value={editingLead.referencias_hogar || ""}
-                                                        onChange={(e) => setEditingLead({ ...editingLead, referencias_hogar: e.target.value })}
-                                                        rows={3}
-                                                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all resize-none uppercase"
-                                                    />
-                                                </div>
+                                {/* SCROLLABLE BODY */}
+                                <form onSubmit={updateLeadData} className="flex-1 overflow-y-auto custom-scrollbar p-8">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="space-y-4">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Nombre Completo</label>
+                                                <input
+                                                    title="Nombre Completo"
+                                                    placeholder="Nombre del Cliente"
+                                                    value={editingLead.full_name}
+                                                    onChange={(e) => setEditingLead({ ...editingLead, full_name: e.target.value })}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-neon-cyan focus:outline-none transition-all uppercase"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Teléfono</label>
+                                                <input
+                                                    title="Teléfono"
+                                                    placeholder="Número de contacto"
+                                                    value={editingLead.phone}
+                                                    onChange={(e) => setEditingLead({ ...editingLead, phone: e.target.value })}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                                />
                                             </div>
                                         </div>
-                                    )}
-                                    <div className="md:col-span-2 mt-6">
-                                        <NeonButton type="submit" className="w-full py-4 !tracking-[0.5em]">ACTUALIZAR REGISTRO</NeonButton>
+
+                                        <div className="space-y-4">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Plan Seleccionado</label>
+                                                <input
+                                                    title="Nombre del Plan"
+                                                    placeholder="Ej. Gamer 500MB"
+                                                    value={editingLead.plan_name}
+                                                    onChange={(e) => setEditingLead({ ...editingLead, plan_name: e.target.value })}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-neon-cyan focus:outline-none transition-all uppercase"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Precio</label>
+                                                <input
+                                                    title="Precio"
+                                                    placeholder="Costo mensual"
+                                                    value={editingLead.price}
+                                                    onChange={(e) => setEditingLead({ ...editingLead, price: e.target.value })}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2 md:col-span-2">
+                                            <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Ubicación / Barrio</label>
+                                            <input
+                                                title="Ubicación"
+                                                placeholder="Ciudad o Barrio"
+                                                value={editingLead.location}
+                                                onChange={(e) => setEditingLead({ ...editingLead, location: e.target.value })}
+                                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-neon-cyan focus:outline-none transition-all uppercase"
+                                            />
+                                        </div>
+
+                                        {editingLead.status === 'rejected' && editingLead.rejection_reason && (
+                                            <div className="md:col-span-2 p-6 rounded-[2rem] bg-red-500/5 border border-red-500/10">
+                                                <label className="text-[9px] font-black uppercase text-red-500/60 ml-1">Motivo de Rechazo</label>
+                                                <p className="text-sm font-bold text-red-500/90 mt-1 italic uppercase underline decoration-red-500/20 underline-offset-4">
+                                                    {editingLead.rejection_reason}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {/* DOCUMENTACIÓN DINÁMICA */}
+                                        {(editingLead.status === 'contacting' || editingLead.status === 'completed' || editingLead.ine_anverso) && (
+                                            <div className="md:col-span-2 space-y-8 pt-8 border-t border-white/5">
+                                                <div className="flex items-center justify-between">
+                                                    <h3 className="text-xs font-black text-neon-cyan flex items-center gap-3">
+                                                        <Shield className="w-5 h-5" /> ARCHIVO OFICIAL DEL CLIENTE
+                                                    </h3>
+                                                    <span className="text-[8px] font-black bg-neon-cyan/10 text-neon-cyan px-2 py-1 rounded border border-neon-cyan/20">Fase: GESTIÓN</span>
+                                                </div>
+
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                    {/* INE ANVERSO */}
+                                                    <div className="space-y-4">
+                                                        <label className="text-[10px] font-black uppercase text-slate-400 ml-2">INE (Anverso)</label>
+                                                        <div className="relative group">
+                                                            {editingLead.ine_anverso ? (
+                                                                <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 bg-black/40">
+                                                                    <img src={editingLead.ine_anverso} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" alt="INE Anverso" />
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => setEditingLead({ ...editingLead, ine_anverso: "" })}
+                                                                        className="absolute top-4 right-4 p-2 bg-black/80 rounded-xl text-white opacity-0 group-hover:opacity-100 transition-all"
+                                                                    >
+                                                                        <Trash2 className="w-4 h-4" />
+                                                                    </button>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="aspect-video rounded-3xl border-2 border-dashed border-white/5 bg-white/[0.02] flex flex-col items-center justify-center gap-3 group-hover:border-neon-cyan/30 transition-all">
+                                                                    <FileUp className="w-8 h-8 text-slate-700" />
+                                                                    <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest text-center px-4">Ingresa URL o Archivo</p>
+                                                                </div>
+                                                            )}
+                                                            <input
+                                                                title="INE Anverso"
+                                                                placeholder="ID / URL de Imagen..."
+                                                                value={editingLead.ine_anverso || ""}
+                                                                onChange={(e) => setEditingLead({ ...editingLead, ine_anverso: e.target.value })}
+                                                                className="mt-4 w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-[10px] focus:border-neon-cyan focus:outline-none placeholder:text-slate-700"
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* INE REVERSO */}
+                                                    <div className="space-y-4">
+                                                        <label className="text-[10px] font-black uppercase text-slate-400 ml-2">INE (Reverso)</label>
+                                                        <div className="relative group">
+                                                            {editingLead.ine_reverso ? (
+                                                                <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 bg-black/40">
+                                                                    <img src={editingLead.ine_reverso} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" alt="INE Reverso" />
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => setEditingLead({ ...editingLead, ine_reverso: "" })}
+                                                                        className="absolute top-4 right-4 p-2 bg-black/80 rounded-xl text-white opacity-0 group-hover:opacity-100 transition-all"
+                                                                    >
+                                                                        <Trash2 className="w-4 h-4" />
+                                                                    </button>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="aspect-video rounded-3xl border-2 border-dashed border-white/5 bg-white/[0.02] flex flex-col items-center justify-center gap-3 group-hover:border-neon-magenta/30 transition-all">
+                                                                    <FileUp className="w-8 h-8 text-slate-700" />
+                                                                    <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest text-center px-4">Ingresa URL o Archivo</p>
+                                                                </div>
+                                                            )}
+                                                            <input
+                                                                title="INE Reverso"
+                                                                placeholder="ID / URL de Imagen..."
+                                                                value={editingLead.ine_reverso || ""}
+                                                                onChange={(e) => setEditingLead({ ...editingLead, ine_reverso: e.target.value })}
+                                                                className="mt-4 w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-[10px] focus:border-neon-magenta focus:outline-none placeholder:text-slate-700"
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* COMPROBANTE DOMICILIO */}
+                                                    <div className="space-y-2 md:col-span-2">
+                                                        <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Comprobante de Domicilio</label>
+                                                        <div className="flex gap-4">
+                                                            <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                                                                <FileText className="w-8 h-8 text-slate-600" />
+                                                            </div>
+                                                            <input
+                                                                title="Comprobante Domicilio"
+                                                                placeholder="Ingresa link de verificación o URL del documento..."
+                                                                value={editingLead.comprobante_domicilio || ""}
+                                                                onChange={(e) => setEditingLead({ ...editingLead, comprobante_domicilio: e.target.value })}
+                                                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* REFERENCIAS */}
+                                                    <div className="space-y-2 md:col-span-2">
+                                                        <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Notas y Referencias del Hogar</label>
+                                                        <textarea
+                                                            title="Referencias del Hogar"
+                                                            placeholder="Describe detalladamente la fachada, puntos de referencia, entre qué calles se encuentra..."
+                                                            value={editingLead.referencias_hogar || ""}
+                                                            onChange={(e) => setEditingLead({ ...editingLead, referencias_hogar: e.target.value })}
+                                                            rows={3}
+                                                            className="w-full bg-white/5 border border-white/10 rounded-3xl px-6 py-5 text-sm focus:border-neon-cyan focus:outline-none transition-all resize-none uppercase leading-relaxed font-bold tracking-tight bg-gradient-to-br from-white/[0.02] to-transparent"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* FIXED FOOTER */}
+                                    <div className="mt-12 sticky bottom-0 bg-slate-950/80 backdrop-blur-md pt-6 pb-2 border-t border-white/5 -mx-8 -mb-8 px-8">
+                                        <NeonButton type="submit" className="w-full py-5 !tracking-[0.5em] text-xs font-black italic">
+                                            SINCRONIZAR CAMBIOS DE EXPEDIENTE
+                                        </NeonButton>
                                     </div>
                                 </form>
                             </GlassCard>
