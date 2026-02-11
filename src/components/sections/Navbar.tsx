@@ -85,11 +85,16 @@ export const Navbar = () => {
 
             if (element) {
                 e.preventDefault();
-                element.scrollIntoView({ behavior: 'smooth' });
                 closeMenu();
-                if (window.history.pushState) {
-                    window.history.pushState(null, '', href);
-                }
+
+                // Allow time for menu to close and body scroll-lock to release
+                setTimeout(() => {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                    // Update URL hash without jump
+                    if (window.history.pushState) {
+                        window.history.pushState(null, '', href);
+                    }
+                }, 350);
             } else {
                 closeMenu();
             }
@@ -115,9 +120,10 @@ export const Navbar = () => {
                         width: scrolled ? "92%" : "98%",
                         y: scrolled ? 0 : 0,
                     }}
-                    className={`max-w-7xl flex items-center justify-between p-2 md:p-3 rounded-full border shadow-2xl pointer-events-auto transition-all duration-300 ${scrolled
-                        ? "bg-black/70 backdrop-blur-xl border-white/10 shadow-neon-cyan/5"
-                        : "bg-black/30 backdrop-blur-md border-white/5"
+                    className={`max-w-7xl flex items-center justify-between p-2 md:p-3 rounded-full border shadow-2xl pointer-events-auto transition-all duration-300 ${mobileMenu ? "opacity-0 pointer-events-none" : "opacity-100 pointer-events-auto"
+                        } ${scrolled
+                            ? "bg-black/70 backdrop-blur-xl border-white/10 shadow-neon-cyan/5"
+                            : "bg-black/30 backdrop-blur-md border-white/5"
                         }`}
                 >
                     {/* Logo Area */}
@@ -208,8 +214,16 @@ export const Navbar = () => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="fixed inset-0 z-[9998] lg:hidden bg-black/98 backdrop-blur-2xl flex flex-col pt-32 px-6 pb-12 overflow-y-auto"
+                        className="fixed inset-0 z-[11000] lg:hidden bg-black/98 backdrop-blur-2xl flex flex-col pt-32 px-6 pb-12 overflow-y-auto"
                     >
+                        {/* Mobile Dedicated Close Button */}
+                        <button
+                            onClick={closeMenu}
+                            title="Cerrar Menú"
+                            className="absolute top-6 right-8 p-3 hover:bg-white/5 rounded-full text-white/50 hover:text-white transition-all transform active:scale-95 z-[11001]"
+                        >
+                            <X className="w-8 h-8" />
+                        </button>
                         <div className="w-full max-w-sm mx-auto flex flex-col gap-2">
                             {navLinks.map((link, i) => (
                                 <div key={link.name} className="flex flex-col gap-2">
@@ -219,7 +233,7 @@ export const Navbar = () => {
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: i * 0.04 }}
                                         onClick={(e) => handleLinkClick(e, link.href)}
-                                        className="flex items-center justify-between p-5 rounded-3xl bg-white/[0.03] border border-white/5 active:bg-white/10 active:scale-[0.98] transition-all no-underline group"
+                                        className="relative z-20 flex items-center justify-between p-5 rounded-3xl bg-white/[0.03] border border-white/5 active:bg-white/10 active:scale-[0.98] transition-all no-underline group"
                                     >
                                         <div className="flex items-center gap-5">
                                             <span className="text-white/20 font-black text-lg group-hover:text-neon-cyan transition-colors">0{i + 1}</span>
