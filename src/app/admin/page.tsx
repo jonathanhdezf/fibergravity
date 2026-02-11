@@ -31,7 +31,14 @@ import {
     XCircle,
     Save,
     X,
-    Menu
+    Menu,
+    Package,
+    Settings,
+    Database,
+    Plus,
+    Check,
+    Shield,
+    Download
 } from "lucide-react";
 import {
     AreaChart,
@@ -65,6 +72,30 @@ interface Lead {
     rejection_reason?: string;
 }
 
+interface Provider {
+    id: string;
+    name: string;
+    logo_url: string;
+    website?: string;
+    description?: string;
+}
+
+interface Plan {
+    id: string;
+    provider_id: string;
+    name: string;
+    type: string;
+    category_name: string;
+    speed: string;
+    price: string;
+    features: string[];
+    recommendation?: string;
+    ranking_score: number;
+    color_scheme: string;
+    icon_slug: string;
+    is_active: boolean;
+}
+
 interface Visit {
     id: string;
     created_at: string;
@@ -82,7 +113,9 @@ export default function PremiumAdminDashboard() {
     const [loading, setLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [password, setPassword] = useState("");
-    const [activeTab, setActiveTab] = useState<"overview" | "leads" | "traffic">("overview");
+    const [activeTab, setActiveTab] = useState<"overview" | "leads" | "traffic" | "inventory" | "integrations">("overview");
+    const [providers, setProviders] = useState<Provider[]>([]);
+    const [plans, setPlans] = useState<Plan[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [lastRefresh, setLastRefresh] = useState(new Date());
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -90,6 +123,8 @@ export default function PremiumAdminDashboard() {
 
     // New States for Lead Management
     const [editingLead, setEditingLead] = useState<Lead | null>(null);
+    const [editingProvider, setEditingProvider] = useState<Provider | null>(null);
+    const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
     const [rejectionModal, setRejectionModal] = useState<{ isOpen: boolean, id: string, reason: string }>({ isOpen: false, id: "", reason: "" });
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
@@ -103,13 +138,17 @@ export default function PremiumAdminDashboard() {
 
     const fetchData = async () => {
         setLoading(true);
-        const [leadsRes, visitsRes] = await Promise.all([
+        const [leadsRes, visitsRes, providersRes, plansRes] = await Promise.all([
             supabase.from('leads').select('*').order('created_at', { ascending: false }),
-            supabase.from('site_visits').select('*').order('created_at', { ascending: false }).limit(1000)
+            supabase.from('site_visits').select('*').order('created_at', { ascending: false }).limit(1000),
+            supabase.from('providers').select('*').order('name'),
+            supabase.from('plans').select('*').order('ranking_score', { ascending: false })
         ]);
 
         if (leadsRes.data) setLeads(leadsRes.data);
         if (visitsRes.data) setVisits(visitsRes.data);
+        if (providersRes.data) setProviders(providersRes.data);
+        if (plansRes.data) setPlans(plansRes.data);
 
         setLoading(false);
         setLastRefresh(new Date());
@@ -154,6 +193,20 @@ export default function PremiumAdminDashboard() {
             setEditingLead(null);
         }
     };
+
+    const deleteItem = async (table: string, id: string) => {
+        const { error } = await supabase.from(table).delete().eq('id', id);
+        if (!error) fetchData();
+    };
+
+    // Filtered Content
+    const filteredPlans = useMemo(() => {
+        return plans.filter(p =>
+            p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            p.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            providers.find(prov => prov.id === p.provider_id)?.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }, [plans, searchQuery, providers]);
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
@@ -241,11 +294,14 @@ export default function PremiumAdminDashboard() {
                             {[
                                 { id: 'overview', icon: TrendingUp, label: 'Overview' },
                                 { id: 'leads', icon: Users, label: 'Leads Hub' },
-                                { id: 'traffic', icon: Globe, label: 'Live Traffic' }
+                                { id: 'inventory', icon: Package, label: 'Inventario' },
+                                { id: 'traffic', icon: Globe, label: 'Live Traffic' },
+                                { id: 'integrations', icon: Settings, label: 'Sistemas' }
                             ].map((tab) => (
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id as any)}
+                                    title={tab.label}
                                     className={`flex items-center gap-2 px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-white/10 text-neon-cyan' : 'text-slate-500 hover:text-white hover:bg-white/5'
                                         }`}
                                 >
@@ -265,12 +321,13 @@ export default function PremiumAdminDashboard() {
                         {/* Mobile Menu Toggle */}
                         <button
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                            title="Menu"
                             className="md:hidden p-3 rounded-xl bg-white/5 text-white"
                         >
                             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                         </button>
 
-                        <button onClick={() => setIsAuthenticated(false)} className="p-3 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all">
+                        <button onClick={() => setIsAuthenticated(false)} title="Cerrar Sesión" className="p-3 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all">
                             <LogOut className="w-5 h-5" />
                         </button>
                     </div>
@@ -290,7 +347,9 @@ export default function PremiumAdminDashboard() {
                             {[
                                 { id: 'overview', icon: TrendingUp, label: 'Overview' },
                                 { id: 'leads', icon: Users, label: 'Leads Hub' },
-                                { id: 'traffic', icon: Globe, label: 'Live Traffic' }
+                                { id: 'inventory', icon: Package, label: 'Inventario' },
+                                { id: 'traffic', icon: Globe, label: 'Live Traffic' },
+                                { id: 'integrations', icon: Settings, label: 'Sistemas' }
                             ].map((tab) => (
                                 <button
                                     key={tab.id}
@@ -401,8 +460,8 @@ export default function PremiumAdminDashboard() {
                     {activeTab === 'leads' && (
                         <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="space-y-6">
                             <GlassCard className="p-8 border-white/5 !bg-black/40 text-black">
-                                <div className="flex flex-col md:flex-row justify-between gap-6 mb-10">
-                                    <div className="relative group w-full md:w-96">
+                                <div className="flex flex-col lg:flex-row justify-between gap-6 mb-10">
+                                    <div className="relative group w-full lg:w-96">
                                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                                         <input
                                             placeholder="Audit Search (Name, Phone, Location)..."
@@ -425,6 +484,23 @@ export default function PremiumAdminDashboard() {
                                             </button>
                                         ))}
                                     </div>
+                                    <button
+                                        onClick={() => {
+                                            const csv = [
+                                                ['ID', 'Fecha', 'Nombre', 'Telefono', 'Ubicacion', 'Categoria', 'Proveedor', 'Plan', 'Precio', 'Status'].join(','),
+                                                ...leads.map(l => [l.id, l.created_at, l.full_name, l.phone, l.location, l.category, l.provider, l.plan_name, l.price, l.status].join(','))
+                                            ].join('\n');
+                                            const blob = new Blob([csv], { type: 'text/csv' });
+                                            const url = window.URL.createObjectURL(blob);
+                                            const a = document.createElement('a');
+                                            a.href = url;
+                                            a.download = `leads_fibergravity_${new Date().toISOString().split('T')[0]}.csv`;
+                                            a.click();
+                                        }}
+                                        className="px-6 py-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-black uppercase tracking-widest text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all flex items-center gap-2"
+                                    >
+                                        <Download className="w-4 h-4" /> Exportar Leads
+                                    </button>
                                 </div>
 
                                 <div className="space-y-4">
@@ -515,18 +591,151 @@ export default function PremiumAdminDashboard() {
                                                             <Trash2 className="w-5 h-5" />
                                                         </button>
                                                     </div>
-
-                                                    {/* Rejection Reason Display */}
-                                                    {lead.status === 'rejected' && lead.rejection_reason && (
-                                                        <div className="mt-2 text-[10px] text-red-500 font-bold uppercase tracking-widest bg-red-500/5 p-2 rounded-lg border border-red-500/10">
-                                                            Razón: {lead.rejection_reason}
-                                                        </div>
-                                                    )}
                                                 </div>
                                             </motion.div>
                                         ))}
                                 </div>
                             </GlassCard>
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'inventory' && (
+                        <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="space-y-8">
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                <h2 className="text-2xl font-black italic">CATÁLOGO DE <span className="text-neon-cyan neon-text-cyan">SERVICIOS</span></h2>
+                                <NeonButton className="py-3 px-6 text-[10px]" onClick={fetchData}>
+                                    <RefreshCw className="w-3.5 h-3.5 mr-2" /> ACTUALIZAR DATOS
+                                </NeonButton>
+                            </div>
+
+                            <div className="grid grid-cols-1 xl:grid-cols-[1fr_2.5fr] gap-8">
+                                {/* Providers List */}
+                                <GlassCard className="p-6 border-white/5 !bg-black/40 h-fit text-black">
+                                    <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-6">Proveedores Activos</h3>
+                                    <div className="space-y-3">
+                                        {providers.map(p => (
+                                            <div key={p.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-10 h-10 rounded-xl bg-white/5 p-2 border border-white/5 flex items-center justify-center">
+                                                        {p.logo_url ? <img src={p.logo_url} alt={p.name} className="w-full h-full object-contain" /> : <Building2 className="w-5 h-5 text-slate-600" />}
+                                                    </div>
+                                                    <span className="font-bold text-sm text-white">{p.name}</span>
+                                                </div>
+                                                <div className="flex gap-1">
+                                                    <button
+                                                        onClick={() => setEditingProvider(p)}
+                                                        title="Editar Proveedor"
+                                                        className="opacity-0 group-hover:opacity-100 p-2 hover:bg-white/5 rounded-lg transition-all text-slate-500 hover:text-white"
+                                                    >
+                                                        <Edit2 className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => deleteItem('providers', p.id)}
+                                                        title="Eliminar Proveedor"
+                                                        className="opacity-0 group-hover:opacity-100 p-2 hover:bg-red-500/10 rounded-lg transition-all text-slate-500 hover:text-red-500"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <button className="w-full mt-6 py-4 rounded-2xl border border-dashed border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:border-neon-cyan hover:text-neon-cyan transition-all flex items-center justify-center gap-2">
+                                        <Plus className="w-4 h-4" /> Registrar Proveedor
+                                    </button>
+                                </GlassCard>
+
+                                {/* Plans Management */}
+                                <GlassCard className="p-8 border-white/5 !bg-black/40 text-black">
+                                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+                                        <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Gestión de Planes y Precios</h3>
+                                        <div className="flex gap-4 w-full md:w-auto">
+                                            <div className="relative group flex-1">
+                                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
+                                                <input
+                                                    placeholder="FILTRAR PLANES..."
+                                                    value={searchQuery}
+                                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-6 py-3 text-[10px] text-white focus:outline-none focus:border-neon-cyan transition-all font-black tracking-widest"
+                                                />
+                                            </div>
+                                            <button title="Nuevo Plan" className="p-3 bg-neon-cyan text-black rounded-xl hover:scale-105 transition-all">
+                                                <Plus className="w-5 h-5" />
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="overflow-x-auto -mx-2">
+                                        <table className="w-full text-left border-collapse min-w-[800px]">
+                                            <thead>
+                                                <tr className="border-b border-white/5">
+                                                    <th className="px-4 pb-4 text-[9px] font-black uppercase tracking-widest text-slate-600">Plan / Producto</th>
+                                                    <th className="px-4 pb-4 text-[9px] font-black uppercase tracking-widest text-slate-600">Tipo</th>
+                                                    <th className="px-4 pb-4 text-[9px] font-black uppercase tracking-widest text-slate-600 text-center">Ranking</th>
+                                                    <th className="px-4 pb-4 text-[9px] font-black uppercase tracking-widest text-slate-600">Precio</th>
+                                                    <th className="px-4 pb-4 text-[9px] font-black uppercase tracking-widest text-slate-600 text-right">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-white/[0.02]">
+                                                {filteredPlans.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan={5} className="py-20 text-center text-slate-600 font-bold uppercase text-[10px] tracking-widest italic">
+                                                            No hay planes que coincidan con la búsqueda.
+                                                        </td>
+                                                    </tr>
+                                                ) : (
+                                                    filteredPlans.map(plan => (
+                                                        <tr key={plan.id} className="group hover:bg-white/[0.01] transition-all">
+                                                            <td className="px-4 py-6">
+                                                                <div>
+                                                                    <p className="font-black italic text-lg text-white tracking-tighter mb-1">{plan.name}</p>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="text-[9px] font-bold text-slate-500 uppercase">{providers.find(p => p.id === plan.provider_id)?.name || 'Desconocido'}</span>
+                                                                        <div className="w-1 h-1 rounded-full bg-slate-800" />
+                                                                        <span className="text-[9px] font-bold text-slate-400">{plan.speed}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-4 py-6">
+                                                                <span className={`px-3 py-1 rounded-lg bg-white/5 border border-white/5 text-[9px] font-black uppercase tracking-widest text-neon-${plan.type === 'Gamer' ? 'cyan' : 'magenta'}`}>
+                                                                    {plan.type}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-4 py-6 text-center">
+                                                                <div className="inline-flex items-center gap-1.5 bg-white/5 px-2 py-1 rounded-lg border border-white/5">
+                                                                    <Activity className="w-3 h-3 text-emerald-500" />
+                                                                    <span className="text-[10px] font-black text-white">{plan.ranking_score}</span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-4 py-6">
+                                                                <span className="text-lg font-black italic text-white">{plan.price}</span>
+                                                            </td>
+                                                            <td className="px-4 py-6 text-right">
+                                                                <div className="flex justify-end gap-2">
+                                                                    <button
+                                                                        onClick={() => setEditingPlan(plan)}
+                                                                        title="Editar Plan"
+                                                                        className="p-3 rounded-xl bg-white/5 text-slate-500 hover:text-white hover:bg-white/10 transition-all"
+                                                                    >
+                                                                        <Edit2 className="w-4 h-4" />
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => deleteItem('plans', plan.id)}
+                                                                        title="Eliminar Plan"
+                                                                        className="p-3 rounded-xl bg-red-500/5 text-red-900/50 hover:text-red-500 hover:bg-red-500/10 transition-all"
+                                                                    >
+                                                                        <Trash2 className="w-4 h-4" />
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </GlassCard>
+                            </div>
                         </motion.div>
                     )}
 
@@ -557,6 +766,53 @@ export default function PremiumAdminDashboard() {
                             </GlassCard>
                         </motion.div>
                     )}
+
+                    {activeTab === 'integrations' && (
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
+                            <h2 className="text-2xl font-black italic">SISTEMAS E <span className="text-neon-magenta neon-text-magenta">INTEGRACIONES</span></h2>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {[
+                                    { name: 'WhatsApp Business', status: 'Connected', icon: Smartphone, desc: 'Notificaciones automáticas de leads y seguimiento directo de clientes.', color: 'emerald' },
+                                    { name: 'Provider APIs', status: 'Scanning', icon: RefreshCw, desc: 'Sincronización de disponibilidad y cobertura en tiempo real con carriers.', color: 'cyan' },
+                                    { name: 'Payment Gateway', status: 'Standby', icon: Shield, desc: 'Procesamiento de pagos seguro para suscripciones y servicios premium.', color: 'magenta' }
+                                ].map((int, i) => (
+                                    <GlassCard key={i} className="p-8 border-white/5 !bg-black/40 group hover:border-white/10 transition-all text-black">
+                                        <div className="flex justify-between items-start mb-8">
+                                            <div className="p-5 rounded-2xl bg-white/5 border border-white/5 group-hover:border-white/10 transition-all">
+                                                <int.icon className={`w-8 h-8 text-${int.color === 'emerald' ? 'emerald-500' : int.color === 'cyan' ? 'neon-cyan' : 'neon-magenta'}`} />
+                                            </div>
+                                            <div className="flex flex-col items-end">
+                                                <span className={`text-[9px] font-black px-3 py-1 rounded-lg bg-${int.color === 'emerald' ? 'emerald' : int.color === 'cyan' ? 'cyan' : 'red'}-500/10 text-${int.color === 'emerald' ? 'emerald' : int.color === 'cyan' ? 'cyan' : 'red'}-500 uppercase tracking-widest border border-current/20`}>
+                                                    {int.status}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <h4 className="text-2xl font-black italic text-white mb-2 tracking-tighter">{int.name}</h4>
+                                        <p className="text-xs text-slate-500 leading-relaxed mb-10 h-12">{int.desc}</p>
+                                        <button className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white hover:bg-white/10 hover:border-white/20 transition-all">
+                                            Configurar Protocolo
+                                        </button>
+                                    </GlassCard>
+                                ))}
+                            </div>
+
+                            <GlassCard className="p-10 border-white/5 !bg-red-500/5 text-black">
+                                <div className="flex flex-col md:flex-row items-center gap-10">
+                                    <div className="p-6 rounded-3xl bg-red-500/10 border border-red-500/20 shadow-2xl shadow-red-500/10">
+                                        <Database className="w-12 h-12 text-red-500" />
+                                    </div>
+                                    <div className="flex-1 text-center md:text-left">
+                                        <h4 className="text-2xl font-black italic text-white mb-2 uppercase tracking-tighter">Bóveda de Seguridad & Backups</h4>
+                                        <p className="text-sm text-slate-500 mb-0 leading-relaxed max-w-2xl">Protección perimetral de datos y respaldos automatizados cada 24 horas en nodos regionales redundantes para asegurar la continuidad sistemática de FiberGravity.</p>
+                                    </div>
+                                    <NeonButton variant="magenta" className="py-4 px-10 text-[10px] w-full md:w-auto">
+                                        VER LOGS DE SEGURIDAD
+                                    </NeonButton>
+                                </div>
+                            </GlassCard>
+                        </motion.div>
+                    )}
                 </AnimatePresence>
             </main>
 
@@ -570,12 +826,14 @@ export default function PremiumAdminDashboard() {
                             <GlassCard className="p-10 border-white/10 !bg-slate-900 shadow-2xl">
                                 <div className="flex justify-between items-center mb-10">
                                     <h2 className="text-2xl font-black italic">MODIFICAR <span className="text-neon-cyan neon-text-cyan underline decoration-white/10 underline-offset-8">EXPEDIENTE</span></h2>
-                                    <button onClick={() => setEditingLead(null)} className="p-2 hover:bg-white/5 rounded-lg transition-all"><X className="w-6 h-6" /></button>
+                                    <button onClick={() => setEditingLead(null)} title="Cerrar" className="p-2 hover:bg-white/5 rounded-lg transition-all"><X className="w-6 h-6" /></button>
                                 </div>
                                 <form onSubmit={updateLeadData} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Nombre Completo</label>
                                         <input
+                                            title="Nombre Completo"
+                                            placeholder="Nombre del Cliente"
                                             value={editingLead.full_name}
                                             onChange={(e) => setEditingLead({ ...editingLead, full_name: e.target.value })}
                                             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all uppercase"
@@ -584,6 +842,8 @@ export default function PremiumAdminDashboard() {
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Teléfono</label>
                                         <input
+                                            title="Teléfono"
+                                            placeholder="Número de contacto"
                                             value={editingLead.phone}
                                             onChange={(e) => setEditingLead({ ...editingLead, phone: e.target.value })}
                                             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
@@ -592,6 +852,8 @@ export default function PremiumAdminDashboard() {
                                     <div className="space-y-2 md:col-span-2">
                                         <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Ubicación / Barrio</label>
                                         <input
+                                            title="Ubicación"
+                                            placeholder="Ciudad o Barrio"
                                             value={editingLead.location}
                                             onChange={(e) => setEditingLead({ ...editingLead, location: e.target.value })}
                                             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all uppercase"
@@ -600,6 +862,8 @@ export default function PremiumAdminDashboard() {
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Plan Seleccionado</label>
                                         <input
+                                            title="Nombre del Plan"
+                                            placeholder="Ej. Gamer 500MB"
                                             value={editingLead.plan_name}
                                             onChange={(e) => setEditingLead({ ...editingLead, plan_name: e.target.value })}
                                             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all uppercase"
@@ -608,6 +872,8 @@ export default function PremiumAdminDashboard() {
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Precio</label>
                                         <input
+                                            title="Precio"
+                                            placeholder="Costo mensual"
                                             value={editingLead.price}
                                             onChange={(e) => setEditingLead({ ...editingLead, price: e.target.value })}
                                             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
