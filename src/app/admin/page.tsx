@@ -1117,6 +1117,23 @@ export default function PremiumAdminDashboard() {
                                             <span className="text-[9px] font-mono text-slate-500">100%</span>
                                         </div>
                                     </GlassCard>
+
+                                    <GlassCard className="p-8 border-white/5 !bg-white/5 opacity-50">
+                                        <div className="flex justify-between items-start mb-6">
+                                            <div className="p-3 rounded-xl bg-neon-cyan/10 text-neon-cyan">
+                                                <MessageCircle className="w-6 h-6" />
+                                            </div>
+                                            <span className="px-2 py-1 rounded-md bg-white/10 text-white/50 text-[8px] font-black uppercase">Pendiente</span>
+                                        </div>
+                                        <h3 className="text-sm font-black italic uppercase text-white mb-2">WhatsApp Business API</h3>
+                                        <p className="text-[10px] text-slate-500 font-bold mb-6">Viabilidad Económica / Escalabilidad</p>
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                                                <div className="h-full w-[5%] bg-neon-cyan shadow-[0_0_10px_#00f3ff]" />
+                                            </div>
+                                            <span className="text-[9px] font-mono text-slate-500">Ready for Scaling</span>
+                                        </div>
+                                    </GlassCard>
                                 </div>
                             </motion.div>
                         )}
