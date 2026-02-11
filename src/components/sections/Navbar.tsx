@@ -224,74 +224,100 @@ export const Navbar = () => {
                         >
                             <X className="w-8 h-8" />
                         </button>
-                        <div className="w-full max-w-sm mx-auto flex flex-col gap-2">
-                            {navLinks.map((link, i) => (
-                                <div key={link.name} className="flex flex-col gap-2">
-                                    <motion.a
-                                        href={getLinkHref(link.href)}
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: i * 0.04 }}
-                                        onClick={(e) => handleLinkClick(e, link.href)}
-                                        className="relative z-20 flex items-center justify-between p-5 rounded-3xl bg-white/[0.03] border border-white/5 active:bg-white/10 active:scale-[0.98] transition-all no-underline group"
-                                    >
-                                        <div className="flex items-center gap-5">
-                                            <span className="text-white/20 font-black text-lg group-hover:text-neon-cyan transition-colors">0{i + 1}</span>
-                                            <span className="text-xl font-black uppercase tracking-tighter italic text-white group-hover:translate-x-1 transition-transform">
-                                                {link.name}
-                                            </span>
-                                        </div>
-                                        {link.submenu ? (
-                                            <ChevronDown className="w-5 h-5 text-slate-700" />
-                                        ) : (
-                                            <ArrowUpRight className="w-5 h-5 text-slate-700 group-hover:text-neon-cyan transition-colors" />
-                                        )}
-                                    </motion.a>
-
-                                    {link.submenu && (
-                                        <div className="grid grid-cols-2 gap-2 px-2 pb-4">
-                                            {link.submenu.map((sub, subIdx) => (
-                                                <motion.a
-                                                    key={sub.name}
-                                                    href={getLinkHref(sub.href)}
-                                                    initial={{ opacity: 0, scale: 0.95 }}
-                                                    animate={{ opacity: 1, scale: 1 }}
-                                                    transition={{ delay: (i * 0.04) + (subIdx * 0.05) }}
-                                                    onClick={(e) => handleLinkClick(e, sub.href)}
-                                                    className="flex items-center gap-3 p-4 rounded-2xl bg-white/[0.02] border border-white/5 text-[10px] font-bold uppercase tracking-widest text-slate-500 active:text-neon-cyan"
-                                                >
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-neon-cyan/30" />
-                                                    {sub.name}
-                                                </motion.a>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-
+                        <div className="w-full max-w-sm mx-auto flex flex-col gap-6">
+                            {/* Premium Animated Brand Header */}
                             <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.4 }}
-                                className="mt-8 p-8 rounded-3xl bg-gradient-to-br from-neon-cyan/10 to-transparent border border-neon-cyan/10 text-center"
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.5, ease: "easeOut" }}
+                                className="flex flex-col items-center justify-center mb-4 relative"
                             >
-                                <div className="text-[10px] font-black tracking-[0.4em] text-neon-cyan uppercase mb-4">
-                                    Digital Experience 2026
-                                </div>
-                                <h4 className="text-white text-lg font-black italic mb-6">
-                                    ¿Listo para la máxima potencia?
-                                </h4>
-                                <NeonButton
-                                    onClick={() => {
-                                        closeMenu();
-                                        setTimeout(openModal, 150);
+                                <motion.div
+                                    animate={{
+                                        y: [0, -10, 0],
+                                        filter: ["drop-shadow(0 0 10px rgba(0,243,255,0.2))", "drop-shadow(0 0 25px rgba(0,243,255,0.5))", "drop-shadow(0 0 10px rgba(0,243,255,0.2))"]
                                     }}
-                                    className="w-full !py-5 text-xs font-black tracking-[0.3em]"
-                                    variant="cyan"
+                                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                    className="relative mb-4"
                                 >
-                                    CONTRATAR AHORA
-                                </NeonButton>
+                                    <img src="/favicon.svg" alt="FiberGravity Logo" className="w-20 h-20" />
+                                    <div className="absolute inset-0 bg-neon-cyan blur-2xl opacity-20 -z-10" />
+                                </motion.div>
+                                <h3 className="text-3xl font-black italic tracking-tighter text-white">
+                                    FIBER<span className="text-neon-cyan">GRAVITY</span>
+                                </h3>
+                                <div className="h-px w-32 bg-gradient-to-r from-transparent via-white/20 to-transparent mt-4" />
                             </motion.div>
+
+                            <div className="flex flex-col gap-2">
+                                {navLinks.map((link, i) => (
+                                    <div key={link.name} className="flex flex-col gap-2">
+                                        <motion.a
+                                            href={getLinkHref(link.href)}
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: i * 0.04 }}
+                                            onClick={(e) => handleLinkClick(e, link.href)}
+                                            className="relative z-20 flex items-center justify-between p-5 rounded-3xl bg-white/[0.03] border border-white/5 active:bg-white/10 active:scale-[0.98] transition-all no-underline group"
+                                        >
+                                            <div className="flex items-center gap-5">
+                                                <span className="text-white/20 font-black text-lg group-hover:text-neon-cyan transition-colors">0{i + 1}</span>
+                                                <span className="text-xl font-black uppercase tracking-tighter italic text-white group-hover:translate-x-1 transition-transform">
+                                                    {link.name}
+                                                </span>
+                                            </div>
+                                            {link.submenu ? (
+                                                <ChevronDown className="w-5 h-5 text-slate-700" />
+                                            ) : (
+                                                <ArrowUpRight className="w-5 h-5 text-slate-700 group-hover:text-neon-cyan transition-colors" />
+                                            )}
+                                        </motion.a>
+
+                                        {link.submenu && (
+                                            <div className="grid grid-cols-2 gap-2 px-2 pb-4">
+                                                {link.submenu.map((sub, subIdx) => (
+                                                    <motion.a
+                                                        key={sub.name}
+                                                        href={getLinkHref(sub.href)}
+                                                        initial={{ opacity: 0, scale: 0.95 }}
+                                                        animate={{ opacity: 1, scale: 1 }}
+                                                        transition={{ delay: (i * 0.04) + (subIdx * 0.05) }}
+                                                        onClick={(e) => handleLinkClick(e, sub.href)}
+                                                        className="flex items-center gap-3 p-4 rounded-2xl bg-white/[0.02] border border-white/5 text-[10px] font-bold uppercase tracking-widest text-slate-500 active:text-neon-cyan"
+                                                    >
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-neon-cyan/30" />
+                                                        {sub.name}
+                                                    </motion.a>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.4 }}
+                                    className="mt-8 p-8 rounded-3xl bg-gradient-to-br from-neon-cyan/10 to-transparent border border-neon-cyan/10 text-center"
+                                >
+                                    <div className="text-[10px] font-black tracking-[0.4em] text-neon-cyan uppercase mb-4">
+                                        Digital Experience 2026
+                                    </div>
+                                    <h4 className="text-white text-lg font-black italic mb-6">
+                                        ¿Listo para la máxima potencia?
+                                    </h4>
+                                    <NeonButton
+                                        onClick={() => {
+                                            closeMenu();
+                                            setTimeout(openModal, 150);
+                                        }}
+                                        className="w-full !py-5 text-xs font-black tracking-[0.3em]"
+                                        variant="cyan"
+                                    >
+                                        CONTRATAR AHORA
+                                    </NeonButton>
+                                </motion.div>
+                            </div>
                         </div>
                     </motion.div>
                 )}
