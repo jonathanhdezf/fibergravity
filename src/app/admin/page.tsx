@@ -25,7 +25,12 @@ import {
     Activity,
     Calendar,
     MousePointer2,
-    Eye
+    Eye,
+    Edit2,
+    Trash2,
+    XCircle,
+    Save,
+    X
 } from "lucide-react";
 import {
     AreaChart,
@@ -56,6 +61,7 @@ interface Lead {
     speed: string;
     price: string;
     status: string;
+    rejection_reason?: string;
 }
 
 interface Visit {
@@ -79,6 +85,11 @@ export default function PremiumAdminDashboard() {
     const [searchQuery, setSearchQuery] = useState("");
     const [lastRefresh, setLastRefresh] = useState(new Date());
 
+    // New States for Lead Management
+    const [editingLead, setEditingLead] = useState<Lead | null>(null);
+    const [rejectionModal, setRejectionModal] = useState<{ isOpen: boolean, id: string, reason: string }>({ isOpen: false, id: "", reason: "" });
+    const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+
     useEffect(() => {
         if (isAuthenticated) {
             fetchData();
@@ -101,9 +112,44 @@ export default function PremiumAdminDashboard() {
         setLastRefresh(new Date());
     };
 
-    const updateStatus = async (id: string, newStatus: string) => {
-        const { error } = await supabase.from('leads').update({ status: newStatus }).eq('id', id);
-        if (!error) fetchData();
+    const updateStatus = async (id: string, newStatus: string, reason?: string) => {
+        const updateData: any = { status: newStatus };
+        if (reason) updateData.rejection_reason = reason;
+
+        const { error } = await supabase.from('leads').update(updateData).eq('id', id);
+        if (!error) {
+            fetchData();
+            setRejectionModal({ isOpen: false, id: "", reason: "" });
+        }
+    };
+
+    const deleteLead = async (id: string) => {
+        const { error } = await supabase.from('leads').delete().eq('id', id);
+        if (!error) {
+            fetchData();
+            setDeleteConfirm(null);
+        }
+    };
+
+    const updateLeadData = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingLead) return;
+
+        const { error } = await supabase
+            .from('leads')
+            .update({
+                full_name: editingLead.full_name,
+                phone: editingLead.phone,
+                location: editingLead.location,
+                plan_name: editingLead.plan_name,
+                price: editingLead.price
+            })
+            .eq('id', editingLead.id);
+
+        if (!error) {
+            fetchData();
+            setEditingLead(null);
+        }
     };
 
     const handleLogin = (e: React.FormEvent) => {
@@ -322,10 +368,14 @@ export default function PremiumAdminDashboard() {
                                         />
                                     </div>
                                     <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-                                        {['all', 'pending', 'contacting', 'completed'].map((s) => (
+                                        {['all', 'pending', 'contacting', 'completed', 'rejected'].map((s) => (
                                             <button
                                                 key={s}
-                                                className="px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest bg-white/5 border border-white/10 text-slate-500 hover:text-white transition-all whitespace-nowrap"
+                                                onClick={() => setFilter(s)}
+                                                className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all whitespace-nowrap ${filter === s
+                                                        ? 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan'
+                                                        : 'bg-white/5 border-white/10 text-slate-500 hover:text-white'
+                                                    }`}
                                             >
                                                 {s}
                                             </button>
@@ -370,17 +420,61 @@ export default function PremiumAdminDashboard() {
                                                     <p className="text-[9px] font-black uppercase text-slate-600 tracking-widest">{new Date(lead.created_at).toLocaleDateString()}</p>
                                                 </div>
                                                 <div className="flex gap-2">
+                                                    {/* Status Update Actions */}
                                                     {lead.status === 'pending' && (
-                                                        <button onClick={() => updateStatus(lead.id, 'contacting')} className="p-4 rounded-2xl bg-neon-cyan/10 text-neon-cyan hover:bg-neon-cyan hover:text-black transition-all">
+                                                        <button
+                                                            onClick={() => updateStatus(lead.id, 'contacting')}
+                                                            className="p-3 rounded-xl bg-neon-cyan/10 text-neon-cyan hover:bg-neon-cyan hover:text-black transition-all"
+                                                            title="Procesar"
+                                                        >
                                                             <RefreshCw className="w-5 h-5" />
                                                         </button>
                                                     )}
-                                                    {lead.status !== 'completed' && (
-                                                        <button onClick={() => updateStatus(lead.id, 'completed')} className="p-4 rounded-2xl bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all">
+                                                    {lead.status !== 'completed' && lead.status !== 'rejected' && (
+                                                        <button
+                                                            onClick={() => updateStatus(lead.id, 'completed')}
+                                                            className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all"
+                                                            title="Finalizar"
+                                                        >
                                                             <CheckCircle2 className="w-5 h-5" />
                                                         </button>
                                                     )}
+                                                    {lead.status !== 'rejected' && (
+                                                        <button
+                                                            onClick={() => setRejectionModal({ isOpen: true, id: lead.id, reason: "" })}
+                                                            className="p-3 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                                                            title="Rechazar"
+                                                        >
+                                                            <XCircle className="w-5 h-5" />
+                                                        </button>
+                                                    )}
+
+                                                    {/* Management Actions */}
+                                                    <div className="w-px h-8 bg-white/10 mx-1 self-center" />
+
+                                                    <button
+                                                        onClick={() => setEditingLead(lead)}
+                                                        className="p-3 rounded-xl bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white transition-all"
+                                                        title="Editar Datos"
+                                                    >
+                                                        <Edit2 className="w-5 h-5" />
+                                                    </button>
+
+                                                    <button
+                                                        onClick={() => setDeleteConfirm(lead.id)}
+                                                        className="p-3 rounded-xl bg-red-900/10 text-red-700 hover:bg-red-600 hover:text-white transition-all"
+                                                        title="Eliminar Permanente"
+                                                    >
+                                                        <Trash2 className="w-5 h-5" />
+                                                    </button>
                                                 </div>
+
+                                                {/* Rejection Reason Display */}
+                                                {lead.status === 'rejected' && lead.rejection_reason && (
+                                                    <div className="mt-2 text-[10px] text-red-500 font-bold uppercase tracking-widest bg-red-500/5 p-2 rounded-lg border border-red-500/10">
+                                                        Razón: {lead.rejection_reason}
+                                                    </div>
+                                                )}
                                             </div>
                                         </motion.div>
                                     ))}
@@ -418,6 +512,131 @@ export default function PremiumAdminDashboard() {
                     )}
                 </AnimatePresence>
             </main>
+
+            {/* MODALS SECTION */}
+            <AnimatePresence>
+                {/* 1. EDIT MODAL */}
+                {editingLead && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingLead(null)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+                        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-2xl">
+                            <GlassCard className="p-10 border-white/10 !bg-slate-900 shadow-2xl">
+                                <div className="flex justify-between items-center mb-10">
+                                    <h2 className="text-2xl font-black italic">MODIFICAR <span className="text-neon-cyan neon-text-cyan underline decoration-white/10 underline-offset-8">EXPEDIENTE</span></h2>
+                                    <button onClick={() => setEditingLead(null)} className="p-2 hover:bg-white/5 rounded-lg transition-all"><X className="w-6 h-6" /></button>
+                                </div>
+                                <form onSubmit={updateLeadData} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Nombre Completo</label>
+                                        <input
+                                            value={editingLead.full_name}
+                                            onChange={(e) => setEditingLead({ ...editingLead, full_name: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all uppercase"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Teléfono</label>
+                                        <input
+                                            value={editingLead.phone}
+                                            onChange={(e) => setEditingLead({ ...editingLead, phone: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-2 md:col-span-2">
+                                        <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Ubicación / Barrio</label>
+                                        <input
+                                            value={editingLead.location}
+                                            onChange={(e) => setEditingLead({ ...editingLead, location: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all uppercase"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Plan Seleccionado</label>
+                                        <input
+                                            value={editingLead.plan_name}
+                                            onChange={(e) => setEditingLead({ ...editingLead, plan_name: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all uppercase"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Precio</label>
+                                        <input
+                                            value={editingLead.price}
+                                            onChange={(e) => setEditingLead({ ...editingLead, price: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="md:col-span-2 mt-6">
+                                        <NeonButton type="submit" className="w-full py-4 !tracking-[0.5em]">ACTUALIZAR REGISTRO</NeonButton>
+                                    </div>
+                                </form>
+                            </GlassCard>
+                        </motion.div>
+                    </div>
+                )}
+
+                {/* 2. REJECTION MODAL */}
+                {rejectionModal.isOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setRejectionModal({ isOpen: false, id: "", reason: "" })} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+                        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-md">
+                            <GlassCard className="p-8 border-red-500/20 !bg-slate-900 shadow-2xl shadow-red-500/10">
+                                <div className="text-center mb-8">
+                                    <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/20">
+                                        <XCircle className="w-8 h-8 text-red-500" />
+                                    </div>
+                                    <h3 className="text-xl font-black italic">RECHAZAR <span className="text-red-500">CLIENTE</span></h3>
+                                    <p className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em] mt-2">Justifica la cancelación del lead</p>
+                                </div>
+                                <div className="space-y-6">
+                                    <textarea
+                                        placeholder="Ej. Fuera de cobertura, No responde llamadas, Plan no viable..."
+                                        value={rejectionModal.reason}
+                                        onChange={(e) => setRejectionModal({ ...rejectionModal, reason: e.target.value })}
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:border-red-500 focus:outline-none transition-all h-32 uppercase font-bold"
+                                        autoFocus
+                                    />
+                                    <div className="flex gap-4">
+                                        <button
+                                            onClick={() => setRejectionModal({ isOpen: false, id: "", reason: "" })}
+                                            className="flex-1 py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition-all"
+                                        >
+                                            CANCELAR
+                                        </button>
+                                        <button
+                                            onClick={() => updateStatus(rejectionModal.id, 'rejected', rejectionModal.reason)}
+                                            disabled={!rejectionModal.reason}
+                                            className="flex-1 py-4 rounded-2xl bg-red-500 text-white text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50"
+                                        >
+                                            RECHAZAR LEAD
+                                        </button>
+                                    </div>
+                                </div>
+                            </GlassCard>
+                        </motion.div>
+                    </div>
+                )}
+
+                {/* 3. DELETE CONFIRMATION */}
+                {deleteConfirm && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDeleteConfirm(null)} className="absolute inset-0 bg-red-950/40 backdrop-blur-xl" />
+                        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-sm text-center">
+                            <GlassCard className="p-8 border-red-500/50 !bg-black">
+                                <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <Trash2 className="w-10 h-10 text-red-500 animate-bounce" />
+                                </div>
+                                <h3 className="text-2xl font-black italic mb-2">¿ELIMINAR <span className="text-red-500">LEAD?</span></h3>
+                                <p className="text-slate-400 text-xs mb-8">Esta acción es irreversible y eliminará el expediente de la base de datos centralizada.</p>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setDeleteConfirm(null)} className="flex-1 py-4 rounded-xl bg-white/5 hover:bg-white/10 font-bold transition-all">NO, VOLVER</button>
+                                    <button onClick={() => deleteLead(deleteConfirm)} className="flex-1 py-4 rounded-xl bg-red-600 hover:bg-red-700 font-bold transition-all shadow-xl shadow-red-600/20">SÍ, ELIMINAR</button>
+                                </div>
+                            </GlassCard>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
             <footer className="py-12 border-t border-white/5 text-center">
                 <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-700">FiberGravity Intelligent Infrastructure • 2026</p>
