@@ -102,7 +102,7 @@ export const CategoryModal = ({ isOpen, onClose, category, providerName }: Categ
 
             if (error) throw error;
 
-            toast.success(`¡Solicitud enviada! Un asesor validará tu cobertura pronto.`, {
+            toast.success(`¡Enviado con éxito! En breve un representante de FiberGravity se pondrá en contacto contigo.`, {
                 icon: '🚀',
                 style: {
                     borderRadius: '20px',

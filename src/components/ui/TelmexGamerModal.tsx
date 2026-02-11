@@ -48,6 +48,7 @@ const gamerPlans = [
 ];
 
 import { supabase } from "@/lib/supabase";
+import toast from "react-hot-toast";
 
 export const TelmexGamerModal = ({ isOpen, onClose }: TelmexGamerModalProps) => {
     const [selectedPlan, setSelectedPlan] = useState(0);
@@ -92,11 +93,22 @@ export const TelmexGamerModal = ({ isOpen, onClose }: TelmexGamerModalProps) => 
 
             if (error) throw error;
 
-            alert("¡Solicitud enviada! Un asesor de FiberGravity te contactará con el equipo especializado de Telmex.");
+            toast.success(`¡Enviado con éxito! En breve un representante de FiberGravity se pondrá en contacto contigo.`, {
+                icon: '📞',
+                style: {
+                    borderRadius: '20px',
+                    background: '#020617',
+                    color: '#fff',
+                    border: '1px solid rgba(0, 243, 255, 0.2)',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    padding: '16px 24px'
+                }
+            });
             onClose();
         } catch (error: any) {
             console.error('Error submitting lead:', error);
-            alert('Hubo un error al enviar tus datos. Por favor intenta de nuevo.');
+            toast.error('Hubo un error al enviar tus datos. Por favor intenta de nuevo.');
         } finally {
             setIsSubmitting(false);
         }
