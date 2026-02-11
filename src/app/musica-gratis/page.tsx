@@ -7,7 +7,9 @@ import { Footer } from "@/components/sections/Footer";
 import { GlassCard } from "@/components/ui/GlassCard";
 import Link from "next/link";
 
-const MusicaGratisPage = () => {
+import { ModalProvider } from "@/components/ModalProvider";
+
+const MusicaGratisClientPage = () => {
     return (
         <main className="min-h-screen bg-[#020617]">
             <Navbar />
@@ -115,4 +117,10 @@ const MusicaGratisPage = () => {
     );
 };
 
-export default MusicaGratisPage;
+export default function MusicaGratisPage() {
+    return (
+        <ModalProvider>
+            <MusicaGratisClientPage />
+        </ModalProvider>
+    );
+}
