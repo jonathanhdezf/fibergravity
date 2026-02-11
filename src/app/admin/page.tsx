@@ -656,8 +656,13 @@ export default function PremiumAdminDashboard() {
         );
     }
 
+    useEffect(() => {
+        if (status === "unauthenticated") {
+            router.push("/auth/login");
+        }
+    }, [status, router]);
+
     if (status === "unauthenticated") {
-        router.push("/auth/login");
         return null;
     }
 
