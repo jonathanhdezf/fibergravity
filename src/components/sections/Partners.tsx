@@ -15,7 +15,7 @@ const partners = [
 
 export const Partners = () => {
     return (
-        <section className="py-20 border-t border-white/5 bg-[#020617]/50">
+        <section id="socios" className="py-20 border-t border-white/5 bg-[#020617]/50 relative">
             <div className="container mx-auto px-6">
                 <motion.p
                     initial={{ opacity: 0, y: 10 }}
