@@ -40,6 +40,9 @@ import {
     Shield,
     Download,
     MessageCircle,
+    MessageSquare,
+    LifeBuoy,
+    Wrench,
     FileText,
     Printer,
     FileUp,
@@ -141,6 +144,16 @@ interface SystemLog {
     admin_name: string;
 }
 
+interface SupportTicket {
+    id: string;
+    created_at: string;
+    full_name: string;
+    phone: string;
+    type: string;
+    description: string;
+    status: 'pending' | 'in_progress' | 'resolved' | 'closed';
+}
+
 const COLORS = ['#00f3ff', '#ff00ff', '#ffffff', '#3b82f6', '#10b981'];
 
 export default function PremiumAdminDashboard() {
@@ -149,7 +162,8 @@ export default function PremiumAdminDashboard() {
     const [loading, setLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [password, setPassword] = useState("");
-    const [activeTab, setActiveTab] = useState<"overview" | "leads" | "traffic" | "inventory" | "integrations" | "logs" | "ventas">("overview");
+    const [activeTab, setActiveTab] = useState<"overview" | "leads" | "tickets" | "ventas" | "inventory" | "traffic" | "integrations" | "logs">("overview");
+    const [tickets, setTickets] = useState<SupportTicket[]>([]);
     const [providers, setProviders] = useState<Provider[]>([]);
     const [plans, setPlans] = useState<Plan[]>([]);
     const [logs, setLogs] = useState<SystemLog[]>([]);
@@ -239,13 +253,14 @@ export default function PremiumAdminDashboard() {
 
     const fetchData = async () => {
         setLoading(true);
-        const [leadsRes, visitsRes, providersRes, plansRes, logsRes, agentsRes] = await Promise.all([
+        const [leadsRes, visitsRes, providersRes, plansRes, logsRes, agentsRes, ticketsRes] = await Promise.all([
             supabase.from('leads').select('*').order('created_at', { ascending: false }),
             supabase.from('site_visits').select('*').order('created_at', { ascending: false }).limit(1000),
             supabase.from('providers').select('*').order('name'),
             supabase.from('plans').select('*').order('ranking_score', { ascending: false }),
             supabase.from('system_logs').select('*').order('created_at', { ascending: false }).limit(500),
-            supabase.from('comisionistas').select('*').order('full_name')
+            supabase.from('comisionistas').select('*').order('full_name'),
+            supabase.from('support_tickets').select('*').order('created_at', { ascending: false })
         ]);
 
         if (leadsRes.data) setLeads(leadsRes.data);
@@ -254,6 +269,7 @@ export default function PremiumAdminDashboard() {
         if (plansRes.data) setPlans(plansRes.data);
         if (logsRes.data) setLogs(logsRes.data);
         if (agentsRes.data) setComisionistas(agentsRes.data);
+        if (ticketsRes.data) setTickets(ticketsRes.data);
 
         setLoading(false);
         setLastRefresh(new Date());
@@ -297,6 +313,14 @@ export default function PremiumAdminDashboard() {
             fetchData();
             setRejectionModal({ isOpen: false, id: "", reason: "" });
             setAgentSelectionModal({ isOpen: false, leadId: "" });
+        }
+    };
+
+    const updateTicketStatus = async (id: string, newStatus: string) => {
+        const { error } = await supabase.from('support_tickets').update({ status: newStatus }).eq('id', id);
+        if (!error) {
+            await logAction('TICKET_STATUS', 'TICKETS', id, `Ticket cambiado a ${newStatus}`);
+            fetchData();
         }
     };
 
@@ -527,7 +551,8 @@ export default function PremiumAdminDashboard() {
                             <div className="hidden md:flex gap-1">
                                 {[
                                     { id: 'overview', icon: TrendingUp, label: 'Vista General' },
-                                    { id: 'leads', icon: Users, label: 'Gestión de Leads' },
+                                    { id: 'leads', icon: Users, label: 'Leads' },
+                                    { id: 'tickets', icon: LifeBuoy, label: 'Tickets' },
                                     { id: 'ventas', icon: UserPlus, label: 'Equipo Ventas' },
                                     { id: 'inventory', icon: Package, label: 'Catálogo' },
                                     { id: 'traffic', icon: Globe, label: 'Tráfico en Vivo' },
@@ -582,7 +607,8 @@ export default function PremiumAdminDashboard() {
                             <div className="flex flex-col gap-4">
                                 {[
                                     { id: 'overview', icon: TrendingUp, label: 'Vista General' },
-                                    { id: 'leads', icon: Users, label: 'Gestión de Leads' },
+                                    { id: 'leads', icon: Users, label: 'Leads' },
+                                    { id: 'tickets', icon: LifeBuoy, label: 'Tickets' },
                                     { id: 'ventas', icon: UserPlus, label: 'Equipo Ventas' },
                                     { id: 'inventory', icon: Package, label: 'Catálogo' },
                                     { id: 'traffic', icon: Globe, label: 'Tráfico en Vivo' },
@@ -882,6 +908,101 @@ export default function PremiumAdminDashboard() {
                                                     </div>
                                                 </motion.div>
                                             ))}
+                                    </div>
+                                </GlassCard>
+                            </motion.div>
+                        )}
+                        {activeTab === 'tickets' && (
+                            <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="space-y-8">
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                    <h2 className="text-2xl font-black italic">TICKETS DE <span className="text-neon-cyan neon-text-cyan">SOPORTE</span></h2>
+                                    <div className="flex gap-2">
+                                        <NeonButton className="py-3 px-6 text-[10px]" onClick={fetchData}>
+                                            <RefreshCw className="w-4 h-4 mr-2" /> ACTUALIZAR
+                                        </NeonButton>
+                                    </div>
+                                </div>
+
+                                <GlassCard className="p-0 overflow-hidden border-white/5 !bg-black/20">
+                                    <div className="overflow-x-auto custom-scrollbar">
+                                        <table className="w-full text-left border-collapse">
+                                            <thead>
+                                                <tr className="bg-white/5 border-b border-white/10">
+                                                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-slate-500">Folio / Fecha</th>
+                                                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-slate-500">Cliente</th>
+                                                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-slate-500">Tipo / Problema</th>
+                                                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-slate-500">Estado</th>
+                                                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-slate-500 text-right">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-white/5">
+                                                {tickets.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan={5} className="px-6 py-20 text-center text-slate-600 font-bold italic">No hay tickets registrados</td>
+                                                    </tr>
+                                                ) : (
+                                                    tickets.map((ticket) => (
+                                                        <tr key={ticket.id} className="group hover:bg-white/[0.02] transition-colors">
+                                                            <td className="px-6 py-5">
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-[10px] font-black font-mono text-neon-cyan mb-1">#{ticket.id.split('-')[0].toUpperCase()}</span>
+                                                                    <span className="text-[9px] font-bold text-slate-500">{new Date(ticket.created_at).toLocaleString()}</span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-6 py-5">
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-xs font-black uppercase text-white">{ticket.full_name}</span>
+                                                                    <span className="text-[10px] font-bold text-slate-500">{ticket.phone}</span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-6 py-5">
+                                                                <div className="flex flex-col max-w-xs">
+                                                                    <span className="text-[10px] font-black text-neon-magenta uppercase mb-1">{ticket.type}</span>
+                                                                    <span className="text-xs text-slate-400 line-clamp-2">{ticket.description}</span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-6 py-5">
+                                                                <select
+                                                                    title="Estado del Ticket"
+                                                                    value={ticket.status}
+                                                                    onChange={(e) => updateTicketStatus(ticket.id, e.target.value)}
+                                                                    className={`text-[9px] font-black px-3 py-1.5 rounded-full border border-white/10 bg-black uppercase tracking-widest focus:outline-none transition-all ${ticket.status === 'pending' ? 'text-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.2)]' :
+                                                                        ticket.status === 'in_progress' ? 'text-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.2)]' :
+                                                                            ticket.status === 'resolved' ? 'text-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.2)]' :
+                                                                                'text-slate-500'
+                                                                        }`}
+                                                                >
+                                                                    <option value="pending">PENDIENTE</option>
+                                                                    <option value="in_progress">EN CURSO</option>
+                                                                    <option value="resolved">RESUELTO</option>
+                                                                    <option value="closed">CERRADO</option>
+                                                                </select>
+                                                            </td>
+                                                            <td className="px-6 py-5 text-right">
+                                                                <div className="flex justify-end gap-2">
+                                                                    <a
+                                                                        href={`https://wa.me/52${ticket.phone}?text=Hola%20${ticket.full_name},%20te%20contacto%20de%20soporte%20FiberGravity%20sobre%20tu%20ticket%20%23${ticket.id.split('-')[0].toUpperCase()}.`}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all"
+                                                                        title="WhatsApp Cliente"
+                                                                    >
+                                                                        <MessageSquare className="w-5 h-5" />
+                                                                    </a>
+                                                                    <button
+                                                                        onClick={() => deleteItem('support_tickets', ticket.id)}
+                                                                        className="p-3 rounded-xl bg-red-900/10 text-red-700 hover:bg-red-600 hover:text-white transition-all"
+                                                                        title="Eliminar Ticket"
+                                                                    >
+                                                                        <Trash2 className="w-5 h-5" />
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </GlassCard>
                             </motion.div>

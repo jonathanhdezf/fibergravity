@@ -4,7 +4,7 @@ import { HTMLMotionProps, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface NeonButtonProps extends HTMLMotionProps<"button"> {
-    variant?: "cyan" | "magenta" | "white";
+    variant?: "cyan" | "magenta" | "white" | "emerald";
 }
 
 export const NeonButton = ({ children, variant = "cyan", className, ...props }: NeonButtonProps) => {
@@ -12,6 +12,7 @@ export const NeonButton = ({ children, variant = "cyan", className, ...props }: 
         cyan: "bg-neon-cyan/20 border-neon-cyan text-neon-cyan hover:bg-neon-cyan hover:text-black neon-glow-cyan",
         magenta: "bg-neon-magenta/20 border-neon-magenta text-neon-magenta hover:bg-neon-magenta hover:text-black neon-glow-magenta",
         white: "bg-white/10 border-white/40 text-white hover:bg-white hover:text-black shadow-[0_0_15px_rgba(255,255,255,0.1)]",
+        emerald: "bg-emerald-500/20 border-emerald-500 text-emerald-500 hover:bg-emerald-500 hover:text-black shadow-[0_0_15px_rgba(16,185,129,0.2)]",
     };
 
     return (
