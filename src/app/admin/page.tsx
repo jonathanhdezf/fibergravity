@@ -526,13 +526,13 @@ export default function PremiumAdminDashboard() {
                             </div>
                             <div className="hidden md:flex gap-1">
                                 {[
-                                    { id: 'overview', icon: TrendingUp, label: 'Overview' },
-                                    { id: 'leads', icon: Users, label: 'Leads Hub' },
+                                    { id: 'overview', icon: TrendingUp, label: 'Vista General' },
+                                    { id: 'leads', icon: Users, label: 'Gestión de Leads' },
                                     { id: 'ventas', icon: UserPlus, label: 'Equipo Ventas' },
                                     { id: 'inventory', icon: Package, label: 'Catálogo' },
-                                    { id: 'traffic', icon: Globe, label: 'Live Traffic' },
+                                    { id: 'traffic', icon: Globe, label: 'Tráfico en Vivo' },
                                     { id: 'integrations', icon: Settings, label: 'Sistemas' },
-                                    { id: 'logs', icon: Activity, label: 'Logs' }
+                                    { id: 'logs', icon: Activity, label: 'Historial' }
                                 ].map((tab) => (
                                     <button
                                         key={tab.id}
@@ -549,9 +549,9 @@ export default function PremiumAdminDashboard() {
                         <div className="flex items-center gap-4">
                             <div className="hidden lg:flex flex-col items-end mr-4">
                                 <span className="text-[8px] font-black uppercase tracking-widest text-emerald-500 flex items-center gap-1">
-                                    <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" /> SYSTEM ACTIVE
+                                    <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" /> SISTEMA ACTIVO
                                 </span>
-                                <span className="text-[10px] font-bold text-slate-500 font-mono">Synced {lastRefresh.toLocaleTimeString()}</span>
+                                <span className="text-[10px] font-bold text-slate-500 font-mono">Sincronizado {lastRefresh.toLocaleTimeString()}</span>
                             </div>
 
                             {/* Mobile Menu Toggle */}
@@ -581,13 +581,13 @@ export default function PremiumAdminDashboard() {
                         >
                             <div className="flex flex-col gap-4">
                                 {[
-                                    { id: 'overview', icon: TrendingUp, label: 'Overview' },
-                                    { id: 'leads', icon: Users, label: 'Leads Hub' },
+                                    { id: 'overview', icon: TrendingUp, label: 'Vista General' },
+                                    { id: 'leads', icon: Users, label: 'Gestión de Leads' },
                                     { id: 'ventas', icon: UserPlus, label: 'Equipo Ventas' },
                                     { id: 'inventory', icon: Package, label: 'Catálogo' },
-                                    { id: 'traffic', icon: Globe, label: 'Live Traffic' },
+                                    { id: 'traffic', icon: Globe, label: 'Tráfico en Vivo' },
                                     { id: 'integrations', icon: Settings, label: 'Sistemas' },
-                                    { id: 'logs', icon: Activity, label: 'Logs' }
+                                    { id: 'logs', icon: Activity, label: 'Historial' }
                                 ].map((tab) => (
                                     <button
                                         key={tab.id}
@@ -635,7 +635,7 @@ export default function PremiumAdminDashboard() {
                                 <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 text-black">
                                     <GlassCard className="p-8 border-white/5 !bg-white/5 h-[450px]">
                                         <h3 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-8 flex items-center gap-2">
-                                            <TrendingUp className="w-4 h-4 text-neon-cyan" /> Traffic & Engagement Analysis
+                                            <TrendingUp className="w-4 h-4 text-neon-cyan" /> Análisis de Tráfico e Interacción
                                         </h3>
                                         <div className="h-[320px] w-full">
                                             <ResponsiveContainer width="100%" height="100%">
@@ -705,7 +705,7 @@ export default function PremiumAdminDashboard() {
                                         <div className="relative group w-full lg:w-96">
                                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                                             <input
-                                                placeholder="Audit Search (Name, Phone, Location)..."
+                                                placeholder="Búsqueda de Leads (Nombre, Teléfono, Ubicación)..."
                                                 value={searchQuery}
                                                 onChange={(e) => setSearchQuery(e.target.value)}
                                                 className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-6 py-4 text-sm text-white focus:outline-none focus:border-neon-cyan focus:bg-white/10 transition-all font-bold"
