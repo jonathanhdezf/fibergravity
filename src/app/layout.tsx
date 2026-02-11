@@ -20,6 +20,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { AnalyticsTracker } from "@/components/AnalyticsTracker";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -30,6 +32,7 @@ export default function RootLayout({
       <body
         className={`${spaceGrotesk.variable} ${inter.variable} font-inter antialiased bg-[#020617] text-white selection:bg-neon-cyan/30`}
       >
+        <AnalyticsTracker />
         <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-900 to-black overflow-hidden" />
         {children}
       </body>
