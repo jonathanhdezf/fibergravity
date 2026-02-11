@@ -142,6 +142,28 @@ export default function PremiumAdminDashboard() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [filter, setFilter] = useState("all");
 
+    // Print Styles Injection
+    useEffect(() => {
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @media print {
+                body * { visibility: hidden; }
+                #printable-dossier, #printable-dossier * { visibility: visible; }
+                #printable-dossier { 
+                    position: absolute; 
+                    left: 0; 
+                    top: 0; 
+                    width: 100%;
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                }
+                @page { size: portrait; margin: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+        return () => { document.head.removeChild(style); };
+    }, []);
+
     // New States for Lead Management
     const [editingLead, setEditingLead] = useState<Lead | null>(null);
     const [editingProvider, setEditingProvider] = useState<Provider | null>(null);
@@ -1176,7 +1198,7 @@ export default function PremiumAdminDashboard() {
                                                                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all bg-black/40 gap-4">
                                                                         <label className="p-3 bg-neon-cyan/20 border border-neon-cyan/40 rounded-2xl text-neon-cyan hover:bg-neon-cyan hover:text-black transition-all cursor-pointer">
                                                                             <FileUp className="w-5 h-5" />
-                                                                            <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'ine_anverso')} />
+                                                                            <input title="Cambiar Foto Anverso" type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'ine_anverso')} />
                                                                         </label>
                                                                         <button
                                                                             type="button"
@@ -1220,7 +1242,7 @@ export default function PremiumAdminDashboard() {
                                                                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all bg-black/40 gap-4">
                                                                         <label className="p-3 bg-neon-magenta/20 border border-neon-magenta/40 rounded-2xl text-neon-magenta hover:bg-neon-magenta hover:text-white transition-all cursor-pointer">
                                                                             <FileUp className="w-5 h-5" />
-                                                                            <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'ine_reverso')} />
+                                                                            <input title="Cambiar Foto Reverso" type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'ine_reverso')} />
                                                                         </label>
                                                                         <button
                                                                             type="button"
