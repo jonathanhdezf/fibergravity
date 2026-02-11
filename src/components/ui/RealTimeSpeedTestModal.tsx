@@ -149,31 +149,31 @@ export const RealTimeSpeedTestModal = ({ isOpen, onClose }: RealTimeSpeedTestMod
                         initial={{ opacity: 0, scale: 0.9, y: 30 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 30 }}
-                        className="relative w-full max-w-4xl z-10"
+                        className="relative w-full max-w-4xl z-10 max-h-[95vh] overflow-y-auto"
                     >
-                        <GlassCard className="p-6 md:p-12 border-white/10 !overflow-visible relative" hoverEffect={false}>
-                            {/* Close Button */}
+                        <GlassCard className="p-5 md:p-12 border-white/10 !overflow-visible relative" hoverEffect={false}>
+                            {/* Close Button: Moved inside on mobile to avoid overflow */}
                             <button
                                 onClick={onClose}
                                 aria-label="Cerrar modal"
-                                className="absolute -top-4 -right-4 p-3 rounded-full bg-white/5 border border-white/10 text-white hover:bg-red-500/20 hover:text-red-500 transition-all z-20 group"
+                                className="absolute top-3 right-3 md:-top-4 md:-right-4 p-2.5 md:p-3 rounded-full bg-black md:bg-white/5 border border-white/10 text-white hover:bg-red-500/20 hover:text-red-500 transition-all z-20 group shadow-xl"
                             >
-                                <X className="w-6 h-6 group-hover:rotate-90 transition-transform" />
+                                <X className="w-5 h-5 md:w-6 md:h-6 group-hover:rotate-90 transition-transform" />
                             </button>
 
-                            <div className="text-center mb-10">
-                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neon-cyan/30 bg-neon-cyan/10 text-neon-cyan text-[10px] font-black uppercase tracking-[0.3em] mb-4">
-                                    <Activity className="w-3.5 h-3.5 animate-pulse" />
+                            <div className="text-center mb-6 md:mb-10">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neon-cyan/30 bg-neon-cyan/10 text-neon-cyan text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] mb-3 md:mb-4">
+                                    <Activity className="w-3 md:w-3.5 h-3 md:h-3.5 animate-pulse" />
                                     FiberGravity UltraCore v6.0
                                 </div>
-                                <h2 className="text-3xl md:text-5xl font-black italic tracking-tighter mb-1 uppercase text-white">Auditoría <span className="text-neon-cyan drop-shadow-[0_0_10px_#00f3ff]">XGS-PON</span></h2>
-                                <p className="text-slate-500 text-[10px] md:text-sm font-bold uppercase tracking-[0.2em]">Sincronizado con nodos de baja latencia — 1.1.1.1</p>
+                                <h2 className="text-2xl md:text-5xl font-black italic tracking-tighter mb-1 uppercase text-white">Auditoría <span className="text-neon-cyan drop-shadow-[0_0_10px_#00f3ff]">XGS-PON</span></h2>
+                                <p className="text-slate-500 text-[9px] md:text-sm font-bold uppercase tracking-[0.15em] md:tracking-[0.2em]">Sincronizado con nodos de baja latencia</p>
                             </div>
 
-                            <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center">
-                                {/* Proportional Speedometer */}
-                                <div className="relative flex flex-col items-center">
-                                    <div className="relative w-64 h-64 md:w-80 md:h-80">
+                            <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 md:gap-12 items-center">
+                                {/* Proportional Speedometer: Scaled for mobile */}
+                                <div className="relative flex flex-col items-center w-full max-w-[280px] md:max-w-none">
+                                    <div className="relative w-full aspect-square md:w-80 md:h-80">
                                         <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90 transition-transform duration-500">
                                             <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="6" strokeDasharray="212 282" />
                                             <motion.circle
@@ -200,73 +200,77 @@ export const RealTimeSpeedTestModal = ({ isOpen, onClose }: RealTimeSpeedTestMod
 
                                         <div className="absolute inset-0 flex flex-col items-center justify-center">
                                             {phase === "idle" ? (
-                                                <button onClick={runTest} className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-neon-cyan/10 border-2 border-neon-cyan/50 flex items-center justify-center hover:bg-neon-cyan shadow-[0_0_30px_rgba(0,243,255,0.3)] group transition-all">
+                                                <button onClick={runTest} className="w-20 h-20 md:w-32 md:h-32 rounded-full bg-neon-cyan/10 border-2 border-neon-cyan/50 flex items-center justify-center hover:bg-neon-cyan shadow-[0_0_30px_rgba(0,243,255,0.3)] group transition-all">
                                                     <span className="text-xl md:text-3xl font-black italic tracking-tighter text-neon-cyan group-hover:text-black">GO</span>
                                                 </button>
                                             ) : (
                                                 <>
-                                                    <motion.div className="text-6xl md:text-8xl font-black italic tracking-tighter tabular-nums text-white">
+                                                    <motion.div className="text-5xl md:text-8xl font-black italic tracking-tighter tabular-nums text-white">
                                                         {phase === "download" ? Math.floor(download) : phase === "upload" ? Math.floor(upload) : phase === "complete" ? Math.floor(download) : "---"}
                                                     </motion.div>
-                                                    <span className="text-slate-500 font-bold uppercase tracking-widest text-xs">Mbps</span>
+                                                    <span className="text-slate-500 font-bold uppercase tracking-widest text-[10px] md:text-xs">Mbps</span>
                                                 </>
                                             )}
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Stats Column */}
-                                <div className="space-y-6">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <GlassCard className={`p-4 border-white/5 ${phase === 'download' ? 'border-neon-cyan bg-neon-cyan/5' : ''}`}>
+                                {/* Stats Column: Mobile Friendly Grid */}
+                                <div className="w-full space-y-6">
+                                    <div className="grid grid-cols-2 gap-3 md:gap-4">
+                                        <GlassCard className={`p-4 border-white/5 transition-all ${phase === 'download' ? 'border-neon-cyan bg-neon-cyan/5 scale-[1.02]' : ''}`}>
                                             <div className="flex justify-between mb-2">
-                                                <ArrowDown className={`w-4 h-4 ${phase === 'download' ? 'text-neon-cyan' : 'text-slate-500'}`} />
-                                                <span className="text-[8px] font-black tracking-widest uppercase text-slate-500">Download</span>
+                                                <ArrowDown className={`w-3.5 h-3.5 md:w-4 md:h-4 ${phase === 'download' ? 'text-neon-cyan' : 'text-slate-500'}`} />
+                                                <span className="text-[7px] md:text-[8px] font-black tracking-widest uppercase text-slate-500">Download</span>
                                             </div>
-                                            <div className="text-2xl md:text-3xl font-black tabular-nums text-white">{download > 0 ? download.toFixed(1) : "---"}</div>
+                                            <div className="text-xl md:text-3xl font-black tabular-nums text-white">
+                                                {download > 0 ? (download > 99 ? Math.floor(download) : download.toFixed(1)) : "---"}
+                                            </div>
                                         </GlassCard>
 
-                                        <GlassCard className={`p-4 border-white/5 ${phase === 'upload' ? 'border-neon-magenta bg-neon-magenta/5' : ''}`}>
+                                        <GlassCard className={`p-4 border-white/5 transition-all ${phase === 'upload' ? 'border-neon-magenta bg-neon-magenta/5 scale-[1.02]' : ''}`}>
                                             <div className="flex justify-between mb-2">
-                                                <ArrowUp className={`w-4 h-4 ${phase === 'upload' ? 'text-neon-magenta' : 'text-slate-500'}`} />
-                                                <span className="text-[8px] font-black tracking-widest uppercase text-slate-500">Upload</span>
+                                                <ArrowUp className={`w-3.5 h-3.5 md:w-4 md:h-4 ${phase === 'upload' ? 'text-neon-magenta' : 'text-slate-500'}`} />
+                                                <span className="text-[7px] md:text-[8px] font-black tracking-widest uppercase text-slate-500">Upload</span>
                                             </div>
-                                            <div className="text-2xl md:text-3xl font-black tabular-nums text-white">{upload > 0 ? upload.toFixed(1) : "---"}</div>
+                                            <div className="text-xl md:text-3xl font-black tabular-nums text-white">
+                                                {upload > 0 ? (upload > 99 ? Math.floor(upload) : upload.toFixed(1)) : "---"}
+                                            </div>
                                         </GlassCard>
 
                                         <GlassCard className="p-4 border-white/5">
                                             <div className="flex justify-between mb-2 text-slate-500">
-                                                <RefreshCw className="w-4 h-4" />
-                                                <span className="text-[8px] font-black tracking-widest uppercase text-slate-500">Ping ms</span>
+                                                <RefreshCw className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                                                <span className="text-[7px] md:text-[8px] font-black tracking-widest uppercase text-slate-500">Ping ms</span>
                                             </div>
-                                            <div className="text-2xl md:text-3xl font-black tabular-nums text-white">{ping > 0 ? ping.toFixed(1) : "---"}</div>
+                                            <div className="text-xl md:text-3xl font-black tabular-nums text-white">{ping > 0 ? ping.toFixed(1) : "---"}</div>
                                         </GlassCard>
 
                                         <GlassCard className="p-4 border-white/5">
                                             <div className="flex justify-between mb-2 text-slate-500">
-                                                <Zap className="w-4 h-4" />
-                                                <span className="text-[8px] font-black tracking-widest uppercase text-slate-500">Jitter ms</span>
+                                                <Zap className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                                                <span className="text-[7px] md:text-[8px] font-black tracking-widest uppercase text-slate-500">Jitter</span>
                                             </div>
-                                            <div className="text-2xl md:text-3xl font-black tabular-nums text-white">{jitter > 0 ? jitter.toFixed(1) : "---"}</div>
+                                            <div className="text-xl md:text-3xl font-black tabular-nums text-white">{jitter > 0 ? jitter.toFixed(1) : "---"}</div>
                                         </GlassCard>
                                     </div>
 
                                     {/* Action Footer */}
-                                    <div className="pt-6 border-t border-white/5 space-y-4">
-                                        <div className="flex items-center justify-between text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                    <div className="pt-4 md:pt-6 border-t border-white/5 space-y-4">
+                                        <div className="flex items-center justify-between text-[8px] md:text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                                             <div className="flex items-center gap-2">
-                                                <Monitor className="w-4 h-4" /> Secure Tunnel
+                                                <Monitor className="w-3.5 h-3.5 md:w-4 md:h-4" /> ISP ANALYZER
                                             </div>
                                             <div className="flex items-center gap-2 text-neon-cyan">
-                                                <ShieldCheck className="w-4 h-4" /> Audit Active
+                                                <ShieldCheck className="w-3.5 h-3.5 md:w-4 md:h-4" /> SECURE AUDIT
                                             </div>
                                         </div>
 
                                         <div className="flex gap-3">
                                             {phase !== 'idle' && phase !== 'complete' ? (
-                                                <button onClick={cancelTest} className="flex-1 py-4 rounded-xl border border-red-500/30 bg-red-500/5 text-red-500 text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">Detener Auditoría</button>
+                                                <button onClick={cancelTest} className="flex-1 py-3.5 md:py-4 rounded-xl border border-red-500/30 bg-red-500/5 text-red-500 text-[9px] md:text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">Detener Auditoría</button>
                                             ) : (
-                                                <NeonButton variant="cyan" className="flex-1 !py-4 text-[10px] font-black tracking-widest" onClick={runTest}>
+                                                <NeonButton variant="cyan" className="flex-1 !py-3.5 md:!py-4 text-[9px] md:text-[10px] font-black tracking-widest" onClick={runTest}>
                                                     {phase === 'complete' ? "Repetir Test" : "Iniciar Escaneo"}
                                                 </NeonButton>
                                             )}
