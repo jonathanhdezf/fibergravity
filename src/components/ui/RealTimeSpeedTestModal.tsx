@@ -21,11 +21,6 @@ export const RealTimeSpeedTestModal = ({ isOpen, onClose }: RealTimeSpeedTestMod
     const [jitter, setJitter] = useState(0);
     const [progress, setProgress] = useState(0);
 
-    // Simulation Targets
-    const targetDownload = 850 + Math.random() * 140;
-    const targetUpload = 400 + Math.random() * 100;
-    const targetPing = 5 + Math.random() * 10;
-    const targetJitter = 1 + Math.random() * 3;
 
     useEffect(() => {
         if (!isOpen) {
@@ -39,66 +34,87 @@ export const RealTimeSpeedTestModal = ({ isOpen, onClose }: RealTimeSpeedTestMod
         }
     }, [isOpen]);
 
-    const runTest = () => {
+    // Medir Ping + Jitter real
+    const measurePing = async () => {
+        const samples: number[] = [];
+
+        for (let i = 0; i < 8; i++) {
+            const start = performance.now();
+            await fetch("https://www.google.com/favicon.ico?cache=" + Math.random(), {
+                mode: "no-cors",
+                cache: "no-store",
+            });
+            const end = performance.now();
+            samples.push(end - start);
+        }
+
+        const avgPing = samples.reduce((a, b) => a + b, 0) / samples.length;
+
+        const variance =
+            samples.reduce((sum, value) => sum + Math.pow(value - avgPing, 2), 0) /
+            samples.length;
+
+        const jitterValue = Math.sqrt(variance);
+
+        setPing(parseFloat(avgPing.toFixed(1)));
+        setJitter(parseFloat(jitterValue.toFixed(1)));
+    };
+
+    // Medir Download REAL
+    const measureDownload = async () => {
+        const fileUrl = "https://speed.hetzner.de/100MB.bin";
+        const startTime = performance.now();
+
+        const response = await fetch(fileUrl, { cache: "no-store" });
+        const reader = response.body?.getReader();
+
+        if (!reader) return;
+
+        let receivedLength = 0;
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            receivedLength += value.length;
+
+            const elapsed = (performance.now() - startTime) / 1000;
+            const speedMbps = (receivedLength * 8) / elapsed / (1024 * 1024);
+
+            setDownload(parseFloat(speedMbps.toFixed(1)));
+        }
+    };
+
+    // Medir Upload REAL
+    const measureUpload = async () => {
+        const data = new Blob([new ArrayBuffer(20 * 1024 * 1024)]); // 20MB
+
+        const startTime = performance.now();
+
+        await fetch("https://httpbin.org/post", {
+            method: "POST",
+            body: data,
+        });
+
+        const elapsed = (performance.now() - startTime) / 1000;
+        const speedMbps = (data.size * 8) / elapsed / (1024 * 1024);
+
+        setUpload(parseFloat(speedMbps.toFixed(1)));
+    };
+
+    const runTest = async () => {
         setPhase("ping");
         setProgress(0);
 
-        // Phase 1: Ping
-        let p = 0;
-        const pingInterval = setInterval(() => {
-            p += 2;
-            setProgress(p);
-            setPing(parseFloat((Math.random() * targetPing).toFixed(1)));
-            if (p >= 100) {
-                clearInterval(pingInterval);
-                setPing(targetPing);
-                setJitter(targetJitter);
-                startDownload();
-            }
-        }, 30);
-    };
+        await measurePing();
 
-    const startDownload = () => {
         setPhase("download");
-        setProgress(0);
+        await measureDownload();
 
-        let p = 0;
-        const downloadInterval = setInterval(() => {
-            p += 0.8;
-            setProgress(p);
-
-            // Logarithmic-ish curve
-            const currentTarget = targetDownload * (p / 100);
-            const fluctuation = (Math.random() - 0.5) * 50;
-            setDownload(Math.max(0, currentTarget + fluctuation));
-
-            if (p >= 100) {
-                clearInterval(downloadInterval);
-                setDownload(targetDownload);
-                startUpload();
-            }
-        }, 16);
-    };
-
-    const startUpload = () => {
         setPhase("upload");
-        setProgress(0);
+        await measureUpload();
 
-        let p = 0;
-        const uploadInterval = setInterval(() => {
-            p += 1.2;
-            setProgress(p);
-
-            const currentTarget = targetUpload * (p / 100);
-            const fluctuation = (Math.random() - 0.5) * 20;
-            setUpload(Math.max(0, currentTarget + fluctuation));
-
-            if (p >= 100) {
-                clearInterval(uploadInterval);
-                setUpload(targetUpload);
-                setPhase("complete");
-            }
-        }, 16);
+        setPhase("complete");
     };
 
     return (
