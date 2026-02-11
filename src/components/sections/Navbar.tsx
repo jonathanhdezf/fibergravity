@@ -79,19 +79,18 @@ export const Navbar = () => {
     };
 
     const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-        const isHashLink = href.startsWith("#");
-
-        if (isHashLink) {
+        if (href.startsWith("#")) {
             const targetId = href.replace('#', '');
             const element = document.getElementById(targetId);
 
-            if (element && isHomePage) {
+            if (element) {
                 e.preventDefault();
                 element.scrollIntoView({ behavior: 'smooth' });
                 closeMenu();
+                if (window.history.pushState) {
+                    window.history.pushState(null, '', href);
+                }
             } else {
-                // If element is not on this page or we are not on home page, 
-                // let default behavior navigate to getLinkHref(href)
                 closeMenu();
             }
         } else {
