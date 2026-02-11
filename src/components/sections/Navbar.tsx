@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { usePathname } from "next/navigation";
 import { Wifi, Menu, X, ArrowUpRight, Zap, Shield, Tv, Radar, Gauge, Users, ChevronDown } from "lucide-react";
 import { NeonButton } from "../ui/NeonButton";
 import { useModal } from "../ModalProvider";
@@ -29,6 +30,8 @@ export const Navbar = () => {
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenu, setMobileMenu] = useState(false);
     const { openModal } = useModal();
+    const pathname = usePathname();
+    const isHomePage = pathname === "/";
 
     // Sturdy history management for mobile back button
     useEffect(() => {
@@ -77,31 +80,26 @@ export const Navbar = () => {
 
     const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
         const isHashLink = href.startsWith("#");
-        const isHomePage = window.location.pathname === "/";
 
         if (isHashLink) {
-            if (!isHomePage) {
-                // If on another page, let the default link behavior take over to go home
-                return;
-            }
-
-            // If on home page, handle smooth scroll
-            e.preventDefault();
             const targetId = href.replace('#', '');
             const element = document.getElementById(targetId);
-            if (element) {
+
+            if (element && isHomePage) {
+                e.preventDefault();
                 element.scrollIntoView({ behavior: 'smooth' });
+                closeMenu();
+            } else {
+                // If element is not on this page or we are not on home page, 
+                // let default behavior navigate to getLinkHref(href)
                 closeMenu();
             }
         } else {
-            // Normal navigation for non-hash links
             closeMenu();
         }
     };
 
     const getLinkHref = (href: string) => {
-        if (typeof window === 'undefined') return href;
-        const isHomePage = window.location.pathname === "/";
         if (href.startsWith("#") && !isHomePage) {
             return `/${href}`;
         }
@@ -124,7 +122,11 @@ export const Navbar = () => {
                         }`}
                 >
                     {/* Logo Area */}
-                    <a href="#hero" className="flex items-center gap-2 pl-3 md:pl-5 group">
+                    <a
+                        href={getLinkHref("#hero")}
+                        onClick={(e) => handleLinkClick(e, "#hero")}
+                        className="flex items-center gap-2 pl-3 md:pl-5 group"
+                    >
                         <div className="relative">
                             <img src="/favicon.svg" alt="FiberGravity Logo" className="w-8 h-8 md:w-10 md:h-10 group-hover:scale-110 transition-transform" />
                             <div className="absolute inset-0 bg-neon-cyan blur-md opacity-20" />
