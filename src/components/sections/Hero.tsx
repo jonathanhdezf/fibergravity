@@ -76,14 +76,7 @@ export const Hero = () => {
             <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
                 {/* 3D Perspective Grid - Optimized for Mobile */}
                 <div
-                    className="absolute inset-0 opacity-20 md:opacity-10 lg:opacity-20 translate-z-0"
-                    style={{
-                        backgroundImage: `linear-gradient(to right, #00f3ff11 1px, transparent 1px), linear-gradient(to bottom, #00f3ff11 1px, transparent 1px)`,
-                        backgroundSize: '100px 100px',
-                        transform: 'perspective(1000px) rotateX(60deg) translateY(-100px) scale(1.5)',
-                        maskImage: 'radial-gradient(ellipse at center, black, transparent 70%)',
-                        WebkitMaskImage: 'radial-gradient(ellipse at center, black, transparent 70%)'
-                    }}
+                    className="absolute inset-0 opacity-20 md:opacity-10 lg:opacity-20 translate-z-0 hero-grid-perspective"
                 />
 
                 {/* Animated Data Streams - Fewer streams on mobile to save CPU */}

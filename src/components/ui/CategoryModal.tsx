@@ -17,6 +17,45 @@ interface CategoryModalProps {
 }
 
 const providerData: any = {
+    "Totalplay Doble Play": {
+        plans: {
+            TV: [
+                { name: "Totalplay Doble Play 150", speed: "150 Mbps (Simétrico)", type: "Internet + TV", price: "$450", features: ["Televisión HD", "WiFi Pro Incluido", "Telefonía Ilimitada", "Fibra XGS-PON"] },
+                { name: "Totalplay Doble Play 250", speed: "250 Mbps (Simétrico)", type: "Internet + TV", price: "$650", features: ["Televisión HD Plus", "Prioridad Gaming", "WiFi Pro Gama Alta", "Fibra XGS-PON"] },
+            ]
+        }
+    },
+    "Megacable Doble Play": {
+        plans: {
+            TV: [
+                { name: "Megacable 300 MB", speed: "300 Mbps (Simétrico)", type: "Internet + TV", price: "$680", features: ["XVIEW+ Incluido", "Suscripción Netflix", "Internet Simétrico", "Telefonía Fija"] },
+                { name: "Megacable 500 MB", speed: "500 Mbps (Simétrico)", type: "Internet + TV", price: "$880", features: ["XVIEW+ Premium", "Netflix Incluido", "Velocidad Extrema", "Soporte Prioritario"] },
+            ]
+        }
+    },
+    "Telmex Infinitum + TV": {
+        plans: {
+            TV: [
+                { name: "Infinitum 80 MB", speed: "80 Mbps", type: "Internet + TV", price: "$399", features: ["Claro Video Gratis", "Netflix Incluido", "Disney+ opcional", "Línea Telmex"] },
+                { name: "Infinitum 150 MB", speed: "150 Mbps", type: "Internet + TV", price: "$549", features: ["Claro Video Gratis", "Netflix + Disney+", "HBO Max Incluido", "Línea Telmex"] },
+            ]
+        }
+    },
+    "izzi 150 Megas + TV+": {
+        plans: {
+            TV: [
+                { name: "izzi tv+ 150", speed: "150 Mbps", type: "Internet + TV", price: "$720", features: ["izzi tv+ incluido", "Televisión Digital", "Netflix Opcional", "App izzi go"] },
+            ]
+        }
+    },
+    "Cablecom Estándar": {
+        plans: {
+            TV: [
+                { name: "Combo Esencial 100", speed: "100 Mbps", type: "Internet + TV", price: "$350", features: ["TV Básica Digital", "Internet Fiable", "Telefonía Incluida", "Soporte en Sitio"] },
+                { name: "Combo Plus 300", speed: "300 Mbps", type: "Internet + TV", price: "$550", features: ["TV Premium HD", "Internet Alta Velocidad", "Módem Dual Band", "SLA Residencial"] },
+            ]
+        }
+    },
     Totalplay: {
         plans: {
             Streamer: [
@@ -44,6 +83,14 @@ const providerData: any = {
                 { name: "Tríple Clásico", speed: "150 MB", type: "Internet + TV + Telef", price: "$650", features: ["80 Canales HD", "Xview+ Incluido"] },
             ]
         }
+    },
+    "Impactel TV & Internet": {
+        plans: {
+            TV: [
+                { name: "Solo Internet", speed: "50 Mbps", type: "Internet", price: "$280", features: ["Señal regional estable", "100+ Canales", "Soporte local", "Sin plazos forzosos"] },
+                { name: "TV + Internet", speed: "50 Mbps", type: "Internet + TV", price: "$500", features: ["Navegación Estable", "100+ Canales", "Hasta 4 TV", "Servicio Residencial"] }
+            ]
+        }
     }
 };
 
@@ -51,7 +98,18 @@ export const CategoryModal = ({ isOpen, onClose, category, providerName }: Categ
     const [selectedPlan, setSelectedPlan] = useState(0);
 
     const getProviderPlans = () => {
-        const data = providerData[providerName] || providerData.Totalplay;
+        // First try exact match
+        let data = providerData[providerName];
+
+        // If no exact match, try fuzzy match on names that start with the provider
+        if (!data) {
+            const key = Object.keys(providerData).find(k =>
+                providerName.toLowerCase().startsWith(k.toLowerCase()) ||
+                k.toLowerCase().startsWith(providerName.toLowerCase())
+            );
+            data = key ? providerData[key] : providerData.Totalplay;
+        }
+
         const plans = data.plans[category];
         if (plans) return plans;
 
@@ -191,10 +249,15 @@ export const CategoryModal = ({ isOpen, onClose, category, providerName }: Categ
                                         >
                                             <div className="flex justify-between items-start mb-4">
                                                 <div className={`p-3 rounded-2xl ${selectedPlan === i ? 'bg-neon-cyan/20' : 'bg-white/5 group-hover:bg-white/10'} transition-colors`}>
-                                                    {category === 'Streamer' ? <Wifi className={`w-5 h-5 ${selectedPlan === i ? 'text-neon-cyan' : 'text-slate-500'}`} /> :
-                                                        category === 'HomeOffice' ? <Monitor className={`w-5 h-5 ${selectedPlan === i ? 'text-neon-cyan' : 'text-slate-500'}`} /> :
-                                                            category === 'TV' ? <Tv className={`w-5 h-5 ${selectedPlan === i ? 'text-neon-cyan' : 'text-slate-500'}`} /> :
-                                                                <Briefcase className={`w-5 h-5 ${selectedPlan === i ? 'text-neon-cyan' : 'text-slate-500'}`} />}
+                                                    {plan.type?.toLowerCase().includes('tv') ? (
+                                                        <Tv className={`w-5 h-5 ${selectedPlan === i ? 'text-neon-cyan' : 'text-slate-500'}`} />
+                                                    ) : (plan.type?.toLowerCase().includes('internet') || category === 'Streamer') ? (
+                                                        <Wifi className={`w-5 h-5 ${selectedPlan === i ? 'text-neon-cyan' : 'text-slate-500'}`} />
+                                                    ) : category === 'HomeOffice' ? (
+                                                        <Monitor className={`w-5 h-5 ${selectedPlan === i ? 'text-neon-cyan' : 'text-slate-500'}`} />
+                                                    ) : (
+                                                        <Briefcase className={`w-5 h-5 ${selectedPlan === i ? 'text-neon-cyan' : 'text-slate-500'}`} />
+                                                    )}
                                                 </div>
                                                 <div className={`text-xl font-black italic ${selectedPlan === i ? 'text-neon-cyan' : 'text-white'}`}>
                                                     {plan.price}

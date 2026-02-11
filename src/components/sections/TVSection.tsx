@@ -85,16 +85,17 @@ const tvBundlePlans = [
     },
     {
         category: "HOGARES BÁSICOS (ECONOMÍA)",
-        provider: "Impactel Básico",
-        speed: "Internet + TV Regional",
+        provider: "Impactel TV & Internet",
+        speed: "Elige tu modalidad",
         features: [
-            "Paquetes económicos para el hogar",
-            "Cobertura regional especializada",
-            "Ideal para navegación básica y TV",
-            "Sin complicaciones ni cargos ocultos"
+            "🌐 Solo Internet: $280 mensuales",
+            "📺 TV + Internet: $500 mensuales",
+            "Señal regional 100% estable",
+            "Más de 100 canales",
+            "Hasta 4 Televisiones"
         ],
-        price: "$280 – $500",
-        recommendation: "CONEXIÓN REGIONAL FIABLE",
+        price: "280 o 500",
+        recommendation: "DÚO DE AHORRO",
         color: "white",
         icon: <Heart className="w-8 h-8" />
     }

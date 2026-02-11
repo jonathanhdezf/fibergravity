@@ -685,7 +685,10 @@ export default function PremiumAdminDashboard() {
                                         <div className="flex justify-center gap-6 mt-4">
                                             {deviceData.map((d, i) => (
                                                 <div key={i} className="flex items-center gap-2">
-                                                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                                                    <div
+                                                        className="chart-legend-dot"
+                                                        style={{ backgroundColor: COLORS[i % COLORS.length] }}
+                                                    />
                                                     <span className="text-[10px] font-black uppercase text-slate-400">{d.name}</span>
                                                 </div>
                                             ))}
@@ -1154,6 +1157,7 @@ export default function PremiumAdminDashboard() {
                                                 </button>
                                                 <button
                                                     onClick={() => deleteItem('comisionistas', agent.id)}
+                                                    title="Eliminar Agente"
                                                     className="p-3 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
@@ -1441,6 +1445,7 @@ export default function PremiumAdminDashboard() {
                                                                             </label>
                                                                             <button
                                                                                 type="button"
+                                                                                title="Eliminar Foto"
                                                                                 onClick={() => setEditingLead({ ...editingLead, ine_anverso: "" })}
                                                                                 className="p-3 bg-red-500/20 border border-red-500/40 rounded-2xl text-red-500 hover:bg-red-500 hover:text-white transition-all"
                                                                             >
@@ -1485,6 +1490,7 @@ export default function PremiumAdminDashboard() {
                                                                             </label>
                                                                             <button
                                                                                 type="button"
+                                                                                title="Eliminar Foto"
                                                                                 onClick={() => setEditingLead({ ...editingLead, ine_reverso: "" })}
                                                                                 className="p-3 bg-red-500/20 border border-red-500/40 rounded-2xl text-red-500 hover:bg-red-500 hover:text-white transition-all"
                                                                             >
@@ -1815,117 +1821,98 @@ export default function PremiumAdminDashboard() {
             {/* 2. PREMIUM PRINTABLE DOSSIER (Visible ONLY during print spools) */}
             {
                 editingLead && (
-                    <div id="printable-dossier" className="hidden print-force-visible" style={{ position: 'relative' }}>
+                    <div id="printable-dossier" className="hidden print-force-visible dossier-root">
                         {/* Stamp: RECHAZADO */}
                         {editingLead.status === 'rejected' && (
-                            <div style={{
-                                position: 'absolute',
-                                top: '80px',
-                                right: '40px',
-                                border: '6px double #ef4444',
-                                borderRadius: '15px',
-                                padding: '15px 30px',
-                                color: '#ef4444',
-                                fontSize: '40px',
-                                fontWeight: '900',
-                                textTransform: 'uppercase',
-                                transform: 'rotate(-12deg)',
-                                background: 'white',
-                                boxShadow: '0 0 0 4px white, 0 0 0 6px #ef4444',
-                                opacity: 0.9,
-                                zIndex: 50,
-                                textAlign: 'center',
-                                pointerEvents: 'none',
-                                fontFamily: 'monospace'
-                            }}>
+                            <div className="dossier-stamp-rejected">
                                 RECHAZADO
-                                <div style={{ fontSize: '10px', fontWeight: 'bold', marginTop: '5px', textTransform: 'uppercase', color: '#991b1b' }}>
+                                <div className="dossier-rejected-reason">
                                     MOTIVO: {editingLead.rejection_reason || "PENDIENTE DE ESPECIFICAR"}
                                 </div>
                             </div>
                         )}
                         {/* Header: High Contrast & Simple */}
-                        <div style={{ borderBottom: '4px solid black', paddingBottom: '30px', marginBottom: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div className="dossier-header">
                             <div>
-                                <h1 style={{ fontSize: '40px', fontWeight: '900', color: 'black', margin: 0 }}>FIBERGRAVITY</h1>
-                                <p style={{ fontSize: '10px', fontWeight: 'bold', color: '#666', letterSpacing: '4px', marginTop: '5px' }}>OFFICIAL LOGISTICS DOSSIER v3.0</p>
+                                <h1 className="dossier-header-title">FIBERGRAVITY</h1>
+                                <p className="dossier-header-subtitle">OFFICIAL LOGISTICS DOSSIER v3.0</p>
                             </div>
-                            <div style={{ textAlign: 'right' }}>
-                                <p style={{ fontSize: '12px', fontWeight: 'bold', color: 'black', margin: 0 }}>FOLIO DE GESTIÓN</p>
-                                <p style={{ fontSize: '28px', fontWeight: '900', color: '#0284c7', margin: 0 }}>#{editingLead.id.split('-')[0].toUpperCase()}</p>
-                                <p style={{ fontSize: '10px', color: '#999' }}>{new Date().toLocaleString()}</p>
+                            <div>
+                                <p className="dossier-folio-label">FOLIO DE GESTIÓN</p>
+                                <p className="dossier-folio-value">#{editingLead.id.split('-')[0].toUpperCase()}</p>
+                                <p className="dossier-timestamp">{new Date().toLocaleString()}</p>
                             </div>
                         </div>
 
                         {/* Section 01: Client Data */}
-                        <div style={{ marginBottom: '40px' }}>
-                            <h3 style={{ fontSize: '12px', fontWeight: '900', borderLeft: '4px solid #0284c7', paddingLeft: '15px', color: '#0284c7', marginBottom: '20px' }}>01. IDENTIFICACIÓN DEL CLIENTE</h3>
-                            <div style={{ border: '2px solid #eee', borderRadius: '15px', padding: '25px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                        <div className="dossier-section">
+                            <h3 className="dossier-section-title">01. IDENTIFICACIÓN DEL CLIENTE</h3>
+                            <div className="dossier-grid-card">
                                 <div>
-                                    <p style={{ fontSize: '10px', color: '#999', margin: '0 0 5px 0' }}>NOMBRE COMPLETO</p>
-                                    <p style={{ fontSize: '18px', fontWeight: 'bold', color: 'black', margin: 0 }}>{editingLead.full_name}</p>
+                                    <p className="dossier-field-label">NOMBRE COMPLETO</p>
+                                    <p className="dossier-field-value">{editingLead.full_name}</p>
                                 </div>
                                 <div>
-                                    <p style={{ fontSize: '10px', color: '#999', margin: '0 0 5px 0' }}>TELÉFONO DE CONTACTO</p>
-                                    <p style={{ fontSize: '18px', fontWeight: 'bold', color: 'black', margin: 0 }}>{editingLead.phone}</p>
+                                    <p className="dossier-field-label">TELÉFONO DE CONTACTO</p>
+                                    <p className="dossier-field-value">{editingLead.phone}</p>
                                 </div>
-                                <div style={{ gridColumn: 'span 2' }}>
-                                    <p style={{ fontSize: '10px', color: '#999', margin: '0 0 5px 0' }}>UBICACIÓN REGISTRADA</p>
-                                    <p style={{ fontSize: '18px', fontWeight: 'bold', color: 'black', margin: 0 }}>{editingLead.location}</p>
+                                <div className="col-span-2">
+                                    <p className="dossier-field-label">UBICACIÓN REGISTRADA</p>
+                                    <p className="dossier-field-value">{editingLead.location}</p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Section 02: Service Details */}
-                        <div style={{ marginBottom: '40px' }}>
-                            <h3 style={{ fontSize: '12px', fontWeight: '900', borderLeft: '4px solid #0284c7', paddingLeft: '15px', color: '#0284c7', marginBottom: '20px' }}>02. DETALLES DEL SERVICIO ASIGNADO</h3>
-                            <div style={{ border: '2px solid #eee', borderRadius: '15px', padding: '25px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                        <div className="dossier-section">
+                            <h3 className="dossier-section-title">02. DETALLES DEL SERVICIO ASIGNADO</h3>
+                            <div className="dossier-grid-card">
                                 <div>
-                                    <p style={{ fontSize: '10px', color: '#999', margin: '0 0 5px 0' }}>PROVEEDOR</p>
-                                    <p style={{ fontSize: '18px', fontWeight: '900', color: 'black', margin: 0 }}>{editingLead.provider}</p>
+                                    <p className="dossier-field-label">PROVEEDOR</p>
+                                    <p className="dossier-field-value-heavy">{editingLead.provider}</p>
                                 </div>
                                 <div>
-                                    <p style={{ fontSize: '10px', color: '#999', margin: '0 0 5px 0' }}>PLAN CONTRATADO</p>
-                                    <p style={{ fontSize: '18px', fontWeight: 'bold', color: 'black', margin: 0 }}>{editingLead.plan_name}</p>
+                                    <p className="dossier-field-label">PLAN CONTRATADO</p>
+                                    <p className="dossier-field-value">{editingLead.plan_name}</p>
                                 </div>
                                 <div>
-                                    <p style={{ fontSize: '10px', color: '#999', margin: '0 0 5px 0' }}>PAGO MENSUAL</p>
-                                    <p style={{ fontSize: '18px', fontWeight: 'bold', color: 'black', margin: 0 }}>{editingLead.price}</p>
+                                    <p className="dossier-field-label">PAGO MENSUAL</p>
+                                    <p className="dossier-field-value">{editingLead.price}</p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Section 03: Documents */}
-                        <div style={{ marginBottom: '40px', pageBreakInside: 'avoid' }}>
-                            <h3 style={{ fontSize: '12px', fontWeight: '900', borderLeft: '4px solid #0284c7', paddingLeft: '15px', color: '#0284c7', marginBottom: '20px' }}>03. EVIDENCIA DOCUMENTAL (INE Y DOMICILIO)</h3>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
-                                <div style={{ textAlign: 'center' }}>
-                                    <p style={{ fontSize: '10px', color: '#666', marginBottom: '10px' }}>ANVERSO (FRONTAL)</p>
-                                    <div style={{ border: '1px solid #ddd', borderRadius: '10px', overflow: 'hidden', height: '180px', background: '#fafafa' }}>
+                        <div className="dossier-section !page-break-inside-avoid">
+                            <h3 className="dossier-section-title">03. EVIDENCIA DOCUMENTAL (INE Y DOMICILIO)</h3>
+                            <div className="dossier-doc-grid">
+                                <div className="dossier-doc-container">
+                                    <p className="dossier-doc-label">ANVERSO (FRONTAL)</p>
+                                    <div className="dossier-image-frame">
                                         {editingLead.ine_anverso ? (
-                                            <img src={editingLead.ine_anverso} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="INE Front" />
+                                            <img src={editingLead.ine_anverso} className="dossier-img" alt="INE Front" />
                                         ) : (
-                                            <p style={{ marginTop: '80px', color: '#ccc' }}>SIN IMAGEN</p>
+                                            <p className="dossier-no-image">SIN IMAGEN</p>
                                         )}
                                     </div>
                                 </div>
-                                <div style={{ textAlign: 'center' }}>
-                                    <p style={{ fontSize: '10px', color: '#666', marginBottom: '10px' }}>REVERSO (TRASERO)</p>
-                                    <div style={{ border: '1px solid #ddd', borderRadius: '10px', overflow: 'hidden', height: '180px', background: '#fafafa' }}>
+                                <div className="dossier-doc-container">
+                                    <p className="dossier-doc-label">REVERSO (TRASERO)</p>
+                                    <div className="dossier-image-frame">
                                         {editingLead.ine_reverso ? (
-                                            <img src={editingLead.ine_reverso} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="INE Back" />
+                                            <img src={editingLead.ine_reverso} className="dossier-img" alt="INE Back" />
                                         ) : (
-                                            <p style={{ marginTop: '80px', color: '#ccc' }}>SIN IMAGEN</p>
+                                            <p className="dossier-no-image">SIN IMAGEN</p>
                                         )}
                                     </div>
                                 </div>
-                                <div style={{ gridColumn: 'span 2', textAlign: 'center', marginTop: '10px' }}>
-                                    <p style={{ fontSize: '10px', color: '#666', marginBottom: '10px' }}>COMPROBANTE DE DOMICILIO</p>
-                                    <div style={{ border: '1px solid #ddd', borderRadius: '10px', overflow: 'hidden', height: '300px', background: '#fafafa' }}>
+                                <div className="col-span-2 dossier-doc-container mt-4">
+                                    <p className="dossier-doc-label">COMPROBANTE DE DOMICILIO</p>
+                                    <div className="dossier-image-frame-large">
                                         {editingLead.comprobante_domicilio ? (
-                                            <img src={editingLead.comprobante_domicilio} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="Proof of Residence" />
+                                            <img src={editingLead.comprobante_domicilio} className="dossier-img" alt="Proof of Residence" />
                                         ) : (
-                                            <p style={{ marginTop: '140px', color: '#ccc' }}>SIN IMAGEN / ARCHIVO PENDIENTE</p>
+                                            <p className="dossier-no-image-large">SIN IMAGEN / ARCHIVO PENDIENTE</p>
                                         )}
                                     </div>
                                 </div>
@@ -1933,19 +1920,19 @@ export default function PremiumAdminDashboard() {
                         </div>
 
                         {/* Section 04: References */}
-                        <div style={{ pageBreakInside: 'avoid' }}>
-                            <h3 style={{ fontSize: '12px', fontWeight: '900', borderLeft: '4px solid #0284c7', paddingLeft: '15px', color: '#0284c7', marginBottom: '20px' }}>04. REFERENCIAS DE INSTALACIÓN</h3>
-                            <div style={{ border: '2px solid #eee', borderRadius: '15px', padding: '25px', background: '#fcfcfc' }}>
-                                <p style={{ fontSize: '14px', lineHeight: '1.6', color: 'black', margin: 0 }}>
+                        <div className="!page-break-inside-avoid">
+                            <h3 className="dossier-section-title">04. REFERENCIAS DE INSTALACIÓN</h3>
+                            <div className="dossier-references-box">
+                                <p className="dossier-references-text">
                                     {editingLead.referencias_hogar || "No se registraron referencias específicas."}
                                 </p>
                             </div>
                         </div>
 
                         {/* Footer */}
-                        <div style={{ borderTop: '1px solid #eee', marginTop: '60px', paddingTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <p style={{ fontSize: '9px', color: '#999' }}>© 2026 FIBERGRAVITY • DOCUMENTO DE USO CONFIDENCIAL</p>
-                            <p style={{ fontSize: '9px', fontWeight: 'bold', color: 'black' }}>NOC - INFRASTRUCTURE OPERATIONS</p>
+                        <div className="dossier-footer">
+                            <p className="dossier-footer-text">© 2026 FIBERGRAVITY • DOCUMENTO DE USO CONFIDENCIAL</p>
+                            <p className="dossier-footer-tag">NOC - INFRASTRUCTURE OPERATIONS</p>
                         </div>
                     </div>
                 )
