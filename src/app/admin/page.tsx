@@ -30,7 +30,8 @@ import {
     Trash2,
     XCircle,
     Save,
-    X
+    X,
+    Menu
 } from "lucide-react";
 import {
     AreaChart,
@@ -84,6 +85,8 @@ export default function PremiumAdminDashboard() {
     const [activeTab, setActiveTab] = useState<"overview" | "leads" | "traffic">("overview");
     const [searchQuery, setSearchQuery] = useState("");
     const [lastRefresh, setLastRefresh] = useState(new Date());
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [filter, setFilter] = useState("all");
 
     // New States for Lead Management
     const [editingLead, setEditingLead] = useState<Lead | null>(null);
@@ -211,10 +214,10 @@ export default function PremiumAdminDashboard() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="ENTER KEY"
-                                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-5 text-center tracking-[0.5em] text-white focus:outline-none focus:border-neon-cyan focus:bg-white/[0.07] transition-all font-black"
+                                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-5 text-center tracking-[0.5em] text-white focus:outline-none focus:border-neon-cyan focus:bg-white/[0.07] transition-all font-black text-lg"
                                 autoFocus
                             />
-                            <NeonButton type="submit" className="w-full py-5">INITIALIZE SYSTEM</NeonButton>
+                            <NeonButton type="submit" className="w-full py-5 text-sm">INITIALIZE SYSTEM</NeonButton>
                         </form>
                     </GlassCard>
                 </motion.div>
@@ -258,12 +261,53 @@ export default function PremiumAdminDashboard() {
                             </span>
                             <span className="text-[10px] font-bold text-slate-500 font-mono">Synced {lastRefresh.toLocaleTimeString()}</span>
                         </div>
+
+                        {/* Mobile Menu Toggle */}
+                        <button
+                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                            className="md:hidden p-3 rounded-xl bg-white/5 text-white"
+                        >
+                            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                        </button>
+
                         <button onClick={() => setIsAuthenticated(false)} className="p-3 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all">
                             <LogOut className="w-5 h-5" />
                         </button>
                     </div>
                 </div>
             </nav>
+
+            {/* Mobile Dropdown Menu */}
+            <AnimatePresence>
+                {isMobileMenuOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="fixed top-20 left-0 right-0 z-[49] bg-black/95 backdrop-blur-3xl border-b border-white/10 p-6 md:hidden"
+                    >
+                        <div className="flex flex-col gap-4">
+                            {[
+                                { id: 'overview', icon: TrendingUp, label: 'Overview' },
+                                { id: 'leads', icon: Users, label: 'Leads Hub' },
+                                { id: 'traffic', icon: Globe, label: 'Live Traffic' }
+                            ].map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => {
+                                        setActiveTab(tab.id as any);
+                                        setIsMobileMenuOpen(false);
+                                    }}
+                                    className={`flex items-center gap-4 p-5 rounded-2xl text-[12px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-neon-cyan/10 text-neon-cyan' : 'text-slate-500'
+                                        }`}
+                                >
+                                    <tab.icon className="w-6 h-6" /> {tab.label}
+                                </button>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             <main className="pt-24 pb-12 px-6 md:px-12 max-w-[1600px] mx-auto">
                 <AnimatePresence mode="wait">
@@ -373,8 +417,8 @@ export default function PremiumAdminDashboard() {
                                                 key={s}
                                                 onClick={() => setFilter(s)}
                                                 className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all whitespace-nowrap ${filter === s
-                                                        ? 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan'
-                                                        : 'bg-white/5 border-white/10 text-slate-500 hover:text-white'
+                                                    ? 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan'
+                                                    : 'bg-white/5 border-white/10 text-slate-500 hover:text-white'
                                                     }`}
                                             >
                                                 {s}
@@ -384,100 +428,103 @@ export default function PremiumAdminDashboard() {
                                 </div>
 
                                 <div className="space-y-4">
-                                    {leads.filter(l => l.full_name.toLowerCase().includes(searchQuery.toLowerCase())).map((lead, i) => (
-                                        <motion.div
-                                            initial={{ opacity: 0, x: -20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: i * 0.05 }}
-                                            key={lead.id}
-                                            className="group flex flex-col md:flex-row items-center justify-between p-6 rounded-[2.5rem] bg-white/[0.02] border border-white/5 hover:border-white/20 transition-all hover:bg-white/[0.04]"
-                                        >
-                                            <div className="flex items-center gap-6 w-full md:w-auto mb-4 md:mb-0">
-                                                <div className={`p-5 rounded-[1.5rem] bg-${lead.category === 'Gamer' ? 'neon-cyan' : 'neon-magenta'}/10 border border-white/5`}>
-                                                    {lead.category === 'Gamer' ? <Gamepad2 className="w-6 h-6 text-neon-cyan" /> : <Tv className="w-6 h-6 text-neon-magenta" />}
-                                                </div>
-                                                <div>
-                                                    <h4 className="text-lg font-black text-white italic">{lead.full_name}</h4>
-                                                    <div className="flex items-center gap-3 text-xs text-slate-500 font-bold uppercase tracking-widest">
-                                                        <span>{lead.phone}</span>
-                                                        <div className="w-1 h-1 rounded-full bg-slate-700" />
-                                                        <span className="text-slate-400">{lead.location}</span>
+                                    {leads
+                                        .filter(l => filter === 'all' || l.status === filter)
+                                        .filter(l => l.full_name.toLowerCase().includes(searchQuery.toLowerCase()))
+                                        .map((lead, i) => (
+                                            <motion.div
+                                                initial={{ opacity: 0, x: -20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                transition={{ delay: i * 0.05 }}
+                                                key={lead.id}
+                                                className="group flex flex-col md:flex-row items-center justify-between p-6 rounded-[2.5rem] bg-white/[0.02] border border-white/5 hover:border-white/20 transition-all hover:bg-white/[0.04]"
+                                            >
+                                                <div className="flex items-center gap-6 w-full md:w-auto mb-4 md:mb-0">
+                                                    <div className={`p-5 rounded-[1.5rem] bg-${lead.category === 'Gamer' ? 'neon-cyan' : 'neon-magenta'}/10 border border-white/5`}>
+                                                        {lead.category === 'Gamer' ? <Gamepad2 className="w-6 h-6 text-neon-cyan" /> : <Tv className="w-6 h-6 text-neon-magenta" />}
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-lg font-black text-white italic">{lead.full_name}</h4>
+                                                        <div className="flex items-center gap-3 text-xs text-slate-500 font-bold uppercase tracking-widest">
+                                                            <span>{lead.phone}</span>
+                                                            <div className="w-1 h-1 rounded-full bg-slate-700" />
+                                                            <span className="text-slate-400">{lead.location}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
 
-                                            <div className="flex flex-col items-center md:items-start gap-1 mb-4 md:mb-0">
-                                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">{lead.provider}</span>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-xs font-black text-neon-cyan italic uppercase">{lead.plan_name}</span>
-                                                    <span className="px-2 py-0.5 rounded-lg bg-white/5 text-[9px] font-bold text-slate-400 tracking-tighter">{lead.speed}</span>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
-                                                <div className="text-right">
-                                                    <p className="text-xl font-black italic text-white">{lead.price}</p>
-                                                    <p className="text-[9px] font-black uppercase text-slate-600 tracking-widest">{new Date(lead.created_at).toLocaleDateString()}</p>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    {/* Status Update Actions */}
-                                                    {lead.status === 'pending' && (
-                                                        <button
-                                                            onClick={() => updateStatus(lead.id, 'contacting')}
-                                                            className="p-3 rounded-xl bg-neon-cyan/10 text-neon-cyan hover:bg-neon-cyan hover:text-black transition-all"
-                                                            title="Procesar"
-                                                        >
-                                                            <RefreshCw className="w-5 h-5" />
-                                                        </button>
-                                                    )}
-                                                    {lead.status !== 'completed' && lead.status !== 'rejected' && (
-                                                        <button
-                                                            onClick={() => updateStatus(lead.id, 'completed')}
-                                                            className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all"
-                                                            title="Finalizar"
-                                                        >
-                                                            <CheckCircle2 className="w-5 h-5" />
-                                                        </button>
-                                                    )}
-                                                    {lead.status !== 'rejected' && (
-                                                        <button
-                                                            onClick={() => setRejectionModal({ isOpen: true, id: lead.id, reason: "" })}
-                                                            className="p-3 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all"
-                                                            title="Rechazar"
-                                                        >
-                                                            <XCircle className="w-5 h-5" />
-                                                        </button>
-                                                    )}
-
-                                                    {/* Management Actions */}
-                                                    <div className="w-px h-8 bg-white/10 mx-1 self-center" />
-
-                                                    <button
-                                                        onClick={() => setEditingLead(lead)}
-                                                        className="p-3 rounded-xl bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white transition-all"
-                                                        title="Editar Datos"
-                                                    >
-                                                        <Edit2 className="w-5 h-5" />
-                                                    </button>
-
-                                                    <button
-                                                        onClick={() => setDeleteConfirm(lead.id)}
-                                                        className="p-3 rounded-xl bg-red-900/10 text-red-700 hover:bg-red-600 hover:text-white transition-all"
-                                                        title="Eliminar Permanente"
-                                                    >
-                                                        <Trash2 className="w-5 h-5" />
-                                                    </button>
-                                                </div>
-
-                                                {/* Rejection Reason Display */}
-                                                {lead.status === 'rejected' && lead.rejection_reason && (
-                                                    <div className="mt-2 text-[10px] text-red-500 font-bold uppercase tracking-widest bg-red-500/5 p-2 rounded-lg border border-red-500/10">
-                                                        Razón: {lead.rejection_reason}
+                                                <div className="flex flex-col items-center md:items-start gap-1 mb-4 md:mb-0">
+                                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">{lead.provider}</span>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs font-black text-neon-cyan italic uppercase">{lead.plan_name}</span>
+                                                        <span className="px-2 py-0.5 rounded-lg bg-white/5 text-[9px] font-bold text-slate-400 tracking-tighter">{lead.speed}</span>
                                                     </div>
-                                                )}
-                                            </div>
-                                        </motion.div>
-                                    ))}
+                                                </div>
+
+                                                <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
+                                                    <div className="text-right">
+                                                        <p className="text-xl font-black italic text-white">{lead.price}</p>
+                                                        <p className="text-[9px] font-black uppercase text-slate-600 tracking-widest">{new Date(lead.created_at).toLocaleDateString()}</p>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        {/* Status Update Actions */}
+                                                        {lead.status === 'pending' && (
+                                                            <button
+                                                                onClick={() => updateStatus(lead.id, 'contacting')}
+                                                                className="p-3 rounded-xl bg-neon-cyan/10 text-neon-cyan hover:bg-neon-cyan hover:text-black transition-all"
+                                                                title="Procesar"
+                                                            >
+                                                                <RefreshCw className="w-5 h-5" />
+                                                            </button>
+                                                        )}
+                                                        {lead.status !== 'completed' && lead.status !== 'rejected' && (
+                                                            <button
+                                                                onClick={() => updateStatus(lead.id, 'completed')}
+                                                                className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all"
+                                                                title="Finalizar"
+                                                            >
+                                                                <CheckCircle2 className="w-5 h-5" />
+                                                            </button>
+                                                        )}
+                                                        {lead.status !== 'rejected' && (
+                                                            <button
+                                                                onClick={() => setRejectionModal({ isOpen: true, id: lead.id, reason: "" })}
+                                                                className="p-3 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                                                                title="Rechazar"
+                                                            >
+                                                                <XCircle className="w-5 h-5" />
+                                                            </button>
+                                                        )}
+
+                                                        {/* Management Actions */}
+                                                        <div className="w-px h-8 bg-white/10 mx-1 self-center" />
+
+                                                        <button
+                                                            onClick={() => setEditingLead(lead)}
+                                                            className="p-3 rounded-xl bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white transition-all"
+                                                            title="Editar Datos"
+                                                        >
+                                                            <Edit2 className="w-5 h-5" />
+                                                        </button>
+
+                                                        <button
+                                                            onClick={() => setDeleteConfirm(lead.id)}
+                                                            className="p-3 rounded-xl bg-red-900/10 text-red-700 hover:bg-red-600 hover:text-white transition-all"
+                                                            title="Eliminar Permanente"
+                                                        >
+                                                            <Trash2 className="w-5 h-5" />
+                                                        </button>
+                                                    </div>
+
+                                                    {/* Rejection Reason Display */}
+                                                    {lead.status === 'rejected' && lead.rejection_reason && (
+                                                        <div className="mt-2 text-[10px] text-red-500 font-bold uppercase tracking-widest bg-red-500/5 p-2 rounded-lg border border-red-500/10">
+                                                            Razón: {lead.rejection_reason}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </motion.div>
+                                        ))}
                                 </div>
                             </GlassCard>
                         </motion.div>
