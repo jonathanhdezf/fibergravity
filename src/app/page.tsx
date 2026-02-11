@@ -9,6 +9,7 @@ import { TVSection } from "@/components/sections/TVSection";
 import { SpeedTest } from "@/components/sections/SpeedTest";
 import { Coverage } from "@/components/sections/Coverage";
 import { Footer } from "@/components/sections/Footer";
+import { LaunchCountdown } from "@/components/sections/LaunchCountdown";
 
 import { Partners } from "@/components/sections/Partners";
 
@@ -20,6 +21,7 @@ export default function Home() {
       <main className="min-h-screen">
         <Navbar />
         <Hero />
+        <LaunchCountdown />
         <PlansHeader />
         <GamerPlans />
         <StreamerPlans />

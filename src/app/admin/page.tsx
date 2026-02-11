@@ -105,6 +105,17 @@ interface Visit {
     page_path: string;
 }
 
+interface SystemLog {
+    id: string;
+    created_at: string;
+    action: string;
+    entity_type: string;
+    entity_id: string;
+    details: string;
+    severity: string;
+    admin_name: string;
+}
+
 const COLORS = ['#00f3ff', '#ff00ff', '#ffffff', '#3b82f6', '#10b981'];
 
 export default function PremiumAdminDashboard() {
@@ -113,9 +124,10 @@ export default function PremiumAdminDashboard() {
     const [loading, setLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [password, setPassword] = useState("");
-    const [activeTab, setActiveTab] = useState<"overview" | "leads" | "traffic" | "inventory" | "integrations">("overview");
+    const [activeTab, setActiveTab] = useState<"overview" | "leads" | "traffic" | "inventory" | "integrations" | "logs">("overview");
     const [providers, setProviders] = useState<Provider[]>([]);
     const [plans, setPlans] = useState<Plan[]>([]);
+    const [logs, setLogs] = useState<SystemLog[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [lastRefresh, setLastRefresh] = useState(new Date());
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -138,20 +150,33 @@ export default function PremiumAdminDashboard() {
 
     const fetchData = async () => {
         setLoading(true);
-        const [leadsRes, visitsRes, providersRes, plansRes] = await Promise.all([
+        const [leadsRes, visitsRes, providersRes, plansRes, logsRes] = await Promise.all([
             supabase.from('leads').select('*').order('created_at', { ascending: false }),
             supabase.from('site_visits').select('*').order('created_at', { ascending: false }).limit(1000),
             supabase.from('providers').select('*').order('name'),
-            supabase.from('plans').select('*').order('ranking_score', { ascending: false })
+            supabase.from('plans').select('*').order('ranking_score', { ascending: false }),
+            supabase.from('system_logs').select('*').order('created_at', { ascending: false }).limit(500)
         ]);
 
         if (leadsRes.data) setLeads(leadsRes.data);
         if (visitsRes.data) setVisits(visitsRes.data);
         if (providersRes.data) setProviders(providersRes.data);
         if (plansRes.data) setPlans(plansRes.data);
+        if (logsRes.data) setLogs(logsRes.data);
 
         setLoading(false);
         setLastRefresh(new Date());
+    };
+
+    const logAction = async (action: string, entity_type: string, entity_id: string | null, details: string, severity: string = 'info') => {
+        await supabase.from('system_logs').insert({
+            action,
+            entity_type,
+            entity_id,
+            details,
+            severity,
+            admin_name: 'System Admin'
+        });
     };
 
     const updateStatus = async (id: string, newStatus: string, reason?: string) => {
@@ -160,6 +185,7 @@ export default function PremiumAdminDashboard() {
 
         const { error } = await supabase.from('leads').update(updateData).eq('id', id);
         if (!error) {
+            await logAction('STATUS_CHANGE', 'LEADS', id, `Cambiado status de lead a ${newStatus}${reason ? ': ' + reason : ''}`);
             fetchData();
             setRejectionModal({ isOpen: false, id: "", reason: "" });
         }
@@ -168,6 +194,7 @@ export default function PremiumAdminDashboard() {
     const deleteLead = async (id: string) => {
         const { error } = await supabase.from('leads').delete().eq('id', id);
         if (!error) {
+            await logAction('DELETE', 'LEADS', id, `Eliminado expediente de lead permanentemente`);
             fetchData();
             setDeleteConfirm(null);
         }
@@ -189,6 +216,7 @@ export default function PremiumAdminDashboard() {
             .eq('id', editingLead.id);
 
         if (!error) {
+            await logAction('UPDATE', 'LEADS', editingLead.id, `Actualizados datos del lead: ${editingLead.full_name}`);
             fetchData();
             setEditingLead(null);
         }
@@ -196,7 +224,10 @@ export default function PremiumAdminDashboard() {
 
     const deleteItem = async (table: string, id: string) => {
         const { error } = await supabase.from(table).delete().eq('id', id);
-        if (!error) fetchData();
+        if (!error) {
+            await logAction('DELETE', table.toUpperCase(), id, `Eliminado registro de la tabla ${table}`);
+            fetchData();
+        }
     };
 
     const saveProvider = async (e: React.FormEvent) => {
@@ -209,6 +240,7 @@ export default function PremiumAdminDashboard() {
             : await supabase.from('providers').insert(data);
 
         if (!res.error) {
+            await logAction(id ? 'UPDATE' : 'CREATE', 'PROVIDERS', id || 'NEW', `${id ? 'Actualizado' : 'Creado'} el proveedor: ${data.name}`);
             fetchData();
             setEditingProvider(null);
         }
@@ -229,6 +261,7 @@ export default function PremiumAdminDashboard() {
             : await supabase.from('plans').insert(data);
 
         if (!res.error) {
+            await logAction(id ? 'UPDATE' : 'CREATE', 'PLANS', id || 'NEW', `${id ? 'Actualizado' : 'Creado'} el plan: ${data.name}`);
             fetchData();
             setEditingPlan(null);
         }
@@ -331,7 +364,8 @@ export default function PremiumAdminDashboard() {
                                 { id: 'leads', icon: Users, label: 'Leads Hub' },
                                 { id: 'inventory', icon: Package, label: 'Inventario' },
                                 { id: 'traffic', icon: Globe, label: 'Live Traffic' },
-                                { id: 'integrations', icon: Settings, label: 'Sistemas' }
+                                { id: 'integrations', icon: Settings, label: 'Sistemas' },
+                                { id: 'logs', icon: Activity, label: 'Logs' }
                             ].map((tab) => (
                                 <button
                                     key={tab.id}
@@ -384,7 +418,8 @@ export default function PremiumAdminDashboard() {
                                 { id: 'leads', icon: Users, label: 'Leads Hub' },
                                 { id: 'inventory', icon: Package, label: 'Inventario' },
                                 { id: 'traffic', icon: Globe, label: 'Live Traffic' },
-                                { id: 'integrations', icon: Settings, label: 'Sistemas' }
+                                { id: 'integrations', icon: Settings, label: 'Sistemas' },
+                                { id: 'logs', icon: Activity, label: 'Logs' }
                             ].map((tab) => (
                                 <button
                                     key={tab.id}
@@ -848,9 +883,94 @@ export default function PremiumAdminDashboard() {
                                         <h4 className="text-2xl font-black italic text-white mb-2 uppercase tracking-tighter">Bóveda de Seguridad & Backups</h4>
                                         <p className="text-sm text-slate-500 mb-0 leading-relaxed max-w-2xl">Protección perimetral de datos y respaldos automatizados cada 24 horas en nodos regionales redundantes para asegurar la continuidad sistemática de FiberGravity.</p>
                                     </div>
-                                    <NeonButton variant="magenta" className="py-4 px-10 text-[10px] w-full md:w-auto">
+                                    <NeonButton
+                                        onClick={() => setActiveTab("logs")}
+                                        variant="magenta"
+                                        className="py-4 px-10 text-[10px] w-full md:w-auto"
+                                    >
                                         VER LOGS DE SEGURIDAD
                                     </NeonButton>
+                                </div>
+                            </GlassCard>
+                        </motion.div>
+                    )}
+                    {activeTab === 'logs' && (
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
+                            <div className="flex justify-between items-center">
+                                <h2 className="text-2xl font-black italic">AUDITORÍA DE <span className="text-emerald-500 neon-text-emerald">SISTEMA</span></h2>
+                                <button
+                                    onClick={() => {
+                                        const csv = [
+                                            ['Fecha', 'Action', 'Entity', 'Details', 'Admin'].join(','),
+                                            ...logs.map(log => [new Date(log.created_at).toLocaleString(), log.action, log.entity_type, log.details, log.admin_name].join(','))
+                                        ].join('\n');
+                                        const blob = new Blob([csv], { type: 'text/csv' });
+                                        const url = window.URL.createObjectURL(blob);
+                                        const a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = `audit_logs_${new Date().toISOString()}.csv`;
+                                        a.click();
+                                    }}
+                                    className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
+                                >
+                                    <Download className="w-4 h-4" /> Exportar Auditoría
+                                </button>
+                            </div>
+
+                            <GlassCard className="p-0 border-white/5 !bg-black/60 overflow-hidden text-black">
+                                <div className="max-h-[700px] overflow-y-auto custom-scrollbar">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead className="sticky top-0 bg-slate-900 border-b border-white/5 z-10">
+                                            <tr>
+                                                <th className="px-8 py-5 text-[9px] font-black uppercase tracking-widest text-slate-500">Timestamp</th>
+                                                <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-slate-500">Acción</th>
+                                                <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-slate-500">Entidad</th>
+                                                <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-slate-500">Descripción del Cambio</th>
+                                                <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-slate-500">Admin</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-white/[0.02]">
+                                            {logs.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan={5} className="py-20 text-center text-slate-600 font-bold uppercase text-[10px] tracking-widest">No se registran actividades recientes en el núcleo.</td>
+                                                </tr>
+                                            ) : (
+                                                logs.map((log) => (
+                                                    <tr key={log.id} className="hover:bg-white/[0.01] transition-all group">
+                                                        <td className="px-8 py-5 whitespace-nowrap">
+                                                            <div className="flex flex-col">
+                                                                <span className="text-[11px] font-mono text-emerald-500/70">{new Date(log.created_at).toLocaleDateString()}</span>
+                                                                <span className="text-[10px] font-mono text-slate-500">{new Date(log.created_at).toLocaleTimeString()}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-5">
+                                                            <span className={`px-2 py-1 rounded-md text-[9px] font-black uppercase border ${log.action.includes('DELETE') ? 'bg-red-500/10 border-red-500/20 text-red-500' :
+                                                                log.action.includes('CREATE') ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
+                                                                    log.action.includes('UPDATE') ? 'bg-blue-500/10 border-blue-500/20 text-blue-500' :
+                                                                        'bg-white/5 border-white/10 text-slate-400'
+                                                                }`}>
+                                                                {log.action}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-6 py-5">
+                                                            <span className="text-[10px] font-black uppercase text-slate-400 font-mono tracking-tighter">
+                                                                {log.entity_type}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-6 py-5">
+                                                            <p className="text-xs text-slate-200 font-medium">{log.details}</p>
+                                                        </td>
+                                                        <td className="px-6 py-5 whitespace-nowrap">
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{log.admin_name}</span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            )}
+                                        </tbody>
+                                    </table>
                                 </div>
                             </GlassCard>
                         </motion.div>
