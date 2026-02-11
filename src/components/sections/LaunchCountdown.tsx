@@ -117,7 +117,7 @@ export const LaunchCountdown = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.1 }}
-                        className="text-5xl md:text-7xl lg:text-8xl font-black italic mb-6 tracking-tighter"
+                        className="text-4xl md:text-7xl lg:text-8xl font-black italic mb-6 tracking-tighter"
                     >
                         PREPÁRATE PARA <span className="text-neon-cyan drop-shadow-[0_0_15px_rgba(0,243,255,0.3)] uppercase">EL FUTURO</span>
                     </motion.h2>
@@ -127,7 +127,7 @@ export const LaunchCountdown = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.2 }}
-                        className="text-slate-400 text-sm md:text-lg max-w-2xl mb-16 uppercase font-bold tracking-widest"
+                        className="text-slate-400 text-[10px] md:text-lg max-w-2xl mb-16 uppercase font-bold tracking-[0.2em] md:tracking-widest px-4"
                     >
                         FiberGravity v3.0 se lanza globalmente. Estamos optimizando los últimos nodos para ofrecerte la experiencia definitiva.
                     </motion.p>

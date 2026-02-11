@@ -583,14 +583,23 @@ export default function PremiumAdminDashboard() {
                                                 animate={{ opacity: 1, x: 0 }}
                                                 transition={{ delay: i * 0.05 }}
                                                 key={lead.id}
-                                                className="group flex flex-col md:flex-row items-center justify-between p-6 rounded-[2.5rem] bg-white/[0.02] border border-white/5 hover:border-white/20 transition-all hover:bg-white/[0.04]"
+                                                className="group flex flex-col md:flex-row items-center justify-between p-4 md:p-6 rounded-[2rem] md:rounded-[2.5rem] bg-white/[0.02] border border-white/5 hover:border-white/20 transition-all hover:bg-white/[0.04] gap-6"
                                             >
                                                 <div className="flex items-center gap-6 w-full md:w-auto mb-4 md:mb-0">
                                                     <div className={`p-5 rounded-[1.5rem] bg-${lead.category === 'Gamer' ? 'neon-cyan' : 'neon-magenta'}/10 border border-white/5`}>
                                                         {lead.category === 'Gamer' ? <Gamepad2 className="w-6 h-6 text-neon-cyan" /> : <Tv className="w-6 h-6 text-neon-magenta" />}
                                                     </div>
                                                     <div>
-                                                        <h4 className="text-lg font-black text-white italic">{lead.full_name}</h4>
+                                                        <div className="flex items-center gap-3">
+                                                            <h4 className="text-lg font-black text-white italic">{lead.full_name}</h4>
+                                                            <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest border ${lead.status === 'rejected' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
+                                                                lead.status === 'completed' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
+                                                                    lead.status === 'contacting' ? 'bg-neon-cyan/10 border-neon-cyan/20 text-neon-cyan' :
+                                                                        'bg-slate-500/10 border-white/10 text-slate-400'
+                                                                }`}>
+                                                                {lead.status}
+                                                            </span>
+                                                        </div>
                                                         <div className="flex items-center gap-3 text-xs text-slate-500 font-bold uppercase tracking-widest">
                                                             <span>{lead.phone}</span>
                                                             <div className="w-1 h-1 rounded-full bg-slate-700" />
@@ -605,6 +614,11 @@ export default function PremiumAdminDashboard() {
                                                         <span className="text-xs font-black text-neon-cyan italic uppercase">{lead.plan_name}</span>
                                                         <span className="px-2 py-0.5 rounded-lg bg-white/5 text-[9px] font-bold text-slate-400 tracking-tighter">{lead.speed}</span>
                                                     </div>
+                                                    {lead.status === 'rejected' && lead.rejection_reason && (
+                                                        <span className="text-[9px] font-medium text-red-500/70 italic max-w-[200px] truncate" title={lead.rejection_reason}>
+                                                            Motivo: {lead.rejection_reason}
+                                                        </span>
+                                                    )}
                                                 </div>
 
                                                 <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
@@ -918,8 +932,8 @@ export default function PremiumAdminDashboard() {
                             </div>
 
                             <GlassCard className="p-0 border-white/5 !bg-black/60 overflow-hidden text-black">
-                                <div className="max-h-[700px] overflow-y-auto custom-scrollbar">
-                                    <table className="w-full text-left border-collapse">
+                                <div className="max-h-[700px] overflow-auto custom-scrollbar">
+                                    <table className="w-full text-left border-collapse min-w-[1000px]">
                                         <thead className="sticky top-0 bg-slate-900 border-b border-white/5 z-10">
                                             <tr>
                                                 <th className="px-8 py-5 text-[9px] font-black uppercase tracking-widest text-slate-500">Timestamp</th>
@@ -1042,6 +1056,14 @@ export default function PremiumAdminDashboard() {
                                             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
                                         />
                                     </div>
+                                    {editingLead.status === 'rejected' && editingLead.rejection_reason && (
+                                        <div className="md:col-span-2 p-4 rounded-2xl bg-red-500/5 border border-red-500/10">
+                                            <label className="text-[9px] font-black uppercase text-red-500/60 ml-1">Motivo de Rechazo</label>
+                                            <p className="text-sm font-bold text-red-500/90 mt-1 italic uppercase">
+                                                {editingLead.rejection_reason}
+                                            </p>
+                                        </div>
+                                    )}
                                     <div className="md:col-span-2 mt-6">
                                         <NeonButton type="submit" className="w-full py-4 !tracking-[0.5em]">ACTUALIZAR REGISTRO</NeonButton>
                                     </div>
