@@ -1592,25 +1592,35 @@ export default function PremiumAdminDashboard() {
 
                     {/* Section 03: Documents */}
                     <div style={{ marginBottom: '40px', pageBreakInside: 'avoid' }}>
-                        <h3 style={{ fontSize: '12px', fontWeight: '900', borderLeft: '4px solid #0284c7', paddingLeft: '15px', color: '#0284c7', marginBottom: '20px' }}>03. EVIDENCIA DOCUMENTAL (INE)</h3>
+                        <h3 style={{ fontSize: '12px', fontWeight: '900', borderLeft: '4px solid #0284c7', paddingLeft: '15px', color: '#0284c7', marginBottom: '20px' }}>03. EVIDENCIA DOCUMENTAL (INE Y DOMICILIO)</h3>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
                             <div style={{ textAlign: 'center' }}>
                                 <p style={{ fontSize: '10px', color: '#666', marginBottom: '10px' }}>ANVERSO (FRONTAL)</p>
-                                <div style={{ border: '1px solid #ddd', borderRadius: '10px', overflow: 'hidden', height: '200px', background: '#fafafa' }}>
+                                <div style={{ border: '1px solid #ddd', borderRadius: '10px', overflow: 'hidden', height: '180px', background: '#fafafa' }}>
                                     {editingLead.ine_anverso ? (
                                         <img src={editingLead.ine_anverso} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="INE Front" />
                                     ) : (
-                                        <p style={{ marginTop: '90px', color: '#ccc' }}>SIN IMAGEN</p>
+                                        <p style={{ marginTop: '80px', color: '#ccc' }}>SIN IMAGEN</p>
                                     )}
                                 </div>
                             </div>
                             <div style={{ textAlign: 'center' }}>
                                 <p style={{ fontSize: '10px', color: '#666', marginBottom: '10px' }}>REVERSO (TRASERO)</p>
-                                <div style={{ border: '1px solid #ddd', borderRadius: '10px', overflow: 'hidden', height: '200px', background: '#fafafa' }}>
+                                <div style={{ border: '1px solid #ddd', borderRadius: '10px', overflow: 'hidden', height: '180px', background: '#fafafa' }}>
                                     {editingLead.ine_reverso ? (
                                         <img src={editingLead.ine_reverso} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="INE Back" />
                                     ) : (
-                                        <p style={{ marginTop: '90px', color: '#ccc' }}>SIN IMAGEN</p>
+                                        <p style={{ marginTop: '80px', color: '#ccc' }}>SIN IMAGEN</p>
+                                    )}
+                                </div>
+                            </div>
+                            <div style={{ gridColumn: 'span 2', textAlign: 'center', marginTop: '10px' }}>
+                                <p style={{ fontSize: '10px', color: '#666', marginBottom: '10px' }}>COMPROBANTE DE DOMICILIO</p>
+                                <div style={{ border: '1px solid #ddd', borderRadius: '10px', overflow: 'hidden', height: '300px', background: '#fafafa' }}>
+                                    {editingLead.comprobante_domicilio ? (
+                                        <img src={editingLead.comprobante_domicilio} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="Proof of Residence" />
+                                    ) : (
+                                        <p style={{ marginTop: '140px', color: '#ccc' }}>SIN IMAGEN / ARCHIVO PENDIENTE</p>
                                     )}
                                 </div>
                             </div>
