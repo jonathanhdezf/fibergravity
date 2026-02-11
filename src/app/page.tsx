@@ -13,26 +13,23 @@ import { LaunchCountdown } from "@/components/sections/LaunchCountdown";
 
 import { Partners } from "@/components/sections/Partners";
 
-import { ModalProvider } from "@/components/ModalProvider";
 
 export default function Home() {
   return (
-    <ModalProvider>
-      <main className="min-h-screen">
-        <Navbar />
-        <Hero />
-        <LaunchCountdown />
-        <PlansHeader />
-        <GamerPlans />
-        <StreamerPlans />
-        <HomeOfficePlans />
-        <EnterprisePlans />
-        <TVSection />
-        <SpeedTest />
-        <Coverage />
-        <Partners />
-        <Footer />
-      </main>
-    </ModalProvider>
+    <main className="min-h-screen">
+      <Navbar />
+      <Hero />
+      <LaunchCountdown />
+      <PlansHeader />
+      <GamerPlans />
+      <StreamerPlans />
+      <HomeOfficePlans />
+      <EnterprisePlans />
+      <TVSection />
+      <SpeedTest />
+      <Coverage />
+      <Partners />
+      <Footer />
+    </main>
   );
 }

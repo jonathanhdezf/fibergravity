@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
-import { Calendar, Clock, ArrowLeft, Share2, Eye, User, BookMarkCheck } from "lucide-react";
+import { Calendar, Clock, ArrowLeft, Share2, Eye, User, BookmarkCheck } from "lucide-react";
 import { Navbar } from "@/components/sections/Navbar";
 import { Footer } from "@/components/sections/Footer";
 import ReactMarkdown from "react-markdown";
@@ -58,7 +58,7 @@ export default function BlogPostClient({ initialPost, slug }: BlogPostClientProp
                             animate={{ opacity: 1, scale: 1 }}
                             className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neon-cyan/10 border border-neon-cyan/20 text-neon-cyan text-[9px] font-black uppercase tracking-widest"
                         >
-                            <BookMarkCheck className="w-3 h-3" /> {post.blog_categories?.name || 'Blog'}
+                            <BookmarkCheck className="w-3 h-3" /> {post.blog_categories?.name || 'Blog'}
                         </motion.div>
 
                         <motion.h1
