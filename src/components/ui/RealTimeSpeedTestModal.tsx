@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Gauge, Activity, ArrowDown, ArrowUp, RefreshCw, Smartphone, Monitor, ShieldCheck, Zap } from "lucide-react";
 import { GlassCard } from "./GlassCard";
