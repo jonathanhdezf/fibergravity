@@ -75,6 +75,39 @@ export const Navbar = () => {
         }
     };
 
+    const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+        const isHashLink = href.startsWith("#");
+        const isHomePage = window.location.pathname === "/";
+
+        if (isHashLink) {
+            if (!isHomePage) {
+                // If on another page, let the default link behavior take over to go home
+                return;
+            }
+
+            // If on home page, handle smooth scroll
+            e.preventDefault();
+            const targetId = href.replace('#', '');
+            const element = document.getElementById(targetId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+                closeMenu();
+            }
+        } else {
+            // Normal navigation for non-hash links
+            closeMenu();
+        }
+    };
+
+    const getLinkHref = (href: string) => {
+        if (typeof window === 'undefined') return href;
+        const isHomePage = window.location.pathname === "/";
+        if (href.startsWith("#") && !isHomePage) {
+            return `/${href}`;
+        }
+        return href;
+    };
+
     return (
         <>
             {/* SENIOR PERSISTENT FLOATING BRIDGE */}
@@ -108,7 +141,8 @@ export const Navbar = () => {
                                 <li key={link.name} className="relative group/item">
                                     <div className="flex items-center gap-1">
                                         <a
-                                            href={link.href}
+                                            href={getLinkHref(link.href)}
+                                            onClick={(e) => handleLinkClick(e, link.href)}
                                             className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-colors py-4 flex items-center gap-1"
                                         >
                                             {link.name}
@@ -122,7 +156,8 @@ export const Navbar = () => {
                                                 {link.submenu.map((sub) => (
                                                     <a
                                                         key={sub.name}
-                                                        href={sub.href}
+                                                        href={getLinkHref(sub.href)}
+                                                        onClick={(e) => handleLinkClick(e, sub.href)}
                                                         className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-[9px] font-bold uppercase tracking-widest text-slate-400 hover:text-neon-cyan transition-all"
                                                     >
                                                         <div className="w-1 h-1 rounded-full bg-neon-cyan/50" />
@@ -178,22 +213,11 @@ export const Navbar = () => {
                             {navLinks.map((link, i) => (
                                 <div key={link.name} className="flex flex-col gap-2">
                                     <motion.a
-                                        href={link.href}
+                                        href={getLinkHref(link.href)}
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: i * 0.04 }}
-                                        onClick={(e) => {
-                                            if (!link.submenu) {
-                                                setMobileMenu(false);
-                                                const targetId = link.href.replace('#', '');
-                                                const element = document.getElementById(targetId);
-                                                if (element) {
-                                                    setTimeout(() => {
-                                                        element.scrollIntoView({ behavior: 'smooth' });
-                                                    }, 100);
-                                                }
-                                            }
-                                        }}
+                                        onClick={(e) => handleLinkClick(e, link.href)}
                                         className="flex items-center justify-between p-5 rounded-3xl bg-white/[0.03] border border-white/5 active:bg-white/10 active:scale-[0.98] transition-all no-underline group"
                                     >
                                         <div className="flex items-center gap-5">
@@ -214,20 +238,11 @@ export const Navbar = () => {
                                             {link.submenu.map((sub, subIdx) => (
                                                 <motion.a
                                                     key={sub.name}
-                                                    href={sub.href}
+                                                    href={getLinkHref(sub.href)}
                                                     initial={{ opacity: 0, scale: 0.95 }}
                                                     animate={{ opacity: 1, scale: 1 }}
                                                     transition={{ delay: (i * 0.04) + (subIdx * 0.05) }}
-                                                    onClick={() => {
-                                                        setMobileMenu(false);
-                                                        const targetId = sub.href.replace('#', '');
-                                                        const element = document.getElementById(targetId);
-                                                        if (element) {
-                                                            setTimeout(() => {
-                                                                element.scrollIntoView({ behavior: 'smooth' });
-                                                            }, 100);
-                                                        }
-                                                    }}
+                                                    onClick={(e) => handleLinkClick(e, sub.href)}
                                                     className="flex items-center gap-3 p-4 rounded-2xl bg-white/[0.02] border border-white/5 text-[10px] font-bold uppercase tracking-widest text-slate-500 active:text-neon-cyan"
                                                 >
                                                     <div className="w-1.5 h-1.5 rounded-full bg-neon-cyan/30" />
