@@ -297,12 +297,12 @@ export default function PremiumAdminDashboard() {
     };
 
     useEffect(() => {
-        if (isAuthenticated) {
+        if (status === "authenticated") {
             fetchData();
             const interval = setInterval(fetchData, 30000); // Auto refresh every 30s
             return () => clearInterval(interval);
         }
-    }, [isAuthenticated]);
+    }, [status]);
 
     const fetchData = async () => {
         setLoading(true);
