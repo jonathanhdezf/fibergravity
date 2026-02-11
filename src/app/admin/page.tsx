@@ -42,7 +42,8 @@ import {
     MessageCircle,
     FileText,
     Printer,
-    FileUp
+    FileUp,
+    Loader2
 } from "lucide-react";
 import {
     AreaChart,
@@ -147,6 +148,40 @@ export default function PremiumAdminDashboard() {
     const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
     const [rejectionModal, setRejectionModal] = useState<{ isOpen: boolean, id: string, reason: string }>({ isOpen: false, id: "", reason: "" });
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+    const [uploading, setUploading] = useState<string | null>(null);
+
+    const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, field: string) => {
+        const file = event.target.files?.[0];
+        if (!file || !editingLead) return;
+
+        setUploading(field);
+
+        try {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${editingLead.id}-${field}-${Date.now()}.${fileExt}`;
+            const filePath = `leads/${editingLead.id}/${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('leads-documentation')
+                .upload(filePath, file, {
+                    upsert: true,
+                    cacheControl: '3600'
+                });
+
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('leads-documentation')
+                .getPublicUrl(filePath);
+
+            setEditingLead({ ...editingLead, [field]: publicUrl } as any);
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            alert('Error al subir el archivo. Asegúrate de que el bucket "leads-documentation" exista en Supabase.');
+        } finally {
+            setUploading(null);
+        }
+    };
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -1138,27 +1173,40 @@ export default function PremiumAdminDashboard() {
                                                             {editingLead.ine_anverso ? (
                                                                 <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 bg-black/40">
                                                                     <img src={editingLead.ine_anverso} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" alt="INE Anverso" />
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => setEditingLead({ ...editingLead, ine_anverso: "" })}
-                                                                        className="absolute top-4 right-4 p-2 bg-black/80 rounded-xl text-white opacity-0 group-hover:opacity-100 transition-all"
-                                                                    >
-                                                                        <Trash2 className="w-4 h-4" />
-                                                                    </button>
+                                                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all bg-black/40 gap-4">
+                                                                        <label className="p-3 bg-neon-cyan/20 border border-neon-cyan/40 rounded-2xl text-neon-cyan hover:bg-neon-cyan hover:text-black transition-all cursor-pointer">
+                                                                            <FileUp className="w-5 h-5" />
+                                                                            <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'ine_anverso')} />
+                                                                        </label>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => setEditingLead({ ...editingLead, ine_anverso: "" })}
+                                                                            className="p-3 bg-red-500/20 border border-red-500/40 rounded-2xl text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                                                                        >
+                                                                            <Trash2 className="w-5 h-5" />
+                                                                        </button>
+                                                                    </div>
                                                                 </div>
                                                             ) : (
-                                                                <div className="aspect-video rounded-3xl border-2 border-dashed border-white/5 bg-white/[0.02] flex flex-col items-center justify-center gap-3 group-hover:border-neon-cyan/30 transition-all">
-                                                                    <FileUp className="w-8 h-8 text-slate-700" />
-                                                                    <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest text-center px-4">Ingresa URL o Archivo</p>
-                                                                </div>
+                                                                <label className="aspect-video rounded-3xl border-2 border-dashed border-white/5 bg-white/[0.02] flex flex-col items-center justify-center gap-3 hover:border-neon-cyan/30 transition-all cursor-pointer">
+                                                                    {uploading === 'ine_anverso' ? (
+                                                                        <Loader2 className="w-8 h-8 text-neon-cyan animate-spin" />
+                                                                    ) : (
+                                                                        <FileUp className="w-8 h-8 text-slate-700" />
+                                                                    )}
+                                                                    <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest text-center px-4">Seleccionar Imagen Anverso</p>
+                                                                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'ine_anverso')} />
+                                                                </label>
                                                             )}
-                                                            <input
-                                                                title="INE Anverso"
-                                                                placeholder="ID / URL de Imagen..."
-                                                                value={editingLead.ine_anverso || ""}
-                                                                onChange={(e) => setEditingLead({ ...editingLead, ine_anverso: e.target.value })}
-                                                                className="mt-4 w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-[10px] focus:border-neon-cyan focus:outline-none placeholder:text-slate-700"
-                                                            />
+                                                            <div className="mt-4 flex gap-2">
+                                                                <input
+                                                                    title="INE Anverso URL"
+                                                                    placeholder="O ingresa URL manual..."
+                                                                    value={editingLead.ine_anverso || ""}
+                                                                    onChange={(e) => setEditingLead({ ...editingLead, ine_anverso: e.target.value })}
+                                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-[10px] focus:border-neon-cyan focus:outline-none placeholder:text-slate-700"
+                                                                />
+                                                            </div>
                                                         </div>
                                                     </div>
 
@@ -1169,27 +1217,40 @@ export default function PremiumAdminDashboard() {
                                                             {editingLead.ine_reverso ? (
                                                                 <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 bg-black/40">
                                                                     <img src={editingLead.ine_reverso} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" alt="INE Reverso" />
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => setEditingLead({ ...editingLead, ine_reverso: "" })}
-                                                                        className="absolute top-4 right-4 p-2 bg-black/80 rounded-xl text-white opacity-0 group-hover:opacity-100 transition-all"
-                                                                    >
-                                                                        <Trash2 className="w-4 h-4" />
-                                                                    </button>
+                                                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all bg-black/40 gap-4">
+                                                                        <label className="p-3 bg-neon-magenta/20 border border-neon-magenta/40 rounded-2xl text-neon-magenta hover:bg-neon-magenta hover:text-white transition-all cursor-pointer">
+                                                                            <FileUp className="w-5 h-5" />
+                                                                            <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'ine_reverso')} />
+                                                                        </label>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => setEditingLead({ ...editingLead, ine_reverso: "" })}
+                                                                            className="p-3 bg-red-500/20 border border-red-500/40 rounded-2xl text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                                                                        >
+                                                                            <Trash2 className="w-5 h-5" />
+                                                                        </button>
+                                                                    </div>
                                                                 </div>
                                                             ) : (
-                                                                <div className="aspect-video rounded-3xl border-2 border-dashed border-white/5 bg-white/[0.02] flex flex-col items-center justify-center gap-3 group-hover:border-neon-magenta/30 transition-all">
-                                                                    <FileUp className="w-8 h-8 text-slate-700" />
-                                                                    <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest text-center px-4">Ingresa URL o Archivo</p>
-                                                                </div>
+                                                                <label className="aspect-video rounded-3xl border-2 border-dashed border-white/5 bg-white/[0.02] flex flex-col items-center justify-center gap-3 hover:border-neon-magenta/30 transition-all cursor-pointer">
+                                                                    {uploading === 'ine_reverso' ? (
+                                                                        <Loader2 className="w-8 h-8 text-neon-magenta animate-spin" />
+                                                                    ) : (
+                                                                        <FileUp className="w-8 h-8 text-slate-700" />
+                                                                    )}
+                                                                    <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest text-center px-4">Seleccionar Imagen Reverso</p>
+                                                                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'ine_reverso')} />
+                                                                </label>
                                                             )}
-                                                            <input
-                                                                title="INE Reverso"
-                                                                placeholder="ID / URL de Imagen..."
-                                                                value={editingLead.ine_reverso || ""}
-                                                                onChange={(e) => setEditingLead({ ...editingLead, ine_reverso: e.target.value })}
-                                                                className="mt-4 w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-[10px] focus:border-neon-magenta focus:outline-none placeholder:text-slate-700"
-                                                            />
+                                                            <div className="mt-4 flex gap-2">
+                                                                <input
+                                                                    title="INE Reverso URL"
+                                                                    placeholder="O ingresa URL manual..."
+                                                                    value={editingLead.ine_reverso || ""}
+                                                                    onChange={(e) => setEditingLead({ ...editingLead, ine_reverso: e.target.value })}
+                                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-[10px] focus:border-neon-magenta focus:outline-none placeholder:text-slate-700"
+                                                                />
+                                                            </div>
                                                         </div>
                                                     </div>
 
@@ -1197,12 +1258,17 @@ export default function PremiumAdminDashboard() {
                                                     <div className="space-y-2 md:col-span-2">
                                                         <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Comprobante de Domicilio</label>
                                                         <div className="flex gap-4">
-                                                            <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                                                                <FileText className="w-8 h-8 text-slate-600" />
-                                                            </div>
+                                                            <label className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 cursor-pointer hover:bg-white/10 transition-all">
+                                                                {uploading === 'comprobante_domicilio' ? (
+                                                                    <Loader2 className="w-6 h-6 text-neon-cyan animate-spin" />
+                                                                ) : (
+                                                                    <FileUp className="w-6 h-6 text-slate-500" />
+                                                                )}
+                                                                <input type="file" className="hidden" accept="image/*,application/pdf" onChange={(e) => handleFileUpload(e, 'comprobante_domicilio')} />
+                                                            </label>
                                                             <input
                                                                 title="Comprobante Domicilio"
-                                                                placeholder="Ingresa link de verificación o URL del documento..."
+                                                                placeholder="URL del documento o usa el botón de subir..."
                                                                 value={editingLead.comprobante_domicilio || ""}
                                                                 onChange={(e) => setEditingLead({ ...editingLead, comprobante_domicilio: e.target.value })}
                                                                 className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-neon-cyan focus:outline-none transition-all"
