@@ -591,17 +591,16 @@ export default function PremiumAdminDashboard() {
     };
 
     // Filtered Content
-    const filteredPlans = useMemo(() => {
-        return plans.filter(p =>
-            p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            p.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            providers.find(prov => prov.id === p.provider_id)?.name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-    }, [plans, searchQuery, providers]);
+    const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
 
-    // Simplified without local login handler
+    // Redirect hook must be here, but the return null must be AFTER all hooks
+    useEffect(() => {
+        if (status === "unauthenticated") {
+            router.push("/auth/login");
+        }
+    }, [status, router]);
 
-    // Data Processing for Charts
+    // Data Processing for Charts - MOVED HERE so the hooks are called before return
     const chartData = useMemo(() => {
         const days: any = {};
         const last7Days = Array.from({ length: 7 }, (_, i) => {
@@ -648,6 +647,14 @@ export default function PremiumAdminDashboard() {
         return stats;
     }, [leads, comisionistas]);
 
+    const filteredPlans = useMemo(() => {
+        return plans.filter(p =>
+            p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            p.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            providers.find(prov => prov.id === p.provider_id)?.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }, [plans, searchQuery, providers]);
+
     if (status === "loading") {
         return (
             <div className="min-h-screen bg-black flex items-center justify-center">
@@ -656,17 +663,9 @@ export default function PremiumAdminDashboard() {
         );
     }
 
-    useEffect(() => {
-        if (status === "unauthenticated") {
-            router.push("/auth/login");
-        }
-    }, [status, router]);
-
     if (status === "unauthenticated") {
         return null;
     }
-
-    const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
 
     const navItems = [
         { id: 'overview', icon: TrendingUp, label: 'Vista General' },
