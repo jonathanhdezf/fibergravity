@@ -65,7 +65,7 @@ const MusicaGratisClientPage = () => {
                     >
                         <div className="absolute inset-[-20px] bg-gradient-to-r from-neon-cyan/20 to-neon-magenta/20 blur-[60px] rounded-[40px] opacity-30" />
 
-                        <GlassCard className="relative overflow-hidden border-white/10 shadow-2xl !p-0 rounded-[32px] aspect-video md:aspect-[21/9] min-h-[500px]">
+                        <GlassCard className="relative overflow-hidden border-white/10 shadow-2xl !p-0 rounded-[32px] h-[600px] md:h-[800px] w-full">
                             <div className="absolute top-0 left-0 right-0 h-12 bg-black/40 backdrop-blur-md border-b border-white/5 z-20 flex items-center px-6 justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className="flex gap-1.5">
