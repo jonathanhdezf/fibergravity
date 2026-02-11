@@ -199,6 +199,41 @@ export default function PremiumAdminDashboard() {
         if (!error) fetchData();
     };
 
+    const saveProvider = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingProvider) return;
+
+        const { id, ...data } = editingProvider as any;
+        const res = id
+            ? await supabase.from('providers').update(data).eq('id', id)
+            : await supabase.from('providers').insert(data);
+
+        if (!res.error) {
+            fetchData();
+            setEditingProvider(null);
+        }
+    };
+
+    const savePlan = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingPlan) return;
+
+        const { id, ...data } = editingPlan as any;
+        // Fix for features which might be an array or string
+        if (typeof data.features === 'string') {
+            data.features = data.features.split(',').map((s: string) => s.trim());
+        }
+
+        const res = id
+            ? await supabase.from('plans').update(data).eq('id', id)
+            : await supabase.from('plans').insert(data);
+
+        if (!res.error) {
+            fetchData();
+            setEditingPlan(null);
+        }
+    };
+
     // Filtered Content
     const filteredPlans = useMemo(() => {
         return plans.filter(p =>
@@ -640,7 +675,10 @@ export default function PremiumAdminDashboard() {
                                             </div>
                                         ))}
                                     </div>
-                                    <button className="w-full mt-6 py-4 rounded-2xl border border-dashed border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:border-neon-cyan hover:text-neon-cyan transition-all flex items-center justify-center gap-2">
+                                    <button
+                                        onClick={() => setEditingProvider({ id: '', name: '', logo_url: '' })}
+                                        className="w-full mt-6 py-4 rounded-2xl border border-dashed border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:border-neon-cyan hover:text-neon-cyan transition-all flex items-center justify-center gap-2"
+                                    >
                                         <Plus className="w-4 h-4" /> Registrar Proveedor
                                     </button>
                                 </GlassCard>
@@ -659,7 +697,11 @@ export default function PremiumAdminDashboard() {
                                                     className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-6 py-3 text-[10px] text-white focus:outline-none focus:border-neon-cyan transition-all font-black tracking-widest"
                                                 />
                                             </div>
-                                            <button title="Nuevo Plan" className="p-3 bg-neon-cyan text-black rounded-xl hover:scale-105 transition-all">
+                                            <button
+                                                onClick={() => setEditingPlan({ id: '', provider_id: providers[0]?.id || '', name: '', type: 'Gamer', category_name: '', speed: '', price: '', features: [], ranking_score: 0, color_scheme: 'cyan', icon_slug: 'zap', is_active: true })}
+                                                title="Nuevo Plan"
+                                                className="p-3 bg-neon-cyan text-black rounded-xl hover:scale-105 transition-all"
+                                            >
                                                 <Plus className="w-5 h-5" />
                                             </button>
                                         </div>
@@ -818,7 +860,7 @@ export default function PremiumAdminDashboard() {
 
             {/* MODALS SECTION */}
             <AnimatePresence>
-                {/* 1. EDIT MODAL */}
+                {/* 1. EDIT LEAD MODAL */}
                 {editingLead && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingLead(null)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
@@ -829,6 +871,7 @@ export default function PremiumAdminDashboard() {
                                     <button onClick={() => setEditingLead(null)} title="Cerrar" className="p-2 hover:bg-white/5 rounded-lg transition-all"><X className="w-6 h-6" /></button>
                                 </div>
                                 <form onSubmit={updateLeadData} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* ... content already there ... */}
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Nombre Completo</label>
                                         <input
@@ -881,6 +924,144 @@ export default function PremiumAdminDashboard() {
                                     </div>
                                     <div className="md:col-span-2 mt-6">
                                         <NeonButton type="submit" className="w-full py-4 !tracking-[0.5em]">ACTUALIZAR REGISTRO</NeonButton>
+                                    </div>
+                                </form>
+                            </GlassCard>
+                        </motion.div>
+                    </div>
+                )}
+
+                {/* 1b. PROVIDER MODAL (Add/Edit) */}
+                {editingProvider && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingProvider(null)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+                        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-md">
+                            <GlassCard className="p-10 border-white/10 !bg-slate-900 shadow-2xl">
+                                <div className="flex justify-between items-center mb-10">
+                                    <h2 className="text-xl font-black italic">{editingProvider.id ? 'EDITAR' : 'NUEVO'} <span className="text-neon-cyan">PROVEEDOR</span></h2>
+                                    <button onClick={() => setEditingProvider(null)} title="Cerrar" className="p-2 hover:bg-white/5 rounded-lg transition-all"><X className="w-6 h-6" /></button>
+                                </div>
+                                <form onSubmit={saveProvider} className="space-y-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Nombre Comercial</label>
+                                        <input
+                                            required
+                                            title="Nombre del Proveedor"
+                                            placeholder="Ej. Totalplay"
+                                            value={editingProvider.name}
+                                            onChange={(e) => setEditingProvider({ ...editingProvider, name: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-black uppercase text-slate-500 ml-2">URL del Logo (PNG/SVG)</label>
+                                        <input
+                                            required
+                                            title="URL del Logo"
+                                            placeholder="https://..."
+                                            value={editingProvider.logo_url}
+                                            onChange={(e) => setEditingProvider({ ...editingProvider, logo_url: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                        />
+                                    </div>
+                                    <NeonButton type="submit" className="w-full py-4">GUARDAR PROVEEDOR</NeonButton>
+                                </form>
+                            </GlassCard>
+                        </motion.div>
+                    </div>
+                )}
+
+                {/* 1c. PLAN MODAL (Add/Edit) */}
+                {editingPlan && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingPlan(null)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+                        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-2xl">
+                            <GlassCard className="p-10 border-white/10 !bg-slate-900 shadow-2xl h-[80vh] overflow-y-auto custom-scrollbar">
+                                <div className="flex justify-between items-center mb-10">
+                                    <h2 className="text-xl font-black italic">{editingPlan.id ? 'EDITAR' : 'NUEVO'} <span className="text-neon-magenta">PLAN</span></h2>
+                                    <button onClick={() => setEditingPlan(null)} title="Cerrar" className="p-2 hover:bg-white/5 rounded-lg transition-all"><X className="w-6 h-6" /></button>
+                                </div>
+                                <form onSubmit={savePlan} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Proveedor</label>
+                                        <select
+                                            title="Seleccionar Proveedor"
+                                            value={editingPlan.provider_id}
+                                            onChange={(e) => setEditingPlan({ ...editingPlan, provider_id: e.target.value })}
+                                            className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                        >
+                                            {providers.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Nombre del Plan</label>
+                                        <input
+                                            required
+                                            title="Nombre del Plan"
+                                            placeholder="Ej. Plan Ultra 500"
+                                            value={editingPlan.name}
+                                            onChange={(e) => setEditingPlan({ ...editingPlan, name: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Tipo</label>
+                                        <select
+                                            title="Tipo de Plan"
+                                            value={editingPlan.type}
+                                            onChange={(e) => setEditingPlan({ ...editingPlan, type: e.target.value })}
+                                            className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                        >
+                                            <option value="Gamer">Gamer</option>
+                                            <option value="Streamer">Streamer</option>
+                                            <option value="Home Office">Home Office</option>
+                                            <option value="Empresas">Empresas</option>
+                                            <option value="Television">Television</option>
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Velocidad</label>
+                                        <input
+                                            title="Velocidad del Plan"
+                                            placeholder="Ej. 500 MB"
+                                            value={editingPlan.speed}
+                                            onChange={(e) => setEditingPlan({ ...editingPlan, speed: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Precio</label>
+                                        <input
+                                            title="Precio Mensual"
+                                            placeholder="Ej. $499"
+                                            value={editingPlan.price}
+                                            onChange={(e) => setEditingPlan({ ...editingPlan, price: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Ranking (0-100)</label>
+                                        <input
+                                            type="number"
+                                            title="Puntuación de Ranking"
+                                            placeholder="95"
+                                            value={editingPlan.ranking_score}
+                                            onChange={(e) => setEditingPlan({ ...editingPlan, ranking_score: parseInt(e.target.value) })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="space-y-2 md:col-span-2">
+                                        <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Características (Separadas por coma)</label>
+                                        <textarea
+                                            title="Características del Plan"
+                                            placeholder="WIFI 6, Instalación Gratis, App Premium"
+                                            value={Array.isArray(editingPlan.features) ? editingPlan.features.join(', ') : editingPlan.features}
+                                            onChange={(e) => setEditingPlan({ ...editingPlan, features: e.target.value as any })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all h-24"
+                                        />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <NeonButton variant="magenta" type="submit" className="w-full py-4">GUARDAR PLAN</NeonButton>
                                     </div>
                                 </form>
                             </GlassCard>
