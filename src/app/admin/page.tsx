@@ -70,6 +70,10 @@ interface Lead {
     price: string;
     status: string;
     rejection_reason?: string;
+    ine_anverso?: string;
+    ine_reverso?: string;
+    comprobante_domicilio?: string;
+    referencias_hogar?: string;
 }
 
 interface Provider {
@@ -211,7 +215,11 @@ export default function PremiumAdminDashboard() {
                 phone: editingLead.phone,
                 location: editingLead.location,
                 plan_name: editingLead.plan_name,
-                price: editingLead.price
+                price: editingLead.price,
+                ine_anverso: editingLead.ine_anverso,
+                ine_reverso: editingLead.ine_reverso,
+                comprobante_domicilio: editingLead.comprobante_domicilio,
+                referencias_hogar: editingLead.referencias_hogar
             })
             .eq('id', editingLead.id);
 
@@ -604,6 +612,12 @@ export default function PremiumAdminDashboard() {
                                                             <span>{lead.phone}</span>
                                                             <div className="w-1 h-1 rounded-full bg-slate-700" />
                                                             <span className="text-slate-400">{lead.location}</span>
+                                                            {(lead.ine_anverso || lead.referencias_hogar) && (
+                                                                <>
+                                                                    <div className="w-1 h-1 rounded-full bg-neon-cyan/40" />
+                                                                    <span className="text-neon-cyan font-black text-[9px] animate-pulse">DOCS OK</span>
+                                                                </>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1062,6 +1076,59 @@ export default function PremiumAdminDashboard() {
                                             <p className="text-sm font-bold text-red-500/90 mt-1 italic uppercase">
                                                 {editingLead.rejection_reason}
                                             </p>
+                                        </div>
+                                    )}
+
+                                    {/* SECCIÓN DE GESTIÓN (CONTACTANDO / COMPLETADO) */}
+                                    {(editingLead.status === 'contacting' || editingLead.status === 'completed' || editingLead.ine_anverso) && (
+                                        <div className="md:col-span-2 space-y-6 pt-6 border-t border-white/5">
+                                            <h3 className="text-xs font-black text-neon-cyan flex items-center gap-2">
+                                                <Shield className="w-4 h-4" /> DOCUMENTACIÓN OFICIAL
+                                            </h3>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div className="space-y-2">
+                                                    <label className="text-[9px] font-black uppercase text-slate-500 ml-2">INE (Anverso - URL)</label>
+                                                    <input
+                                                        title="INE Anverso"
+                                                        placeholder="URL de la imagen o archivo"
+                                                        value={editingLead.ine_anverso || ""}
+                                                        onChange={(e) => setEditingLead({ ...editingLead, ine_anverso: e.target.value })}
+                                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-[9px] font-black uppercase text-slate-500 ml-2">INE (Reverso - URL)</label>
+                                                    <input
+                                                        title="INE Reverso"
+                                                        placeholder="URL de la imagen o archivo"
+                                                        value={editingLead.ine_reverso || ""}
+                                                        onChange={(e) => setEditingLead({ ...editingLead, ine_reverso: e.target.value })}
+                                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2 md:col-span-2">
+                                                    <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Comprobante de Domicilio (URL)</label>
+                                                    <input
+                                                        title="Comprobante Domicilio"
+                                                        placeholder="URL del comprobante"
+                                                        value={editingLead.comprobante_domicilio || ""}
+                                                        onChange={(e) => setEditingLead({ ...editingLead, comprobante_domicilio: e.target.value })}
+                                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2 md:col-span-2">
+                                                    <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Referencias del Hogar / Casa</label>
+                                                    <textarea
+                                                        title="Referencias del Hogar"
+                                                        placeholder="Ej. Casa azul con portón negro, frente al parque..."
+                                                        value={editingLead.referencias_hogar || ""}
+                                                        onChange={(e) => setEditingLead({ ...editingLead, referencias_hogar: e.target.value })}
+                                                        rows={3}
+                                                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all resize-none uppercase"
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
                                     )}
                                     <div className="md:col-span-2 mt-6">

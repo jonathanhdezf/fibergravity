@@ -8,7 +8,7 @@ export const LaunchCountdown = () => {
     const [isMounted, setIsMounted] = useState(false);
 
     // Fecha objetivo estable
-    const targetDate = useMemo(() => new Date("2026-02-12T00:00:00"), []);
+    const targetDate = useMemo(() => new Date("2026-02-18T00:00:00"), []);
 
     const [timeLeft, setTimeLeft] = useState({
         days: 0, hours: 0, minutes: 0, seconds: 0
@@ -100,7 +100,7 @@ export const LaunchCountdown = () => {
                         viewport={{ once: true }}
                         className="text-slate-400 text-[10px] md:text-lg max-w-xl mb-20 uppercase font-bold tracking-[0.2em] leading-relaxed opacity-70"
                     >
-                        Estamos orquestando el despliegue de infraestructura más grande de la década. Prepárate para la velocidad luz.
+                        Estamos orquestando el despliegue de infraestructura.
                     </motion.p>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-14 mb-24">
