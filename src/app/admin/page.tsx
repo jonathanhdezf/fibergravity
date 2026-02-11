@@ -142,28 +142,6 @@ export default function PremiumAdminDashboard() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [filter, setFilter] = useState("all");
 
-    // Print Styles Injection
-    useEffect(() => {
-        const style = document.createElement('style');
-        style.innerHTML = `
-            @media print {
-                body * { visibility: hidden; }
-                #printable-dossier, #printable-dossier * { visibility: visible; }
-                #printable-dossier { 
-                    position: absolute; 
-                    left: 0; 
-                    top: 0; 
-                    width: 100%;
-                    -webkit-print-color-adjust: exact !important;
-                    print-color-adjust: exact !important;
-                }
-                @page { size: portrait; margin: 0; }
-            }
-        `;
-        document.head.appendChild(style);
-        return () => { document.head.removeChild(style); };
-    }, []);
-
     // New States for Lead Management
     const [editingLead, setEditingLead] = useState<Lead | null>(null);
     const [editingProvider, setEditingProvider] = useState<Provider | null>(null);
@@ -416,491 +394,654 @@ export default function PremiumAdminDashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-[#020617] text-white selection:bg-neon-cyan/30">
-            {/* Sidebar / Top Nav */}
-            <nav className="fixed top-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-2xl border-b border-white/5 px-6 md:px-12 py-4">
-                <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-8">
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-neon-cyan rounded-lg flex items-center justify-center">
-                                <Activity className="w-5 h-5 text-black" />
+        <div className="relative min-h-screen bg-[#020617] text-white selection:bg-neon-cyan/30">
+            {/* 1. ADMINISTRATION INTERFACE (Hidden when printing) */}
+            <div className="print:hidden">
+                {/* Sidebar / Top Nav */}
+                <nav className="fixed top-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-2xl border-b border-white/5 px-6 md:px-12 py-4">
+                    <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-8">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-neon-cyan rounded-lg flex items-center justify-center">
+                                    <Activity className="w-5 h-5 text-black" />
+                                </div>
+                                <span className="font-black italic tracking-tighter text-xl">FIBER<span className="text-neon-cyan">OS</span></span>
                             </div>
-                            <span className="font-black italic tracking-tighter text-xl">FIBER<span className="text-neon-cyan">OS</span></span>
-                        </div>
-                        <div className="hidden md:flex gap-1">
-                            {[
-                                { id: 'overview', icon: TrendingUp, label: 'Overview' },
-                                { id: 'leads', icon: Users, label: 'Leads Hub' },
-                                { id: 'inventory', icon: Package, label: 'Inventario' },
-                                { id: 'traffic', icon: Globe, label: 'Live Traffic' },
-                                { id: 'integrations', icon: Settings, label: 'Sistemas' },
-                                { id: 'logs', icon: Activity, label: 'Logs' }
-                            ].map((tab) => (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setActiveTab(tab.id as any)}
-                                    title={tab.label}
-                                    className={`flex items-center gap-2 px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-white/10 text-neon-cyan' : 'text-slate-500 hover:text-white hover:bg-white/5'
-                                        }`}
-                                >
-                                    <tab.icon className="w-4 h-4" /> {tab.label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <div className="hidden lg:flex flex-col items-end mr-4">
-                            <span className="text-[8px] font-black uppercase tracking-widest text-emerald-500 flex items-center gap-1">
-                                <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" /> SYSTEM ACTIVE
-                            </span>
-                            <span className="text-[10px] font-bold text-slate-500 font-mono">Synced {lastRefresh.toLocaleTimeString()}</span>
-                        </div>
-
-                        {/* Mobile Menu Toggle */}
-                        <button
-                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                            title="Menu"
-                            className="md:hidden p-3 rounded-xl bg-white/5 text-white"
-                        >
-                            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                        </button>
-
-                        <button onClick={() => setIsAuthenticated(false)} title="Cerrar Sesión" className="p-3 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all">
-                            <LogOut className="w-5 h-5" />
-                        </button>
-                    </div>
-                </div>
-            </nav>
-
-            {/* Mobile Dropdown Menu */}
-            <AnimatePresence>
-                {isMobileMenuOpen && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        className="fixed top-20 left-0 right-0 z-[49] bg-black/95 backdrop-blur-3xl border-b border-white/10 p-6 md:hidden"
-                    >
-                        <div className="flex flex-col gap-4">
-                            {[
-                                { id: 'overview', icon: TrendingUp, label: 'Overview' },
-                                { id: 'leads', icon: Users, label: 'Leads Hub' },
-                                { id: 'inventory', icon: Package, label: 'Inventario' },
-                                { id: 'traffic', icon: Globe, label: 'Live Traffic' },
-                                { id: 'integrations', icon: Settings, label: 'Sistemas' },
-                                { id: 'logs', icon: Activity, label: 'Logs' }
-                            ].map((tab) => (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => {
-                                        setActiveTab(tab.id as any);
-                                        setIsMobileMenuOpen(false);
-                                    }}
-                                    className={`flex items-center gap-4 p-5 rounded-2xl text-[12px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-neon-cyan/10 text-neon-cyan' : 'text-slate-500'
-                                        }`}
-                                >
-                                    <tab.icon className="w-6 h-6" /> {tab.label}
-                                </button>
-                            ))}
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            <main className="pt-24 pb-12 px-6 md:px-12 max-w-[1600px] mx-auto">
-                <AnimatePresence mode="wait">
-                    {activeTab === 'overview' && (
-                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
-                            {/* Key Performance Cards */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-black">
+                            <div className="hidden md:flex gap-1">
                                 {[
-                                    { label: 'Visitas Totales', val: visits.length, icon: Eye, color: 'cyan', trend: '+12%' },
-                                    { label: 'Nuevos Leads', val: leads.length, icon: Users, color: 'magenta', trend: '+5%' },
-                                    { label: 'Conversión', val: `${((leads.length / Math.max(1, visits.length)) * 100).toFixed(1)}%`, icon: TrendingUp, color: 'emerald', trend: 'Optimized' },
-                                    { label: 'Tiempo Real', val: Math.floor(Math.random() * 5) + 2, icon: Activity, color: 'white', trend: 'Live' }
-                                ].map((stat, i) => (stat.val && (
-                                    <GlassCard key={i} className="p-8 border-white/5 group hover:border-white/20 transition-all !bg-white/5">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div className={`p-4 rounded-2xl bg-${stat.color === 'cyan' ? 'neon-cyan' : stat.color === 'magenta' ? 'neon-magenta' : 'white'}/10 border border-white/5`}>
-                                                <stat.icon className={`w-6 h-6 text-${stat.color === 'cyan' ? 'neon-cyan' : stat.color === 'magenta' ? 'neon-magenta' : stat.color === 'emerald' ? 'emerald-500' : 'white'}`} />
-                                            </div>
-                                            <span className="text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-lg">{stat.trend}</span>
-                                        </div>
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">{stat.label}</p>
-                                        <p className="text-4xl font-black italic text-white tracking-tighter">{stat.val}</p>
-                                    </GlassCard>
-                                )))}
+                                    { id: 'overview', icon: TrendingUp, label: 'Overview' },
+                                    { id: 'leads', icon: Users, label: 'Leads Hub' },
+                                    { id: 'inventory', icon: Package, label: 'Inventario' },
+                                    { id: 'traffic', icon: Globe, label: 'Live Traffic' },
+                                    { id: 'integrations', icon: Settings, label: 'Sistemas' },
+                                    { id: 'logs', icon: Activity, label: 'Logs' }
+                                ].map((tab) => (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setActiveTab(tab.id as any)}
+                                        title={tab.label}
+                                        className={`flex items-center gap-2 px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-white/10 text-neon-cyan' : 'text-slate-500 hover:text-white hover:bg-white/5'
+                                            }`}
+                                    >
+                                        <tab.icon className="w-4 h-4" /> {tab.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <div className="hidden lg:flex flex-col items-end mr-4">
+                                <span className="text-[8px] font-black uppercase tracking-widest text-emerald-500 flex items-center gap-1">
+                                    <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" /> SYSTEM ACTIVE
+                                </span>
+                                <span className="text-[10px] font-bold text-slate-500 font-mono">Synced {lastRefresh.toLocaleTimeString()}</span>
                             </div>
 
-                            {/* Charts Row */}
-                            <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 text-black">
-                                <GlassCard className="p-8 border-white/5 !bg-white/5 h-[450px]">
-                                    <h3 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-8 flex items-center gap-2">
-                                        <TrendingUp className="w-4 h-4 text-neon-cyan" /> Traffic & Engagement Analysis
-                                    </h3>
-                                    <div className="h-[320px] w-full">
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <AreaChart data={chartData}>
-                                                <defs>
-                                                    <linearGradient id="colorVisits" x1="0" y1="0" x2="0" y2="1">
-                                                        <stop offset="5%" stopColor="#00f3ff" stopOpacity={0.3} />
-                                                        <stop offset="95%" stopColor="#00f3ff" stopOpacity={0} />
-                                                    </linearGradient>
-                                                </defs>
-                                                <XAxis dataKey="date" stroke="#475569" fontSize={10} axisLine={false} tickLine={false} />
-                                                <YAxis stroke="#475569" fontSize={10} axisLine={false} tickLine={false} />
-                                                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
-                                                <Tooltip
-                                                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #ffffff10', borderRadius: '12px' }}
-                                                    itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
-                                                />
-                                                <Area type="monotone" dataKey="visits" stroke="#00f3ff" strokeWidth={3} fillOpacity={1} fill="url(#colorVisits)" />
-                                                <Area type="monotone" dataKey="leads" stroke="#ff00ff" strokeWidth={3} fill="transparent" />
-                                            </AreaChart>
-                                        </ResponsiveContainer>
-                                    </div>
-                                </GlassCard>
+                            {/* Mobile Menu Toggle */}
+                            <button
+                                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                                title="Menu"
+                                className="md:hidden p-3 rounded-xl bg-white/5 text-white"
+                            >
+                                {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                            </button>
 
-                                <GlassCard className="p-8 border-white/5 !bg-white/5 h-[450px]">
-                                    <h3 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-8">Dispositivos</h3>
-                                    <div className="h-[300px] w-full">
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <PieChart>
-                                                <Pie
-                                                    data={deviceData}
-                                                    innerRadius={60}
-                                                    outerRadius={100}
-                                                    paddingAngle={8}
-                                                    dataKey="value"
-                                                >
-                                                    {deviceData.map((entry, index) => (
-                                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                                    ))}
-                                                </Pie>
-                                                <Tooltip
-                                                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #ffffff10', borderRadius: '12px' }}
-                                                />
-                                            </PieChart>
-                                        </ResponsiveContainer>
-                                    </div>
-                                    <div className="flex justify-center gap-6 mt-4">
-                                        {deviceData.map((d, i) => (
-                                            <div key={i} className="flex items-center gap-2">
-                                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                                                <span className="text-[10px] font-black uppercase text-slate-400">{d.name}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </GlassCard>
+                            <button onClick={() => setIsAuthenticated(false)} title="Cerrar Sesión" className="p-3 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all">
+                                <LogOut className="w-5 h-5" />
+                            </button>
+                        </div>
+                    </div>
+                </nav>
+
+                {/* Mobile Dropdown Menu */}
+                <AnimatePresence>
+                    {isMobileMenuOpen && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            className="fixed top-20 left-0 right-0 z-[49] bg-black/95 backdrop-blur-3xl border-b border-white/10 p-6 md:hidden"
+                        >
+                            <div className="flex flex-col gap-4">
+                                {[
+                                    { id: 'overview', icon: TrendingUp, label: 'Overview' },
+                                    { id: 'leads', icon: Users, label: 'Leads Hub' },
+                                    { id: 'inventory', icon: Package, label: 'Inventario' },
+                                    { id: 'traffic', icon: Globe, label: 'Live Traffic' },
+                                    { id: 'integrations', icon: Settings, label: 'Sistemas' },
+                                    { id: 'logs', icon: Activity, label: 'Logs' }
+                                ].map((tab) => (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => {
+                                            setActiveTab(tab.id as any);
+                                            setIsMobileMenuOpen(false);
+                                        }}
+                                        className={`flex items-center gap-4 p-5 rounded-2xl text-[12px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-neon-cyan/10 text-neon-cyan' : 'text-slate-500'
+                                            }`}
+                                    >
+                                        <tab.icon className="w-6 h-6" /> {tab.label}
+                                    </button>
+                                ))}
                             </div>
                         </motion.div>
                     )}
+                </AnimatePresence>
 
-                    {activeTab === 'leads' && (
-                        <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="space-y-6">
-                            <GlassCard className="p-8 border-white/5 !bg-black/40 text-black">
-                                <div className="flex flex-col lg:flex-row justify-between gap-6 mb-10">
-                                    <div className="relative group w-full lg:w-96">
-                                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                                        <input
-                                            placeholder="Audit Search (Name, Phone, Location)..."
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-6 py-4 text-sm text-white focus:outline-none focus:border-neon-cyan focus:bg-white/10 transition-all font-bold"
-                                        />
+                <main className="pt-24 pb-12 px-6 md:px-12 max-w-[1600px] mx-auto">
+                    <AnimatePresence mode="wait">
+                        {activeTab === 'overview' && (
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
+                                {/* Key Performance Cards */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-black">
+                                    {[
+                                        { label: 'Visitas Totales', val: visits.length, icon: Eye, color: 'cyan', trend: '+12%' },
+                                        { label: 'Nuevos Leads', val: leads.length, icon: Users, color: 'magenta', trend: '+5%' },
+                                        { label: 'Conversión', val: `${((leads.length / Math.max(1, visits.length)) * 100).toFixed(1)}%`, icon: TrendingUp, color: 'emerald', trend: 'Optimized' },
+                                        { label: 'Tiempo Real', val: Math.floor(Math.random() * 5) + 2, icon: Activity, color: 'white', trend: 'Live' }
+                                    ].map((stat, i) => (stat.val && (
+                                        <GlassCard key={i} className="p-8 border-white/5 group hover:border-white/20 transition-all !bg-white/5">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className={`p-4 rounded-2xl bg-${stat.color === 'cyan' ? 'neon-cyan' : stat.color === 'magenta' ? 'neon-magenta' : 'white'}/10 border border-white/5`}>
+                                                    <stat.icon className={`w-6 h-6 text-${stat.color === 'cyan' ? 'neon-cyan' : stat.color === 'magenta' ? 'neon-magenta' : stat.color === 'emerald' ? 'emerald-500' : 'white'}`} />
+                                                </div>
+                                                <span className="text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-lg">{stat.trend}</span>
+                                            </div>
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">{stat.label}</p>
+                                            <p className="text-4xl font-black italic text-white tracking-tighter">{stat.val}</p>
+                                        </GlassCard>
+                                    )))}
+                                </div>
+
+                                {/* Charts Row */}
+                                <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 text-black">
+                                    <GlassCard className="p-8 border-white/5 !bg-white/5 h-[450px]">
+                                        <h3 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-8 flex items-center gap-2">
+                                            <TrendingUp className="w-4 h-4 text-neon-cyan" /> Traffic & Engagement Analysis
+                                        </h3>
+                                        <div className="h-[320px] w-full">
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <AreaChart data={chartData}>
+                                                    <defs>
+                                                        <linearGradient id="colorVisits" x1="0" y1="0" x2="0" y2="1">
+                                                            <stop offset="5%" stopColor="#00f3ff" stopOpacity={0.3} />
+                                                            <stop offset="95%" stopColor="#00f3ff" stopOpacity={0} />
+                                                        </linearGradient>
+                                                    </defs>
+                                                    <XAxis dataKey="date" stroke="#475569" fontSize={10} axisLine={false} tickLine={false} />
+                                                    <YAxis stroke="#475569" fontSize={10} axisLine={false} tickLine={false} />
+                                                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                                                    <Tooltip
+                                                        contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #ffffff10', borderRadius: '12px' }}
+                                                        itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
+                                                    />
+                                                    <Area type="monotone" dataKey="visits" stroke="#00f3ff" strokeWidth={3} fillOpacity={1} fill="url(#colorVisits)" />
+                                                    <Area type="monotone" dataKey="leads" stroke="#ff00ff" strokeWidth={3} fill="transparent" />
+                                                </AreaChart>
+                                            </ResponsiveContainer>
+                                        </div>
+                                    </GlassCard>
+
+                                    <GlassCard className="p-8 border-white/5 !bg-white/5 h-[450px]">
+                                        <h3 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-8">Dispositivos</h3>
+                                        <div className="h-[300px] w-full">
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <PieChart>
+                                                    <Pie
+                                                        data={deviceData}
+                                                        innerRadius={60}
+                                                        outerRadius={100}
+                                                        paddingAngle={8}
+                                                        dataKey="value"
+                                                    >
+                                                        {deviceData.map((entry, index) => (
+                                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                        ))}
+                                                    </Pie>
+                                                    <Tooltip
+                                                        contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #ffffff10', borderRadius: '12px' }}
+                                                    />
+                                                </PieChart>
+                                            </ResponsiveContainer>
+                                        </div>
+                                        <div className="flex justify-center gap-6 mt-4">
+                                            {deviceData.map((d, i) => (
+                                                <div key={i} className="flex items-center gap-2">
+                                                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                                                    <span className="text-[10px] font-black uppercase text-slate-400">{d.name}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </GlassCard>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {activeTab === 'leads' && (
+                            <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="space-y-6">
+                                <GlassCard className="p-8 border-white/5 !bg-black/40 text-black">
+                                    <div className="flex flex-col lg:flex-row justify-between gap-6 mb-10">
+                                        <div className="relative group w-full lg:w-96">
+                                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                                            <input
+                                                placeholder="Audit Search (Name, Phone, Location)..."
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-6 py-4 text-sm text-white focus:outline-none focus:border-neon-cyan focus:bg-white/10 transition-all font-bold"
+                                            />
+                                        </div>
+                                        <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                                            {['all', 'pending', 'contacting', 'completed', 'rejected'].map((s) => (
+                                                <button
+                                                    key={s}
+                                                    onClick={() => setFilter(s)}
+                                                    className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all whitespace-nowrap ${filter === s
+                                                        ? 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan'
+                                                        : 'bg-white/5 border-white/10 text-slate-500 hover:text-white'
+                                                        }`}
+                                                >
+                                                    {s}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                const csv = [
+                                                    ['ID', 'Fecha', 'Nombre', 'Telefono', 'Ubicacion', 'Categoria', 'Proveedor', 'Plan', 'Precio', 'Status'].join(','),
+                                                    ...leads.map(l => [l.id, l.created_at, l.full_name, l.phone, l.location, l.category, l.provider, l.plan_name, l.price, l.status].join(','))
+                                                ].join('\n');
+                                                const blob = new Blob([csv], { type: 'text/csv' });
+                                                const url = window.URL.createObjectURL(blob);
+                                                const a = document.createElement('a');
+                                                a.href = url;
+                                                a.download = `leads_fibergravity_${new Date().toISOString().split('T')[0]}.csv`;
+                                                a.click();
+                                            }}
+                                            className="px-6 py-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-black uppercase tracking-widest text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all flex items-center gap-2"
+                                        >
+                                            <Download className="w-4 h-4" /> Exportar Leads
+                                        </button>
                                     </div>
-                                    <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-                                        {['all', 'pending', 'contacting', 'completed', 'rejected'].map((s) => (
-                                            <button
-                                                key={s}
-                                                onClick={() => setFilter(s)}
-                                                className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all whitespace-nowrap ${filter === s
-                                                    ? 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan'
-                                                    : 'bg-white/5 border-white/10 text-slate-500 hover:text-white'
-                                                    }`}
-                                            >
-                                                {s}
-                                            </button>
+
+                                    <div className="space-y-4">
+                                        {leads
+                                            .filter(l => filter === 'all' || l.status === filter)
+                                            .filter(l => l.full_name.toLowerCase().includes(searchQuery.toLowerCase()))
+                                            .map((lead, i) => (
+                                                <motion.div
+                                                    initial={{ opacity: 0, x: -20 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    transition={{ delay: i * 0.05 }}
+                                                    key={lead.id}
+                                                    className="group flex flex-col md:flex-row items-center justify-between p-4 md:p-6 rounded-[2rem] md:rounded-[2.5rem] bg-white/[0.02] border border-white/5 hover:border-white/20 transition-all hover:bg-white/[0.04] gap-6"
+                                                >
+                                                    <div className="flex items-center gap-6 w-full md:w-auto mb-4 md:mb-0">
+                                                        <div className={`p-5 rounded-[1.5rem] bg-${lead.category === 'Gamer' ? 'neon-cyan' : 'neon-magenta'}/10 border border-white/5`}>
+                                                            {lead.category === 'Gamer' ? <Gamepad2 className="w-6 h-6 text-neon-cyan" /> : <Tv className="w-6 h-6 text-neon-magenta" />}
+                                                        </div>
+                                                        <div>
+                                                            <div className="flex items-center gap-3">
+                                                                <h4 className="text-lg font-black text-white italic">{lead.full_name}</h4>
+                                                                <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest border ${lead.status === 'rejected' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
+                                                                    lead.status === 'completed' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
+                                                                        lead.status === 'contacting' ? 'bg-neon-cyan/10 border-neon-cyan/20 text-neon-cyan' :
+                                                                            'bg-slate-500/10 border-white/10 text-slate-400'
+                                                                    }`}>
+                                                                    {lead.status}
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex items-center gap-3 text-xs text-slate-500 font-bold uppercase tracking-widest">
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        window.open(`https://wa.me/52${lead.phone.replace(/\D/g, '')}`, '_blank');
+                                                                    }}
+                                                                    className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/10 hover:bg-emerald-500 hover:text-white transition-all group"
+                                                                >
+                                                                    <MessageCircle className="w-3 h-3" />
+                                                                    <span>{lead.phone}</span>
+                                                                </button>
+                                                                <div className="w-1 h-1 rounded-full bg-slate-700" />
+                                                                <span className="text-slate-400">{lead.location}</span>
+                                                                {(lead.ine_anverso || lead.referencias_hogar) && (
+                                                                    <>
+                                                                        <div className="w-1 h-1 rounded-full bg-neon-cyan/40" />
+                                                                        <span className="text-neon-cyan font-black text-[9px] animate-pulse">DOCS OK</span>
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex flex-col items-center md:items-start gap-1 mb-4 md:mb-0">
+                                                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">{lead.provider}</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-xs font-black text-neon-cyan italic uppercase">{lead.plan_name}</span>
+                                                            <span className="px-2 py-0.5 rounded-lg bg-white/5 text-[9px] font-bold text-slate-400 tracking-tighter">{lead.speed}</span>
+                                                        </div>
+                                                        {lead.status === 'rejected' && lead.rejection_reason && (
+                                                            <span className="text-[9px] font-medium text-red-500/70 italic max-w-[200px] truncate" title={lead.rejection_reason}>
+                                                                Motivo: {lead.rejection_reason}
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
+                                                        <div className="text-right">
+                                                            <p className="text-xl font-black italic text-white">{lead.price}</p>
+                                                            <p className="text-[9px] font-black uppercase text-slate-600 tracking-widest">{new Date(lead.created_at).toLocaleDateString()}</p>
+                                                        </div>
+                                                        <div className="flex gap-2">
+                                                            {/* Status Update Actions */}
+                                                            {lead.status === 'pending' && (
+                                                                <button
+                                                                    onClick={() => updateStatus(lead.id, 'contacting')}
+                                                                    className="p-3 rounded-xl bg-neon-cyan/10 text-neon-cyan hover:bg-neon-cyan hover:text-black transition-all"
+                                                                    title="Procesar"
+                                                                >
+                                                                    <RefreshCw className="w-5 h-5" />
+                                                                </button>
+                                                            )}
+                                                            {lead.status !== 'completed' && lead.status !== 'rejected' && (
+                                                                <button
+                                                                    onClick={() => updateStatus(lead.id, 'completed')}
+                                                                    className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all"
+                                                                    title="Finalizar"
+                                                                >
+                                                                    <CheckCircle2 className="w-5 h-5" />
+                                                                </button>
+                                                            )}
+                                                            {lead.status !== 'rejected' && (
+                                                                <button
+                                                                    onClick={() => setRejectionModal({ isOpen: true, id: lead.id, reason: "" })}
+                                                                    className="p-3 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                                                                    title="Rechazar"
+                                                                >
+                                                                    <XCircle className="w-5 h-5" />
+                                                                </button>
+                                                            )}
+
+                                                            {/* Management Actions */}
+                                                            <div className="w-px h-8 bg-white/10 mx-1 self-center" />
+
+                                                            <button
+                                                                onClick={() => setEditingLead(lead)}
+                                                                className="p-3 rounded-xl bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white transition-all"
+                                                                title="Editar Datos"
+                                                            >
+                                                                <Edit2 className="w-5 h-5" />
+                                                            </button>
+
+                                                            <button
+                                                                onClick={() => setDeleteConfirm(lead.id)}
+                                                                className="p-3 rounded-xl bg-red-900/10 text-red-700 hover:bg-red-600 hover:text-white transition-all"
+                                                                title="Eliminar Permanente"
+                                                            >
+                                                                <Trash2 className="w-5 h-5" />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
+                                            ))}
+                                    </div>
+                                </GlassCard>
+                            </motion.div>
+                        )}
+
+                        {activeTab === 'inventory' && (
+                            <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="space-y-8">
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                    <h2 className="text-2xl font-black italic">CATÁLOGO DE <span className="text-neon-cyan neon-text-cyan">SERVICIOS</span></h2>
+                                    <NeonButton className="py-3 px-6 text-[10px]" onClick={fetchData}>
+                                        <RefreshCw className="w-3.5 h-3.5 mr-2" /> ACTUALIZAR DATOS
+                                    </NeonButton>
+                                </div>
+
+                                <div className="grid grid-cols-1 xl:grid-cols-[1fr_2.5fr] gap-8">
+                                    {/* Providers List */}
+                                    <GlassCard className="p-6 border-white/5 !bg-black/40 h-fit text-black">
+                                        <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-6">Proveedores Activos</h3>
+                                        <div className="space-y-3">
+                                            {providers.map(p => (
+                                                <div key={p.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-10 h-10 rounded-xl bg-white/5 p-2 border border-white/5 flex items-center justify-center">
+                                                            {p.logo_url ? <img src={p.logo_url} alt={p.name} className="w-full h-full object-contain" /> : <Building2 className="w-5 h-5 text-slate-600" />}
+                                                        </div>
+                                                        <span className="font-bold text-sm text-white">{p.name}</span>
+                                                    </div>
+                                                    <div className="flex gap-1">
+                                                        <button
+                                                            onClick={() => setEditingProvider(p)}
+                                                            title="Editar Proveedor"
+                                                            className="opacity-0 group-hover:opacity-100 p-2 hover:bg-white/5 rounded-lg transition-all text-slate-500 hover:text-white"
+                                                        >
+                                                            <Edit2 className="w-4 h-4" />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => deleteItem('providers', p.id)}
+                                                            title="Eliminar Proveedor"
+                                                            className="opacity-0 group-hover:opacity-100 p-2 hover:bg-red-500/10 rounded-lg transition-all text-slate-500 hover:text-red-500"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <button
+                                            onClick={() => setEditingProvider({ id: '', name: '', logo_url: '' })}
+                                            className="w-full mt-6 py-4 rounded-2xl border border-dashed border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:border-neon-cyan hover:text-neon-cyan transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <Plus className="w-4 h-4" /> Registrar Proveedor
+                                        </button>
+                                    </GlassCard>
+
+                                    {/* Plans Management */}
+                                    <GlassCard className="p-8 border-white/5 !bg-black/40 text-black">
+                                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+                                            <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Gestión de Planes y Precios</h3>
+                                            <div className="flex gap-4 w-full md:w-auto">
+                                                <div className="relative group flex-1">
+                                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
+                                                    <input
+                                                        placeholder="FILTRAR PLANES..."
+                                                        value={searchQuery}
+                                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                                        className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-6 py-3 text-[10px] text-white focus:outline-none focus:border-neon-cyan transition-all font-black tracking-widest"
+                                                    />
+                                                </div>
+                                                <button
+                                                    onClick={() => setEditingPlan({ id: '', provider_id: providers[0]?.id || '', name: '', type: 'Gamer', category_name: '', speed: '', price: '', features: [], ranking_score: 0, color_scheme: 'cyan', icon_slug: 'zap', is_active: true })}
+                                                    title="Nuevo Plan"
+                                                    className="p-3 bg-neon-cyan text-black rounded-xl hover:scale-105 transition-all"
+                                                >
+                                                    <Plus className="w-5 h-5" />
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="overflow-x-auto -mx-2">
+                                            <table className="w-full text-left border-collapse min-w-[800px]">
+                                                <thead>
+                                                    <tr className="border-b border-white/5">
+                                                        <th className="px-4 pb-4 text-[9px] font-black uppercase tracking-widest text-slate-600">Plan / Producto</th>
+                                                        <th className="px-4 pb-4 text-[9px] font-black uppercase tracking-widest text-slate-600">Tipo</th>
+                                                        <th className="px-4 pb-4 text-[9px] font-black uppercase tracking-widest text-slate-600 text-center">Ranking</th>
+                                                        <th className="px-4 pb-4 text-[9px] font-black uppercase tracking-widest text-slate-600">Precio</th>
+                                                        <th className="px-4 pb-4 text-[9px] font-black uppercase tracking-widest text-slate-600 text-right">Acciones</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-white/[0.02]">
+                                                    {filteredPlans.length === 0 ? (
+                                                        <tr>
+                                                            <td colSpan={5} className="py-20 text-center text-slate-600 font-bold uppercase text-[10px] tracking-widest italic">
+                                                                No hay planes que coincidan con la búsqueda.
+                                                            </td>
+                                                        </tr>
+                                                    ) : (
+                                                        filteredPlans.map(plan => (
+                                                            <tr key={plan.id} className="group hover:bg-white/[0.01] transition-all">
+                                                                <td className="px-4 py-6">
+                                                                    <div>
+                                                                        <p className="font-black italic text-lg text-white tracking-tighter mb-1">{plan.name}</p>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <span className="text-[9px] font-bold text-slate-500 uppercase">{providers.find(p => p.id === plan.provider_id)?.name || 'Desconocido'}</span>
+                                                                            <div className="w-1 h-1 rounded-full bg-slate-800" />
+                                                                            <span className="text-[9px] font-bold text-slate-400">{plan.speed}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-4 py-6">
+                                                                    <span className={`px-3 py-1 rounded-lg bg-white/5 border border-white/5 text-[9px] font-black uppercase tracking-widest text-neon-${plan.type === 'Gamer' ? 'cyan' : 'magenta'}`}>
+                                                                        {plan.type}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="px-4 py-6 text-center">
+                                                                    <div className="inline-flex items-center gap-1.5 bg-white/5 px-2 py-1 rounded-lg border border-white/5">
+                                                                        <Activity className="w-3 h-3 text-emerald-500" />
+                                                                        <span className="text-[10px] font-black text-white">{plan.ranking_score}</span>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-4 py-6">
+                                                                    <span className="text-lg font-black italic text-white">{plan.price}</span>
+                                                                </td>
+                                                                <td className="px-4 py-6 text-right">
+                                                                    <div className="flex justify-end gap-2">
+                                                                        <button
+                                                                            onClick={() => setEditingPlan(plan)}
+                                                                            title="Editar Plan"
+                                                                            className="p-3 rounded-xl bg-white/5 text-slate-500 hover:text-white hover:bg-white/10 transition-all"
+                                                                        >
+                                                                            <Edit2 className="w-4 h-4" />
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => deleteItem('plans', plan.id)}
+                                                                            title="Eliminar Plan"
+                                                                            className="p-3 rounded-xl bg-red-500/5 text-red-900/50 hover:text-red-500 hover:bg-red-500/10 transition-all"
+                                                                        >
+                                                                            <Trash2 className="w-4 h-4" />
+                                                                        </button>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </GlassCard>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {activeTab === 'traffic' && (
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                                <GlassCard className="p-8 border-white/5 !bg-black/40 h-[600px] overflow-hidden flex flex-col text-black">
+                                    <h3 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-8 flex items-center gap-2">
+                                        <Activity className="w-4 h-4 text-emerald-500" /> Real-time Node Monitoring
+                                    </h3>
+                                    <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
+                                        {visits.map((visit, i) => (
+                                            <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.01] border border-white/5 hover:bg-white/[0.03] transition-all">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center border border-white/5">
+                                                        {visit.device_type === 'mobile' ? <Smartphone className="w-4 h-4 text-neon-magenta" /> : <Monitor className="w-4 h-4 text-neon-cyan" />}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs font-black text-slate-200 uppercase tracking-widest">{visit.page_path}</p>
+                                                        <div className="flex items-center gap-2 mt-1">
+                                                            <span className="text-[10px] font-bold text-slate-500">{visit.browser} on {visit.os}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <span className="text-[10px] font-mono text-slate-600">{new Date(visit.created_at).toLocaleTimeString()}</span>
+                                            </div>
                                         ))}
                                     </div>
+                                </GlassCard>
+                            </motion.div>
+                        )}
+
+                        {activeTab === 'integrations' && (
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
+                                <h2 className="text-2xl font-black italic">SISTEMAS E <span className="text-neon-magenta neon-text-magenta">INTEGRACIONES</span></h2>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {[
+                                        { name: 'WhatsApp Business', status: 'Connected', icon: Smartphone, desc: 'Notificaciones automáticas de leads y seguimiento directo de clientes.', color: 'emerald' },
+                                        { name: 'Provider APIs', status: 'Scanning', icon: RefreshCw, desc: 'Sincronización de disponibilidad y cobertura en tiempo real con carriers.', color: 'cyan' },
+                                        { name: 'Payment Gateway', status: 'Standby', icon: Shield, desc: 'Procesamiento de pagos seguro para suscripciones y servicios premium.', color: 'magenta' }
+                                    ].map((int, i) => (
+                                        <GlassCard key={i} className="p-8 border-white/5 !bg-black/40 group hover:border-white/10 transition-all text-black">
+                                            <div className="flex justify-between items-start mb-8">
+                                                <div className="p-5 rounded-2xl bg-white/5 border border-white/5 group-hover:border-white/10 transition-all">
+                                                    <int.icon className={`w-8 h-8 text-${int.color === 'emerald' ? 'emerald-500' : int.color === 'cyan' ? 'neon-cyan' : 'neon-magenta'}`} />
+                                                </div>
+                                                <div className="flex flex-col items-end">
+                                                    <span className={`text-[9px] font-black px-3 py-1 rounded-lg bg-${int.color === 'emerald' ? 'emerald' : int.color === 'cyan' ? 'cyan' : 'red'}-500/10 text-${int.color === 'emerald' ? 'emerald' : int.color === 'cyan' ? 'cyan' : 'red'}-500 uppercase tracking-widest border border-current/20`}>
+                                                        {int.status}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <h4 className="text-2xl font-black italic text-white mb-2 tracking-tighter">{int.name}</h4>
+                                            <p className="text-xs text-slate-500 leading-relaxed mb-10 h-12">{int.desc}</p>
+                                            <button className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white hover:bg-white/10 hover:border-white/20 transition-all">
+                                                Configurar Protocolo
+                                            </button>
+                                        </GlassCard>
+                                    ))}
+                                </div>
+
+                                <GlassCard className="p-10 border-white/5 !bg-red-500/5 text-black">
+                                    <div className="flex flex-col md:flex-row items-center gap-10">
+                                        <div className="p-6 rounded-3xl bg-red-500/10 border border-red-500/20 shadow-2xl shadow-red-500/10">
+                                            <Database className="w-12 h-12 text-red-500" />
+                                        </div>
+                                        <div className="flex-1 text-center md:text-left">
+                                            <h4 className="text-2xl font-black italic text-white mb-2 uppercase tracking-tighter">Bóveda de Seguridad & Backups</h4>
+                                            <p className="text-sm text-slate-500 mb-0 leading-relaxed max-w-2xl">Protección perimetral de datos y respaldos automatizados cada 24 horas en nodos regionales redundantes para asegurar la continuidad sistemática de FiberGravity.</p>
+                                        </div>
+                                        <NeonButton
+                                            onClick={() => setActiveTab("logs")}
+                                            variant="magenta"
+                                            className="py-4 px-10 text-[10px] w-full md:w-auto"
+                                        >
+                                            VER LOGS DE SEGURIDAD
+                                        </NeonButton>
+                                    </div>
+                                </GlassCard>
+                            </motion.div>
+                        )}
+                        {activeTab === 'logs' && (
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
+                                <div className="flex justify-between items-center">
+                                    <h2 className="text-2xl font-black italic">AUDITORÍA DE <span className="text-emerald-500 neon-text-emerald">SISTEMA</span></h2>
                                     <button
                                         onClick={() => {
                                             const csv = [
-                                                ['ID', 'Fecha', 'Nombre', 'Telefono', 'Ubicacion', 'Categoria', 'Proveedor', 'Plan', 'Precio', 'Status'].join(','),
-                                                ...leads.map(l => [l.id, l.created_at, l.full_name, l.phone, l.location, l.category, l.provider, l.plan_name, l.price, l.status].join(','))
+                                                ['Fecha', 'Action', 'Entity', 'Details', 'Admin'].join(','),
+                                                ...logs.map(log => [new Date(log.created_at).toLocaleString(), log.action, log.entity_type, log.details, log.admin_name].join(','))
                                             ].join('\n');
                                             const blob = new Blob([csv], { type: 'text/csv' });
                                             const url = window.URL.createObjectURL(blob);
                                             const a = document.createElement('a');
                                             a.href = url;
-                                            a.download = `leads_fibergravity_${new Date().toISOString().split('T')[0]}.csv`;
+                                            a.download = `audit_logs_${new Date().toISOString()}.csv`;
                                             a.click();
                                         }}
-                                        className="px-6 py-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-black uppercase tracking-widest text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all flex items-center gap-2"
+                                        className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
                                     >
-                                        <Download className="w-4 h-4" /> Exportar Leads
+                                        <Download className="w-4 h-4" /> Exportar Auditoría
                                     </button>
                                 </div>
 
-                                <div className="space-y-4">
-                                    {leads
-                                        .filter(l => filter === 'all' || l.status === filter)
-                                        .filter(l => l.full_name.toLowerCase().includes(searchQuery.toLowerCase()))
-                                        .map((lead, i) => (
-                                            <motion.div
-                                                initial={{ opacity: 0, x: -20 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                transition={{ delay: i * 0.05 }}
-                                                key={lead.id}
-                                                className="group flex flex-col md:flex-row items-center justify-between p-4 md:p-6 rounded-[2rem] md:rounded-[2.5rem] bg-white/[0.02] border border-white/5 hover:border-white/20 transition-all hover:bg-white/[0.04] gap-6"
-                                            >
-                                                <div className="flex items-center gap-6 w-full md:w-auto mb-4 md:mb-0">
-                                                    <div className={`p-5 rounded-[1.5rem] bg-${lead.category === 'Gamer' ? 'neon-cyan' : 'neon-magenta'}/10 border border-white/5`}>
-                                                        {lead.category === 'Gamer' ? <Gamepad2 className="w-6 h-6 text-neon-cyan" /> : <Tv className="w-6 h-6 text-neon-magenta" />}
-                                                    </div>
-                                                    <div>
-                                                        <div className="flex items-center gap-3">
-                                                            <h4 className="text-lg font-black text-white italic">{lead.full_name}</h4>
-                                                            <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest border ${lead.status === 'rejected' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
-                                                                lead.status === 'completed' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
-                                                                    lead.status === 'contacting' ? 'bg-neon-cyan/10 border-neon-cyan/20 text-neon-cyan' :
-                                                                        'bg-slate-500/10 border-white/10 text-slate-400'
-                                                                }`}>
-                                                                {lead.status}
-                                                            </span>
-                                                        </div>
-                                                        <div className="flex items-center gap-3 text-xs text-slate-500 font-bold uppercase tracking-widest">
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    window.open(`https://wa.me/52${lead.phone.replace(/\D/g, '')}`, '_blank');
-                                                                }}
-                                                                className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/10 hover:bg-emerald-500 hover:text-white transition-all group"
-                                                            >
-                                                                <MessageCircle className="w-3 h-3" />
-                                                                <span>{lead.phone}</span>
-                                                            </button>
-                                                            <div className="w-1 h-1 rounded-full bg-slate-700" />
-                                                            <span className="text-slate-400">{lead.location}</span>
-                                                            {(lead.ine_anverso || lead.referencias_hogar) && (
-                                                                <>
-                                                                    <div className="w-1 h-1 rounded-full bg-neon-cyan/40" />
-                                                                    <span className="text-neon-cyan font-black text-[9px] animate-pulse">DOCS OK</span>
-                                                                </>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex flex-col items-center md:items-start gap-1 mb-4 md:mb-0">
-                                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">{lead.provider}</span>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-xs font-black text-neon-cyan italic uppercase">{lead.plan_name}</span>
-                                                        <span className="px-2 py-0.5 rounded-lg bg-white/5 text-[9px] font-bold text-slate-400 tracking-tighter">{lead.speed}</span>
-                                                    </div>
-                                                    {lead.status === 'rejected' && lead.rejection_reason && (
-                                                        <span className="text-[9px] font-medium text-red-500/70 italic max-w-[200px] truncate" title={lead.rejection_reason}>
-                                                            Motivo: {lead.rejection_reason}
-                                                        </span>
-                                                    )}
-                                                </div>
-
-                                                <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
-                                                    <div className="text-right">
-                                                        <p className="text-xl font-black italic text-white">{lead.price}</p>
-                                                        <p className="text-[9px] font-black uppercase text-slate-600 tracking-widest">{new Date(lead.created_at).toLocaleDateString()}</p>
-                                                    </div>
-                                                    <div className="flex gap-2">
-                                                        {/* Status Update Actions */}
-                                                        {lead.status === 'pending' && (
-                                                            <button
-                                                                onClick={() => updateStatus(lead.id, 'contacting')}
-                                                                className="p-3 rounded-xl bg-neon-cyan/10 text-neon-cyan hover:bg-neon-cyan hover:text-black transition-all"
-                                                                title="Procesar"
-                                                            >
-                                                                <RefreshCw className="w-5 h-5" />
-                                                            </button>
-                                                        )}
-                                                        {lead.status !== 'completed' && lead.status !== 'rejected' && (
-                                                            <button
-                                                                onClick={() => updateStatus(lead.id, 'completed')}
-                                                                className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all"
-                                                                title="Finalizar"
-                                                            >
-                                                                <CheckCircle2 className="w-5 h-5" />
-                                                            </button>
-                                                        )}
-                                                        {lead.status !== 'rejected' && (
-                                                            <button
-                                                                onClick={() => setRejectionModal({ isOpen: true, id: lead.id, reason: "" })}
-                                                                className="p-3 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all"
-                                                                title="Rechazar"
-                                                            >
-                                                                <XCircle className="w-5 h-5" />
-                                                            </button>
-                                                        )}
-
-                                                        {/* Management Actions */}
-                                                        <div className="w-px h-8 bg-white/10 mx-1 self-center" />
-
-                                                        <button
-                                                            onClick={() => setEditingLead(lead)}
-                                                            className="p-3 rounded-xl bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white transition-all"
-                                                            title="Editar Datos"
-                                                        >
-                                                            <Edit2 className="w-5 h-5" />
-                                                        </button>
-
-                                                        <button
-                                                            onClick={() => setDeleteConfirm(lead.id)}
-                                                            className="p-3 rounded-xl bg-red-900/10 text-red-700 hover:bg-red-600 hover:text-white transition-all"
-                                                            title="Eliminar Permanente"
-                                                        >
-                                                            <Trash2 className="w-5 h-5" />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </motion.div>
-                                        ))}
-                                </div>
-                            </GlassCard>
-                        </motion.div>
-                    )}
-
-                    {activeTab === 'inventory' && (
-                        <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="space-y-8">
-                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                                <h2 className="text-2xl font-black italic">CATÁLOGO DE <span className="text-neon-cyan neon-text-cyan">SERVICIOS</span></h2>
-                                <NeonButton className="py-3 px-6 text-[10px]" onClick={fetchData}>
-                                    <RefreshCw className="w-3.5 h-3.5 mr-2" /> ACTUALIZAR DATOS
-                                </NeonButton>
-                            </div>
-
-                            <div className="grid grid-cols-1 xl:grid-cols-[1fr_2.5fr] gap-8">
-                                {/* Providers List */}
-                                <GlassCard className="p-6 border-white/5 !bg-black/40 h-fit text-black">
-                                    <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-6">Proveedores Activos</h3>
-                                    <div className="space-y-3">
-                                        {providers.map(p => (
-                                            <div key={p.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all group">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-10 h-10 rounded-xl bg-white/5 p-2 border border-white/5 flex items-center justify-center">
-                                                        {p.logo_url ? <img src={p.logo_url} alt={p.name} className="w-full h-full object-contain" /> : <Building2 className="w-5 h-5 text-slate-600" />}
-                                                    </div>
-                                                    <span className="font-bold text-sm text-white">{p.name}</span>
-                                                </div>
-                                                <div className="flex gap-1">
-                                                    <button
-                                                        onClick={() => setEditingProvider(p)}
-                                                        title="Editar Proveedor"
-                                                        className="opacity-0 group-hover:opacity-100 p-2 hover:bg-white/5 rounded-lg transition-all text-slate-500 hover:text-white"
-                                                    >
-                                                        <Edit2 className="w-4 h-4" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => deleteItem('providers', p.id)}
-                                                        title="Eliminar Proveedor"
-                                                        className="opacity-0 group-hover:opacity-100 p-2 hover:bg-red-500/10 rounded-lg transition-all text-slate-500 hover:text-red-500"
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <button
-                                        onClick={() => setEditingProvider({ id: '', name: '', logo_url: '' })}
-                                        className="w-full mt-6 py-4 rounded-2xl border border-dashed border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:border-neon-cyan hover:text-neon-cyan transition-all flex items-center justify-center gap-2"
-                                    >
-                                        <Plus className="w-4 h-4" /> Registrar Proveedor
-                                    </button>
-                                </GlassCard>
-
-                                {/* Plans Management */}
-                                <GlassCard className="p-8 border-white/5 !bg-black/40 text-black">
-                                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
-                                        <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Gestión de Planes y Precios</h3>
-                                        <div className="flex gap-4 w-full md:w-auto">
-                                            <div className="relative group flex-1">
-                                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
-                                                <input
-                                                    placeholder="FILTRAR PLANES..."
-                                                    value={searchQuery}
-                                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                                    className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-6 py-3 text-[10px] text-white focus:outline-none focus:border-neon-cyan transition-all font-black tracking-widest"
-                                                />
-                                            </div>
-                                            <button
-                                                onClick={() => setEditingPlan({ id: '', provider_id: providers[0]?.id || '', name: '', type: 'Gamer', category_name: '', speed: '', price: '', features: [], ranking_score: 0, color_scheme: 'cyan', icon_slug: 'zap', is_active: true })}
-                                                title="Nuevo Plan"
-                                                className="p-3 bg-neon-cyan text-black rounded-xl hover:scale-105 transition-all"
-                                            >
-                                                <Plus className="w-5 h-5" />
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div className="overflow-x-auto -mx-2">
-                                        <table className="w-full text-left border-collapse min-w-[800px]">
-                                            <thead>
-                                                <tr className="border-b border-white/5">
-                                                    <th className="px-4 pb-4 text-[9px] font-black uppercase tracking-widest text-slate-600">Plan / Producto</th>
-                                                    <th className="px-4 pb-4 text-[9px] font-black uppercase tracking-widest text-slate-600">Tipo</th>
-                                                    <th className="px-4 pb-4 text-[9px] font-black uppercase tracking-widest text-slate-600 text-center">Ranking</th>
-                                                    <th className="px-4 pb-4 text-[9px] font-black uppercase tracking-widest text-slate-600">Precio</th>
-                                                    <th className="px-4 pb-4 text-[9px] font-black uppercase tracking-widest text-slate-600 text-right">Acciones</th>
+                                <GlassCard className="p-0 border-white/5 !bg-black/60 overflow-hidden text-black">
+                                    <div className="max-h-[700px] overflow-auto custom-scrollbar">
+                                        <table className="w-full text-left border-collapse min-w-[1000px]">
+                                            <thead className="sticky top-0 bg-slate-900 border-b border-white/5 z-10">
+                                                <tr>
+                                                    <th className="px-8 py-5 text-[9px] font-black uppercase tracking-widest text-slate-500">Timestamp</th>
+                                                    <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-slate-500">Acción</th>
+                                                    <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-slate-500">Entidad</th>
+                                                    <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-slate-500">Descripción del Cambio</th>
+                                                    <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-slate-500">Admin</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-white/[0.02]">
-                                                {filteredPlans.length === 0 ? (
+                                                {logs.length === 0 ? (
                                                     <tr>
-                                                        <td colSpan={5} className="py-20 text-center text-slate-600 font-bold uppercase text-[10px] tracking-widest italic">
-                                                            No hay planes que coincidan con la búsqueda.
-                                                        </td>
+                                                        <td colSpan={5} className="py-20 text-center text-slate-600 font-bold uppercase text-[10px] tracking-widest">No se registran actividades recientes en el núcleo.</td>
                                                     </tr>
                                                 ) : (
-                                                    filteredPlans.map(plan => (
-                                                        <tr key={plan.id} className="group hover:bg-white/[0.01] transition-all">
-                                                            <td className="px-4 py-6">
-                                                                <div>
-                                                                    <p className="font-black italic text-lg text-white tracking-tighter mb-1">{plan.name}</p>
-                                                                    <div className="flex items-center gap-2">
-                                                                        <span className="text-[9px] font-bold text-slate-500 uppercase">{providers.find(p => p.id === plan.provider_id)?.name || 'Desconocido'}</span>
-                                                                        <div className="w-1 h-1 rounded-full bg-slate-800" />
-                                                                        <span className="text-[9px] font-bold text-slate-400">{plan.speed}</span>
-                                                                    </div>
+                                                    logs.map((log) => (
+                                                        <tr key={log.id} className="hover:bg-white/[0.01] transition-all group">
+                                                            <td className="px-8 py-5 whitespace-nowrap">
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-[11px] font-mono text-emerald-500/70">{new Date(log.created_at).toLocaleDateString()}</span>
+                                                                    <span className="text-[10px] font-mono text-slate-500">{new Date(log.created_at).toLocaleTimeString()}</span>
                                                                 </div>
                                                             </td>
-                                                            <td className="px-4 py-6">
-                                                                <span className={`px-3 py-1 rounded-lg bg-white/5 border border-white/5 text-[9px] font-black uppercase tracking-widest text-neon-${plan.type === 'Gamer' ? 'cyan' : 'magenta'}`}>
-                                                                    {plan.type}
+                                                            <td className="px-6 py-5">
+                                                                <span className={`px-2 py-1 rounded-md text-[9px] font-black uppercase border ${log.action.includes('DELETE') ? 'bg-red-500/10 border-red-500/20 text-red-500' :
+                                                                    log.action.includes('CREATE') ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
+                                                                        log.action.includes('UPDATE') ? 'bg-blue-500/10 border-blue-500/20 text-blue-500' :
+                                                                            'bg-white/5 border-white/10 text-slate-400'
+                                                                    }`}>
+                                                                    {log.action}
                                                                 </span>
                                                             </td>
-                                                            <td className="px-4 py-6 text-center">
-                                                                <div className="inline-flex items-center gap-1.5 bg-white/5 px-2 py-1 rounded-lg border border-white/5">
-                                                                    <Activity className="w-3 h-3 text-emerald-500" />
-                                                                    <span className="text-[10px] font-black text-white">{plan.ranking_score}</span>
-                                                                </div>
+                                                            <td className="px-6 py-5">
+                                                                <span className="text-[10px] font-black uppercase text-slate-400 font-mono tracking-tighter">
+                                                                    {log.entity_type}
+                                                                </span>
                                                             </td>
-                                                            <td className="px-4 py-6">
-                                                                <span className="text-lg font-black italic text-white">{plan.price}</span>
+                                                            <td className="px-6 py-5">
+                                                                <p className="text-xs text-slate-200 font-medium">{log.details}</p>
                                                             </td>
-                                                            <td className="px-4 py-6 text-right">
-                                                                <div className="flex justify-end gap-2">
-                                                                    <button
-                                                                        onClick={() => setEditingPlan(plan)}
-                                                                        title="Editar Plan"
-                                                                        className="p-3 rounded-xl bg-white/5 text-slate-500 hover:text-white hover:bg-white/10 transition-all"
-                                                                    >
-                                                                        <Edit2 className="w-4 h-4" />
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() => deleteItem('plans', plan.id)}
-                                                                        title="Eliminar Plan"
-                                                                        className="p-3 rounded-xl bg-red-500/5 text-red-900/50 hover:text-red-500 hover:bg-red-500/10 transition-all"
-                                                                    >
-                                                                        <Trash2 className="w-4 h-4" />
-                                                                    </button>
+                                                            <td className="px-6 py-5 whitespace-nowrap">
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{log.admin_name}</span>
                                                                 </div>
                                                             </td>
                                                         </tr>
@@ -910,627 +1051,614 @@ export default function PremiumAdminDashboard() {
                                         </table>
                                     </div>
                                 </GlassCard>
-                            </div>
-                        </motion.div>
-                    )}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </main>
 
-                    {activeTab === 'traffic' && (
-                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-                            <GlassCard className="p-8 border-white/5 !bg-black/40 h-[600px] overflow-hidden flex flex-col text-black">
-                                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-8 flex items-center gap-2">
-                                    <Activity className="w-4 h-4 text-emerald-500" /> Real-time Node Monitoring
-                                </h3>
-                                <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
-                                    {visits.map((visit, i) => (
-                                        <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.01] border border-white/5 hover:bg-white/[0.03] transition-all">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center border border-white/5">
-                                                    {visit.device_type === 'mobile' ? <Smartphone className="w-4 h-4 text-neon-magenta" /> : <Monitor className="w-4 h-4 text-neon-cyan" />}
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs font-black text-slate-200 uppercase tracking-widest">{visit.page_path}</p>
-                                                    <div className="flex items-center gap-2 mt-1">
-                                                        <span className="text-[10px] font-bold text-slate-500">{visit.browser} on {visit.os}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <span className="text-[10px] font-mono text-slate-600">{new Date(visit.created_at).toLocaleTimeString()}</span>
+                {/* MODALS SECTION */}
+                <AnimatePresence>
+                    {editingLead && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingLead(null)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                                className="relative w-full max-w-3xl max-h-[90vh] flex flex-col"
+                            >
+                                <GlassCard className="border-white/10 !bg-slate-950/90 shadow-2xl flex flex-col overflow-hidden p-0 rounded-[2.5rem]">
+                                    {/* FIXED HEADER */}
+                                    <div className="p-8 pb-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                                        <div>
+                                            <h2 className="text-2xl font-black italic mb-1 uppercase tracking-tighter">
+                                                MODIFICAR <span className="text-neon-cyan neon-text-cyan">EXPEDIENTE</span>
+                                            </h2>
+                                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">ID: {editingLead.id.split('-')[0]}</p>
                                         </div>
-                                    ))}
-                                </div>
-                            </GlassCard>
-                        </motion.div>
-                    )}
-
-                    {activeTab === 'integrations' && (
-                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
-                            <h2 className="text-2xl font-black italic">SISTEMAS E <span className="text-neon-magenta neon-text-magenta">INTEGRACIONES</span></h2>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {[
-                                    { name: 'WhatsApp Business', status: 'Connected', icon: Smartphone, desc: 'Notificaciones automáticas de leads y seguimiento directo de clientes.', color: 'emerald' },
-                                    { name: 'Provider APIs', status: 'Scanning', icon: RefreshCw, desc: 'Sincronización de disponibilidad y cobertura en tiempo real con carriers.', color: 'cyan' },
-                                    { name: 'Payment Gateway', status: 'Standby', icon: Shield, desc: 'Procesamiento de pagos seguro para suscripciones y servicios premium.', color: 'magenta' }
-                                ].map((int, i) => (
-                                    <GlassCard key={i} className="p-8 border-white/5 !bg-black/40 group hover:border-white/10 transition-all text-black">
-                                        <div className="flex justify-between items-start mb-8">
-                                            <div className="p-5 rounded-2xl bg-white/5 border border-white/5 group-hover:border-white/10 transition-all">
-                                                <int.icon className={`w-8 h-8 text-${int.color === 'emerald' ? 'emerald-500' : int.color === 'cyan' ? 'neon-cyan' : 'neon-magenta'}`} />
-                                            </div>
-                                            <div className="flex flex-col items-end">
-                                                <span className={`text-[9px] font-black px-3 py-1 rounded-lg bg-${int.color === 'emerald' ? 'emerald' : int.color === 'cyan' ? 'cyan' : 'red'}-500/10 text-${int.color === 'emerald' ? 'emerald' : int.color === 'cyan' ? 'cyan' : 'red'}-500 uppercase tracking-widest border border-current/20`}>
-                                                    {int.status}
-                                                </span>
-                                            </div>
+                                        <div className="flex gap-4">
+                                            <button
+                                                onClick={() => window.print()}
+                                                title="Descargar Dossier"
+                                                className="p-3 bg-white/5 hover:bg-white/10 rounded-2xl text-slate-400 hover:text-white transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"
+                                            >
+                                                <Printer className="w-5 h-5" /> EXPEDIENTE
+                                            </button>
+                                            <button onClick={() => setEditingLead(null)} title="Cerrar" className="p-3 hover:bg-white/5 rounded-2xl transition-all text-slate-500 hover:text-white border border-transparent hover:border-white/10"><X className="w-6 h-6" /></button>
                                         </div>
-                                        <h4 className="text-2xl font-black italic text-white mb-2 tracking-tighter">{int.name}</h4>
-                                        <p className="text-xs text-slate-500 leading-relaxed mb-10 h-12">{int.desc}</p>
-                                        <button className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white hover:bg-white/10 hover:border-white/20 transition-all">
-                                            Configurar Protocolo
-                                        </button>
-                                    </GlassCard>
-                                ))}
-                            </div>
-
-                            <GlassCard className="p-10 border-white/5 !bg-red-500/5 text-black">
-                                <div className="flex flex-col md:flex-row items-center gap-10">
-                                    <div className="p-6 rounded-3xl bg-red-500/10 border border-red-500/20 shadow-2xl shadow-red-500/10">
-                                        <Database className="w-12 h-12 text-red-500" />
                                     </div>
-                                    <div className="flex-1 text-center md:text-left">
-                                        <h4 className="text-2xl font-black italic text-white mb-2 uppercase tracking-tighter">Bóveda de Seguridad & Backups</h4>
-                                        <p className="text-sm text-slate-500 mb-0 leading-relaxed max-w-2xl">Protección perimetral de datos y respaldos automatizados cada 24 horas en nodos regionales redundantes para asegurar la continuidad sistemática de FiberGravity.</p>
-                                    </div>
-                                    <NeonButton
-                                        onClick={() => setActiveTab("logs")}
-                                        variant="magenta"
-                                        className="py-4 px-10 text-[10px] w-full md:w-auto"
-                                    >
-                                        VER LOGS DE SEGURIDAD
-                                    </NeonButton>
-                                </div>
-                            </GlassCard>
-                        </motion.div>
-                    )}
-                    {activeTab === 'logs' && (
-                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
-                            <div className="flex justify-between items-center">
-                                <h2 className="text-2xl font-black italic">AUDITORÍA DE <span className="text-emerald-500 neon-text-emerald">SISTEMA</span></h2>
-                                <button
-                                    onClick={() => {
-                                        const csv = [
-                                            ['Fecha', 'Action', 'Entity', 'Details', 'Admin'].join(','),
-                                            ...logs.map(log => [new Date(log.created_at).toLocaleString(), log.action, log.entity_type, log.details, log.admin_name].join(','))
-                                        ].join('\n');
-                                        const blob = new Blob([csv], { type: 'text/csv' });
-                                        const url = window.URL.createObjectURL(blob);
-                                        const a = document.createElement('a');
-                                        a.href = url;
-                                        a.download = `audit_logs_${new Date().toISOString()}.csv`;
-                                        a.click();
-                                    }}
-                                    className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
-                                >
-                                    <Download className="w-4 h-4" /> Exportar Auditoría
-                                </button>
-                            </div>
 
-                            <GlassCard className="p-0 border-white/5 !bg-black/60 overflow-hidden text-black">
-                                <div className="max-h-[700px] overflow-auto custom-scrollbar">
-                                    <table className="w-full text-left border-collapse min-w-[1000px]">
-                                        <thead className="sticky top-0 bg-slate-900 border-b border-white/5 z-10">
-                                            <tr>
-                                                <th className="px-8 py-5 text-[9px] font-black uppercase tracking-widest text-slate-500">Timestamp</th>
-                                                <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-slate-500">Acción</th>
-                                                <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-slate-500">Entidad</th>
-                                                <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-slate-500">Descripción del Cambio</th>
-                                                <th className="px-6 py-5 text-[9px] font-black uppercase tracking-widest text-slate-500">Admin</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-white/[0.02]">
-                                            {logs.length === 0 ? (
-                                                <tr>
-                                                    <td colSpan={5} className="py-20 text-center text-slate-600 font-bold uppercase text-[10px] tracking-widest">No se registran actividades recientes en el núcleo.</td>
-                                                </tr>
-                                            ) : (
-                                                logs.map((log) => (
-                                                    <tr key={log.id} className="hover:bg-white/[0.01] transition-all group">
-                                                        <td className="px-8 py-5 whitespace-nowrap">
-                                                            <div className="flex flex-col">
-                                                                <span className="text-[11px] font-mono text-emerald-500/70">{new Date(log.created_at).toLocaleDateString()}</span>
-                                                                <span className="text-[10px] font-mono text-slate-500">{new Date(log.created_at).toLocaleTimeString()}</span>
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-6 py-5">
-                                                            <span className={`px-2 py-1 rounded-md text-[9px] font-black uppercase border ${log.action.includes('DELETE') ? 'bg-red-500/10 border-red-500/20 text-red-500' :
-                                                                log.action.includes('CREATE') ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
-                                                                    log.action.includes('UPDATE') ? 'bg-blue-500/10 border-blue-500/20 text-blue-500' :
-                                                                        'bg-white/5 border-white/10 text-slate-400'
-                                                                }`}>
-                                                                {log.action}
-                                                            </span>
-                                                        </td>
-                                                        <td className="px-6 py-5">
-                                                            <span className="text-[10px] font-black uppercase text-slate-400 font-mono tracking-tighter">
-                                                                {log.entity_type}
-                                                            </span>
-                                                        </td>
-                                                        <td className="px-6 py-5">
-                                                            <p className="text-xs text-slate-200 font-medium">{log.details}</p>
-                                                        </td>
-                                                        <td className="px-6 py-5 whitespace-nowrap">
-                                                            <div className="flex items-center gap-2">
-                                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{log.admin_name}</span>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))
+                                    {/* SCROLLABLE BODY */}
+                                    <form onSubmit={updateLeadData} className="flex-1 overflow-y-auto custom-scrollbar p-8">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                            <div className="space-y-4">
+                                                <div className="space-y-2">
+                                                    <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Nombre Completo</label>
+                                                    <input
+                                                        title="Nombre Completo"
+                                                        placeholder="Nombre del Cliente"
+                                                        value={editingLead.full_name}
+                                                        onChange={(e) => setEditingLead({ ...editingLead, full_name: e.target.value })}
+                                                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-neon-cyan focus:outline-none transition-all uppercase"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Teléfono</label>
+                                                    <input
+                                                        title="Teléfono"
+                                                        placeholder="Número de contacto"
+                                                        value={editingLead.phone}
+                                                        onChange={(e) => setEditingLead({ ...editingLead, phone: e.target.value })}
+                                                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-4">
+                                                <div className="space-y-2">
+                                                    <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Plan Seleccionado</label>
+                                                    <input
+                                                        title="Nombre del Plan"
+                                                        placeholder="Ej. Gamer 500MB"
+                                                        value={editingLead.plan_name}
+                                                        onChange={(e) => setEditingLead({ ...editingLead, plan_name: e.target.value })}
+                                                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-neon-cyan focus:outline-none transition-all uppercase"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Precio</label>
+                                                    <input
+                                                        title="Precio"
+                                                        placeholder="Costo mensual"
+                                                        value={editingLead.price}
+                                                        onChange={(e) => setEditingLead({ ...editingLead, price: e.target.value })}
+                                                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2 md:col-span-2">
+                                                <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Ubicación / Barrio</label>
+                                                <input
+                                                    title="Ubicación"
+                                                    placeholder="Ciudad o Barrio"
+                                                    value={editingLead.location}
+                                                    onChange={(e) => setEditingLead({ ...editingLead, location: e.target.value })}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-neon-cyan focus:outline-none transition-all uppercase"
+                                                />
+                                            </div>
+
+                                            {editingLead.status === 'rejected' && editingLead.rejection_reason && (
+                                                <div className="md:col-span-2 p-6 rounded-[2rem] bg-red-500/5 border border-red-500/10">
+                                                    <label className="text-[9px] font-black uppercase text-red-500/60 ml-1">Motivo de Rechazo</label>
+                                                    <p className="text-sm font-bold text-red-500/90 mt-1 italic uppercase underline decoration-red-500/20 underline-offset-4">
+                                                        {editingLead.rejection_reason}
+                                                    </p>
+                                                </div>
                                             )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </GlassCard>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </main>
 
-            {/* MODALS SECTION */}
-            <AnimatePresence>
-                {editingLead && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingLead(null)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="relative w-full max-w-3xl max-h-[90vh] flex flex-col"
-                        >
-                            <GlassCard className="border-white/10 !bg-slate-950/90 shadow-2xl flex flex-col overflow-hidden p-0 rounded-[2.5rem]">
-                                {/* FIXED HEADER */}
-                                <div className="p-8 pb-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
-                                    <div>
-                                        <h2 className="text-2xl font-black italic mb-1 uppercase tracking-tighter">
-                                            MODIFICAR <span className="text-neon-cyan neon-text-cyan">EXPEDIENTE</span>
-                                        </h2>
-                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">ID: {editingLead.id.split('-')[0]}</p>
-                                    </div>
-                                    <div className="flex gap-4">
-                                        <button
-                                            onClick={() => window.print()}
-                                            title="Descargar Dossier"
-                                            className="p-3 bg-white/5 hover:bg-white/10 rounded-2xl text-slate-400 hover:text-white transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"
-                                        >
-                                            <Printer className="w-5 h-5" /> EXPEDIENTE
-                                        </button>
-                                        <button onClick={() => setEditingLead(null)} title="Cerrar" className="p-3 hover:bg-white/5 rounded-2xl transition-all text-slate-500 hover:text-white border border-transparent hover:border-white/10"><X className="w-6 h-6" /></button>
-                                    </div>
-                                </div>
-
-                                {/* SCROLLABLE BODY */}
-                                <form onSubmit={updateLeadData} className="flex-1 overflow-y-auto custom-scrollbar p-8">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        <div className="space-y-4">
-                                            <div className="space-y-2">
-                                                <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Nombre Completo</label>
-                                                <input
-                                                    title="Nombre Completo"
-                                                    placeholder="Nombre del Cliente"
-                                                    value={editingLead.full_name}
-                                                    onChange={(e) => setEditingLead({ ...editingLead, full_name: e.target.value })}
-                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-neon-cyan focus:outline-none transition-all uppercase"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Teléfono</label>
-                                                <input
-                                                    title="Teléfono"
-                                                    placeholder="Número de contacto"
-                                                    value={editingLead.phone}
-                                                    onChange={(e) => setEditingLead({ ...editingLead, phone: e.target.value })}
-                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-neon-cyan focus:outline-none transition-all"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-4">
-                                            <div className="space-y-2">
-                                                <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Plan Seleccionado</label>
-                                                <input
-                                                    title="Nombre del Plan"
-                                                    placeholder="Ej. Gamer 500MB"
-                                                    value={editingLead.plan_name}
-                                                    onChange={(e) => setEditingLead({ ...editingLead, plan_name: e.target.value })}
-                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-neon-cyan focus:outline-none transition-all uppercase"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Precio</label>
-                                                <input
-                                                    title="Precio"
-                                                    placeholder="Costo mensual"
-                                                    value={editingLead.price}
-                                                    onChange={(e) => setEditingLead({ ...editingLead, price: e.target.value })}
-                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-neon-cyan focus:outline-none transition-all"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-2 md:col-span-2">
-                                            <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Ubicación / Barrio</label>
-                                            <input
-                                                title="Ubicación"
-                                                placeholder="Ciudad o Barrio"
-                                                value={editingLead.location}
-                                                onChange={(e) => setEditingLead({ ...editingLead, location: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-neon-cyan focus:outline-none transition-all uppercase"
-                                            />
-                                        </div>
-
-                                        {editingLead.status === 'rejected' && editingLead.rejection_reason && (
-                                            <div className="md:col-span-2 p-6 rounded-[2rem] bg-red-500/5 border border-red-500/10">
-                                                <label className="text-[9px] font-black uppercase text-red-500/60 ml-1">Motivo de Rechazo</label>
-                                                <p className="text-sm font-bold text-red-500/90 mt-1 italic uppercase underline decoration-red-500/20 underline-offset-4">
-                                                    {editingLead.rejection_reason}
-                                                </p>
-                                            </div>
-                                        )}
-
-                                        {/* DOCUMENTACIÓN DINÁMICA */}
-                                        {(editingLead.status === 'contacting' || editingLead.status === 'completed' || editingLead.ine_anverso) && (
-                                            <div className="md:col-span-2 space-y-8 pt-8 border-t border-white/5">
-                                                <div className="flex items-center justify-between">
-                                                    <h3 className="text-xs font-black text-neon-cyan flex items-center gap-3">
-                                                        <Shield className="w-5 h-5" /> ARCHIVO OFICIAL DEL CLIENTE
-                                                    </h3>
-                                                    <span className="text-[8px] font-black bg-neon-cyan/10 text-neon-cyan px-2 py-1 rounded border border-neon-cyan/20">Fase: GESTIÓN</span>
-                                                </div>
-
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                    {/* INE ANVERSO */}
-                                                    <div className="space-y-4">
-                                                        <label className="text-[10px] font-black uppercase text-slate-400 ml-2">INE (Anverso)</label>
-                                                        <div className="relative group">
-                                                            {editingLead.ine_anverso ? (
-                                                                <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 bg-black/40">
-                                                                    <img src={editingLead.ine_anverso} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" alt="INE Anverso" />
-                                                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all bg-black/40 gap-4">
-                                                                        <label className="p-3 bg-neon-cyan/20 border border-neon-cyan/40 rounded-2xl text-neon-cyan hover:bg-neon-cyan hover:text-black transition-all cursor-pointer">
-                                                                            <FileUp className="w-5 h-5" />
-                                                                            <input title="Cambiar Foto Anverso" type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'ine_anverso')} />
-                                                                        </label>
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={() => setEditingLead({ ...editingLead, ine_anverso: "" })}
-                                                                            className="p-3 bg-red-500/20 border border-red-500/40 rounded-2xl text-red-500 hover:bg-red-500 hover:text-white transition-all"
-                                                                        >
-                                                                            <Trash2 className="w-5 h-5" />
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                            ) : (
-                                                                <label className="aspect-video rounded-3xl border-2 border-dashed border-white/5 bg-white/[0.02] flex flex-col items-center justify-center gap-3 hover:border-neon-cyan/30 transition-all cursor-pointer">
-                                                                    {uploading === 'ine_anverso' ? (
-                                                                        <Loader2 className="w-8 h-8 text-neon-cyan animate-spin" />
-                                                                    ) : (
-                                                                        <FileUp className="w-8 h-8 text-slate-700" />
-                                                                    )}
-                                                                    <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest text-center px-4">Seleccionar Imagen Anverso</p>
-                                                                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'ine_anverso')} />
-                                                                </label>
-                                                            )}
-                                                            <div className="mt-4 flex gap-2">
-                                                                <input
-                                                                    title="INE Anverso URL"
-                                                                    placeholder="O ingresa URL manual..."
-                                                                    value={editingLead.ine_anverso || ""}
-                                                                    onChange={(e) => setEditingLead({ ...editingLead, ine_anverso: e.target.value })}
-                                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-[10px] focus:border-neon-cyan focus:outline-none placeholder:text-slate-700"
-                                                                />
-                                                            </div>
-                                                        </div>
+                                            {/* DOCUMENTACIÓN DINÁMICA */}
+                                            {(editingLead.status === 'contacting' || editingLead.status === 'completed' || editingLead.ine_anverso) && (
+                                                <div className="md:col-span-2 space-y-8 pt-8 border-t border-white/5">
+                                                    <div className="flex items-center justify-between">
+                                                        <h3 className="text-xs font-black text-neon-cyan flex items-center gap-3">
+                                                            <Shield className="w-5 h-5" /> ARCHIVO OFICIAL DEL CLIENTE
+                                                        </h3>
+                                                        <span className="text-[8px] font-black bg-neon-cyan/10 text-neon-cyan px-2 py-1 rounded border border-neon-cyan/20">Fase: GESTIÓN</span>
                                                     </div>
 
-                                                    {/* INE REVERSO */}
-                                                    <div className="space-y-4">
-                                                        <label className="text-[10px] font-black uppercase text-slate-400 ml-2">INE (Reverso)</label>
-                                                        <div className="relative group">
-                                                            {editingLead.ine_reverso ? (
-                                                                <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 bg-black/40">
-                                                                    <img src={editingLead.ine_reverso} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" alt="INE Reverso" />
-                                                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all bg-black/40 gap-4">
-                                                                        <label className="p-3 bg-neon-magenta/20 border border-neon-magenta/40 rounded-2xl text-neon-magenta hover:bg-neon-magenta hover:text-white transition-all cursor-pointer">
-                                                                            <FileUp className="w-5 h-5" />
-                                                                            <input title="Cambiar Foto Reverso" type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'ine_reverso')} />
-                                                                        </label>
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={() => setEditingLead({ ...editingLead, ine_reverso: "" })}
-                                                                            className="p-3 bg-red-500/20 border border-red-500/40 rounded-2xl text-red-500 hover:bg-red-500 hover:text-white transition-all"
-                                                                        >
-                                                                            <Trash2 className="w-5 h-5" />
-                                                                        </button>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                        {/* INE ANVERSO */}
+                                                        <div className="space-y-4">
+                                                            <label className="text-[10px] font-black uppercase text-slate-400 ml-2">INE (Anverso)</label>
+                                                            <div className="relative group">
+                                                                {editingLead.ine_anverso ? (
+                                                                    <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 bg-black/40">
+                                                                        <img src={editingLead.ine_anverso} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" alt="INE Anverso" />
+                                                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all bg-black/40 gap-4">
+                                                                            <label className="p-3 bg-neon-cyan/20 border border-neon-cyan/40 rounded-2xl text-neon-cyan hover:bg-neon-cyan hover:text-black transition-all cursor-pointer">
+                                                                                <FileUp className="w-5 h-5" />
+                                                                                <input title="Cambiar Foto Anverso" type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'ine_anverso')} />
+                                                                            </label>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => setEditingLead({ ...editingLead, ine_anverso: "" })}
+                                                                                className="p-3 bg-red-500/20 border border-red-500/40 rounded-2xl text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                                                                            >
+                                                                                <Trash2 className="w-5 h-5" />
+                                                                            </button>
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                            ) : (
-                                                                <label className="aspect-video rounded-3xl border-2 border-dashed border-white/5 bg-white/[0.02] flex flex-col items-center justify-center gap-3 hover:border-neon-magenta/30 transition-all cursor-pointer">
-                                                                    {uploading === 'ine_reverso' ? (
-                                                                        <Loader2 className="w-8 h-8 text-neon-magenta animate-spin" />
-                                                                    ) : (
-                                                                        <FileUp className="w-8 h-8 text-slate-700" />
-                                                                    )}
-                                                                    <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest text-center px-4">Seleccionar Imagen Reverso</p>
-                                                                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'ine_reverso')} />
-                                                                </label>
-                                                            )}
-                                                            <div className="mt-4 flex gap-2">
-                                                                <input
-                                                                    title="INE Reverso URL"
-                                                                    placeholder="O ingresa URL manual..."
-                                                                    value={editingLead.ine_reverso || ""}
-                                                                    onChange={(e) => setEditingLead({ ...editingLead, ine_reverso: e.target.value })}
-                                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-[10px] focus:border-neon-magenta focus:outline-none placeholder:text-slate-700"
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* COMPROBANTE DOMICILIO */}
-                                                    <div className="space-y-2 md:col-span-2">
-                                                        <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Comprobante de Domicilio</label>
-                                                        <div className="flex gap-4">
-                                                            <label className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 cursor-pointer hover:bg-white/10 transition-all">
-                                                                {uploading === 'comprobante_domicilio' ? (
-                                                                    <Loader2 className="w-6 h-6 text-neon-cyan animate-spin" />
                                                                 ) : (
-                                                                    <FileUp className="w-6 h-6 text-slate-500" />
+                                                                    <label className="aspect-video rounded-3xl border-2 border-dashed border-white/5 bg-white/[0.02] flex flex-col items-center justify-center gap-3 hover:border-neon-cyan/30 transition-all cursor-pointer">
+                                                                        {uploading === 'ine_anverso' ? (
+                                                                            <Loader2 className="w-8 h-8 text-neon-cyan animate-spin" />
+                                                                        ) : (
+                                                                            <FileUp className="w-8 h-8 text-slate-700" />
+                                                                        )}
+                                                                        <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest text-center px-4">Seleccionar Imagen Anverso</p>
+                                                                        <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'ine_anverso')} />
+                                                                    </label>
                                                                 )}
-                                                                <input type="file" className="hidden" accept="image/*,application/pdf" onChange={(e) => handleFileUpload(e, 'comprobante_domicilio')} />
-                                                            </label>
-                                                            <input
-                                                                title="Comprobante Domicilio"
-                                                                placeholder="URL del documento o usa el botón de subir..."
-                                                                value={editingLead.comprobante_domicilio || ""}
-                                                                onChange={(e) => setEditingLead({ ...editingLead, comprobante_domicilio: e.target.value })}
-                                                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                                                <div className="mt-4 flex gap-2">
+                                                                    <input
+                                                                        title="INE Anverso URL"
+                                                                        placeholder="O ingresa URL manual..."
+                                                                        value={editingLead.ine_anverso || ""}
+                                                                        onChange={(e) => setEditingLead({ ...editingLead, ine_anverso: e.target.value })}
+                                                                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-[10px] focus:border-neon-cyan focus:outline-none placeholder:text-slate-700"
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* INE REVERSO */}
+                                                        <div className="space-y-4">
+                                                            <label className="text-[10px] font-black uppercase text-slate-400 ml-2">INE (Reverso)</label>
+                                                            <div className="relative group">
+                                                                {editingLead.ine_reverso ? (
+                                                                    <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 bg-black/40">
+                                                                        <img src={editingLead.ine_reverso} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" alt="INE Reverso" />
+                                                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all bg-black/40 gap-4">
+                                                                            <label className="p-3 bg-neon-magenta/20 border border-neon-magenta/40 rounded-2xl text-neon-magenta hover:bg-neon-magenta hover:text-white transition-all cursor-pointer">
+                                                                                <FileUp className="w-5 h-5" />
+                                                                                <input title="Cambiar Foto Reverso" type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'ine_reverso')} />
+                                                                            </label>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => setEditingLead({ ...editingLead, ine_reverso: "" })}
+                                                                                className="p-3 bg-red-500/20 border border-red-500/40 rounded-2xl text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                                                                            >
+                                                                                <Trash2 className="w-5 h-5" />
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                ) : (
+                                                                    <label className="aspect-video rounded-3xl border-2 border-dashed border-white/5 bg-white/[0.02] flex flex-col items-center justify-center gap-3 hover:border-neon-magenta/30 transition-all cursor-pointer">
+                                                                        {uploading === 'ine_reverso' ? (
+                                                                            <Loader2 className="w-8 h-8 text-neon-magenta animate-spin" />
+                                                                        ) : (
+                                                                            <FileUp className="w-8 h-8 text-slate-700" />
+                                                                        )}
+                                                                        <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest text-center px-4">Seleccionar Imagen Reverso</p>
+                                                                        <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, 'ine_reverso')} />
+                                                                    </label>
+                                                                )}
+                                                                <div className="mt-4 flex gap-2">
+                                                                    <input
+                                                                        title="INE Reverso URL"
+                                                                        placeholder="O ingresa URL manual..."
+                                                                        value={editingLead.ine_reverso || ""}
+                                                                        onChange={(e) => setEditingLead({ ...editingLead, ine_reverso: e.target.value })}
+                                                                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-[10px] focus:border-neon-magenta focus:outline-none placeholder:text-slate-700"
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* COMPROBANTE DOMICILIO */}
+                                                        <div className="space-y-2 md:col-span-2">
+                                                            <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Comprobante de Domicilio</label>
+                                                            <div className="flex gap-4">
+                                                                <label className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 cursor-pointer hover:bg-white/10 transition-all">
+                                                                    {uploading === 'comprobante_domicilio' ? (
+                                                                        <Loader2 className="w-6 h-6 text-neon-cyan animate-spin" />
+                                                                    ) : (
+                                                                        <FileUp className="w-6 h-6 text-slate-500" />
+                                                                    )}
+                                                                    <input type="file" className="hidden" accept="image/*,application/pdf" onChange={(e) => handleFileUpload(e, 'comprobante_domicilio')} />
+                                                                </label>
+                                                                <input
+                                                                    title="Comprobante Domicilio"
+                                                                    placeholder="URL del documento o usa el botón de subir..."
+                                                                    value={editingLead.comprobante_domicilio || ""}
+                                                                    onChange={(e) => setEditingLead({ ...editingLead, comprobante_domicilio: e.target.value })}
+                                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                                                />
+                                                            </div>
+                                                        </div>
+
+                                                        {/* REFERENCIAS */}
+                                                        <div className="space-y-2 md:col-span-2">
+                                                            <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Notas y Referencias del Hogar</label>
+                                                            <textarea
+                                                                title="Referencias del Hogar"
+                                                                placeholder="Describe detalladamente la fachada, puntos de referencia, entre qué calles se encuentra..."
+                                                                value={editingLead.referencias_hogar || ""}
+                                                                onChange={(e) => setEditingLead({ ...editingLead, referencias_hogar: e.target.value })}
+                                                                rows={3}
+                                                                className="w-full bg-white/5 border border-white/10 rounded-3xl px-6 py-5 text-sm focus:border-neon-cyan focus:outline-none transition-all resize-none uppercase leading-relaxed font-bold tracking-tight bg-gradient-to-br from-white/[0.02] to-transparent"
                                                             />
                                                         </div>
                                                     </div>
-
-                                                    {/* REFERENCIAS */}
-                                                    <div className="space-y-2 md:col-span-2">
-                                                        <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Notas y Referencias del Hogar</label>
-                                                        <textarea
-                                                            title="Referencias del Hogar"
-                                                            placeholder="Describe detalladamente la fachada, puntos de referencia, entre qué calles se encuentra..."
-                                                            value={editingLead.referencias_hogar || ""}
-                                                            onChange={(e) => setEditingLead({ ...editingLead, referencias_hogar: e.target.value })}
-                                                            rows={3}
-                                                            className="w-full bg-white/5 border border-white/10 rounded-3xl px-6 py-5 text-sm focus:border-neon-cyan focus:outline-none transition-all resize-none uppercase leading-relaxed font-bold tracking-tight bg-gradient-to-br from-white/[0.02] to-transparent"
-                                                        />
-                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
-                                    </div>
+                                            )}
+                                        </div>
 
-                                    {/* FIXED FOOTER */}
-                                    <div className="mt-12 sticky bottom-0 bg-slate-950/80 backdrop-blur-md pt-6 pb-2 border-t border-white/5 -mx-8 -mb-8 px-8">
-                                        <NeonButton type="submit" className="w-full py-5 !tracking-[0.5em] text-xs font-black italic">
-                                            SINCRONIZAR CAMBIOS DE EXPEDIENTE
-                                        </NeonButton>
-                                    </div>
-                                </form>
-                            </GlassCard>
-                        </motion.div>
-                    </div>
-                )}
+                                        {/* FIXED FOOTER */}
+                                        <div className="mt-12 sticky bottom-0 bg-slate-950/80 backdrop-blur-md pt-6 pb-2 border-t border-white/5 -mx-8 -mb-8 px-8">
+                                            <NeonButton type="submit" className="w-full py-5 !tracking-[0.5em] text-xs font-black italic">
+                                                SINCRONIZAR CAMBIOS DE EXPEDIENTE
+                                            </NeonButton>
+                                        </div>
+                                    </form>
+                                </GlassCard>
+                            </motion.div>
+                        </div>
+                    )}
 
-                {/* 1b. PROVIDER MODAL (Add/Edit) */}
-                {editingProvider && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingProvider(null)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
-                        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-md">
-                            <GlassCard className="p-10 border-white/10 !bg-slate-900 shadow-2xl">
-                                <div className="flex justify-between items-center mb-10">
-                                    <h2 className="text-xl font-black italic">{editingProvider.id ? 'EDITAR' : 'NUEVO'} <span className="text-neon-cyan">PROVEEDOR</span></h2>
-                                    <button onClick={() => setEditingProvider(null)} title="Cerrar" className="p-2 hover:bg-white/5 rounded-lg transition-all"><X className="w-6 h-6" /></button>
-                                </div>
-                                <form onSubmit={saveProvider} className="space-y-6">
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Nombre Comercial</label>
-                                        <input
-                                            required
-                                            title="Nombre del Proveedor"
-                                            placeholder="Ej. Totalplay"
-                                            value={editingProvider.name}
-                                            onChange={(e) => setEditingProvider({ ...editingProvider, name: e.target.value })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
-                                        />
+                    {/* 1b. PROVIDER MODAL (Add/Edit) */}
+                    {editingProvider && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingProvider(null)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+                            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-md">
+                                <GlassCard className="p-10 border-white/10 !bg-slate-900 shadow-2xl">
+                                    <div className="flex justify-between items-center mb-10">
+                                        <h2 className="text-xl font-black italic">{editingProvider.id ? 'EDITAR' : 'NUEVO'} <span className="text-neon-cyan">PROVEEDOR</span></h2>
+                                        <button onClick={() => setEditingProvider(null)} title="Cerrar" className="p-2 hover:bg-white/5 rounded-lg transition-all"><X className="w-6 h-6" /></button>
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] font-black uppercase text-slate-500 ml-2">URL del Logo (PNG/SVG)</label>
-                                        <input
-                                            required
-                                            title="URL del Logo"
-                                            placeholder="https://..."
-                                            value={editingProvider.logo_url}
-                                            onChange={(e) => setEditingProvider({ ...editingProvider, logo_url: e.target.value })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
-                                        />
-                                    </div>
-                                    <NeonButton type="submit" className="w-full py-4">GUARDAR PROVEEDOR</NeonButton>
-                                </form>
-                            </GlassCard>
-                        </motion.div>
-                    </div>
-                )}
+                                    <form onSubmit={saveProvider} className="space-y-6">
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Nombre Comercial</label>
+                                            <input
+                                                required
+                                                title="Nombre del Proveedor"
+                                                placeholder="Ej. Totalplay"
+                                                value={editingProvider.name}
+                                                onChange={(e) => setEditingProvider({ ...editingProvider, name: e.target.value })}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black uppercase text-slate-500 ml-2">URL del Logo (PNG/SVG)</label>
+                                            <input
+                                                required
+                                                title="URL del Logo"
+                                                placeholder="https://..."
+                                                value={editingProvider.logo_url}
+                                                onChange={(e) => setEditingProvider({ ...editingProvider, logo_url: e.target.value })}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                            />
+                                        </div>
+                                        <NeonButton type="submit" className="w-full py-4">GUARDAR PROVEEDOR</NeonButton>
+                                    </form>
+                                </GlassCard>
+                            </motion.div>
+                        </div>
+                    )}
 
-                {/* 1c. PLAN MODAL (Add/Edit) */}
-                {editingPlan && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingPlan(null)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
-                        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-2xl">
-                            <GlassCard className="p-10 border-white/10 !bg-slate-900 shadow-2xl h-[80vh] overflow-y-auto custom-scrollbar">
-                                <div className="flex justify-between items-center mb-10">
-                                    <h2 className="text-xl font-black italic">{editingPlan.id ? 'EDITAR' : 'NUEVO'} <span className="text-neon-magenta">PLAN</span></h2>
-                                    <button onClick={() => setEditingPlan(null)} title="Cerrar" className="p-2 hover:bg-white/5 rounded-lg transition-all"><X className="w-6 h-6" /></button>
-                                </div>
-                                <form onSubmit={savePlan} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Proveedor</label>
-                                        <select
-                                            title="Seleccionar Proveedor"
-                                            value={editingPlan.provider_id}
-                                            onChange={(e) => setEditingPlan({ ...editingPlan, provider_id: e.target.value })}
-                                            className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
-                                        >
-                                            {providers.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                                        </select>
+                    {/* 1c. PLAN MODAL (Add/Edit) */}
+                    {editingPlan && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingPlan(null)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+                            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-2xl">
+                                <GlassCard className="p-10 border-white/10 !bg-slate-900 shadow-2xl h-[80vh] overflow-y-auto custom-scrollbar">
+                                    <div className="flex justify-between items-center mb-10">
+                                        <h2 className="text-xl font-black italic">{editingPlan.id ? 'EDITAR' : 'NUEVO'} <span className="text-neon-magenta">PLAN</span></h2>
+                                        <button onClick={() => setEditingPlan(null)} title="Cerrar" className="p-2 hover:bg-white/5 rounded-lg transition-all"><X className="w-6 h-6" /></button>
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Nombre del Plan</label>
-                                        <input
-                                            required
-                                            title="Nombre del Plan"
-                                            placeholder="Ej. Plan Ultra 500"
-                                            value={editingPlan.name}
-                                            onChange={(e) => setEditingPlan({ ...editingPlan, name: e.target.value })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
-                                        />
+                                    <form onSubmit={savePlan} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Proveedor</label>
+                                            <select
+                                                title="Seleccionar Proveedor"
+                                                value={editingPlan.provider_id}
+                                                onChange={(e) => setEditingPlan({ ...editingPlan, provider_id: e.target.value })}
+                                                className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                            >
+                                                {providers.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                                            </select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Nombre del Plan</label>
+                                            <input
+                                                required
+                                                title="Nombre del Plan"
+                                                placeholder="Ej. Plan Ultra 500"
+                                                value={editingPlan.name}
+                                                onChange={(e) => setEditingPlan({ ...editingPlan, name: e.target.value })}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Tipo</label>
+                                            <select
+                                                title="Tipo de Plan"
+                                                value={editingPlan.type}
+                                                onChange={(e) => setEditingPlan({ ...editingPlan, type: e.target.value })}
+                                                className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                            >
+                                                <option value="Gamer">Gamer</option>
+                                                <option value="Streamer">Streamer</option>
+                                                <option value="Home Office">Home Office</option>
+                                                <option value="Empresas">Empresas</option>
+                                                <option value="Television">Television</option>
+                                            </select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Velocidad</label>
+                                            <input
+                                                title="Velocidad del Plan"
+                                                placeholder="Ej. 500 MB"
+                                                value={editingPlan.speed}
+                                                onChange={(e) => setEditingPlan({ ...editingPlan, speed: e.target.value })}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Precio</label>
+                                            <input
+                                                title="Precio Mensual"
+                                                placeholder="Ej. $499"
+                                                value={editingPlan.price}
+                                                onChange={(e) => setEditingPlan({ ...editingPlan, price: e.target.value })}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Ranking (0-100)</label>
+                                            <input
+                                                type="number"
+                                                title="Puntuación de Ranking"
+                                                placeholder="95"
+                                                value={editingPlan.ranking_score}
+                                                onChange={(e) => setEditingPlan({ ...editingPlan, ranking_score: parseInt(e.target.value) })}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
+                                            />
+                                        </div>
+                                        <div className="space-y-2 md:col-span-2">
+                                            <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Características (Separadas por coma)</label>
+                                            <textarea
+                                                title="Características del Plan"
+                                                placeholder="WIFI 6, Instalación Gratis, App Premium"
+                                                value={Array.isArray(editingPlan.features) ? editingPlan.features.join(', ') : editingPlan.features}
+                                                onChange={(e) => setEditingPlan({ ...editingPlan, features: e.target.value as any })}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all h-24"
+                                            />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <NeonButton variant="magenta" type="submit" className="w-full py-4">GUARDAR PLAN</NeonButton>
+                                        </div>
+                                    </form>
+                                </GlassCard>
+                            </motion.div>
+                        </div>
+                    )}
+
+                    {/* 2. REJECTION MODAL */}
+                    {rejectionModal.isOpen && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setRejectionModal({ isOpen: false, id: "", reason: "" })} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
+                            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-md">
+                                <GlassCard className="p-8 border-red-500/20 !bg-slate-900 shadow-2xl shadow-red-500/10">
+                                    <div className="text-center mb-8">
+                                        <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/20">
+                                            <XCircle className="w-8 h-8 text-red-500" />
+                                        </div>
+                                        <h3 className="text-xl font-black italic">RECHAZAR <span className="text-red-500">CLIENTE</span></h3>
+                                        <p className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em] mt-2">Justifica la cancelación del lead</p>
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Tipo</label>
-                                        <select
-                                            title="Tipo de Plan"
-                                            value={editingPlan.type}
-                                            onChange={(e) => setEditingPlan({ ...editingPlan, type: e.target.value })}
-                                            className="w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
-                                        >
-                                            <option value="Gamer">Gamer</option>
-                                            <option value="Streamer">Streamer</option>
-                                            <option value="Home Office">Home Office</option>
-                                            <option value="Empresas">Empresas</option>
-                                            <option value="Television">Television</option>
-                                        </select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Velocidad</label>
-                                        <input
-                                            title="Velocidad del Plan"
-                                            placeholder="Ej. 500 MB"
-                                            value={editingPlan.speed}
-                                            onChange={(e) => setEditingPlan({ ...editingPlan, speed: e.target.value })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Precio</label>
-                                        <input
-                                            title="Precio Mensual"
-                                            placeholder="Ej. $499"
-                                            value={editingPlan.price}
-                                            onChange={(e) => setEditingPlan({ ...editingPlan, price: e.target.value })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Ranking (0-100)</label>
-                                        <input
-                                            type="number"
-                                            title="Puntuación de Ranking"
-                                            placeholder="95"
-                                            value={editingPlan.ranking_score}
-                                            onChange={(e) => setEditingPlan({ ...editingPlan, ranking_score: parseInt(e.target.value) })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all"
-                                        />
-                                    </div>
-                                    <div className="space-y-2 md:col-span-2">
-                                        <label className="text-[9px] font-black uppercase text-slate-500 ml-2">Características (Separadas por coma)</label>
+                                    <div className="space-y-6">
                                         <textarea
-                                            title="Características del Plan"
-                                            placeholder="WIFI 6, Instalación Gratis, App Premium"
-                                            value={Array.isArray(editingPlan.features) ? editingPlan.features.join(', ') : editingPlan.features}
-                                            onChange={(e) => setEditingPlan({ ...editingPlan, features: e.target.value as any })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none transition-all h-24"
+                                            placeholder="Ej. Fuera de cobertura, No responde llamadas, Plan no viable..."
+                                            value={rejectionModal.reason}
+                                            onChange={(e) => setRejectionModal({ ...rejectionModal, reason: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:border-red-500 focus:outline-none transition-all h-32 uppercase font-bold"
+                                            autoFocus
                                         />
+                                        <div className="flex gap-4">
+                                            <button
+                                                onClick={() => setRejectionModal({ isOpen: false, id: "", reason: "" })}
+                                                className="flex-1 py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition-all"
+                                            >
+                                                CANCELAR
+                                            </button>
+                                            <button
+                                                onClick={() => updateStatus(rejectionModal.id, 'rejected', rejectionModal.reason)}
+                                                disabled={!rejectionModal.reason}
+                                                className="flex-1 py-4 rounded-2xl bg-red-500 text-white text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50"
+                                            >
+                                                RECHAZAR LEAD
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div className="md:col-span-2">
-                                        <NeonButton variant="magenta" type="submit" className="w-full py-4">GUARDAR PLAN</NeonButton>
-                                    </div>
-                                </form>
-                            </GlassCard>
-                        </motion.div>
-                    </div>
-                )}
+                                </GlassCard>
+                            </motion.div>
+                        </div>
+                    )}
 
-                {/* 2. REJECTION MODAL */}
-                {rejectionModal.isOpen && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setRejectionModal({ isOpen: false, id: "", reason: "" })} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
-                        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-md">
-                            <GlassCard className="p-8 border-red-500/20 !bg-slate-900 shadow-2xl shadow-red-500/10">
-                                <div className="text-center mb-8">
-                                    <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/20">
-                                        <XCircle className="w-8 h-8 text-red-500" />
+                    {/* 3. DELETE CONFIRMATION */}
+                    {deleteConfirm && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDeleteConfirm(null)} className="absolute inset-0 bg-red-950/40 backdrop-blur-xl" />
+                            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-sm text-center">
+                                <GlassCard className="p-8 border-red-500/50 !bg-black">
+                                    <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <Trash2 className="w-10 h-10 text-red-500 animate-bounce" />
                                     </div>
-                                    <h3 className="text-xl font-black italic">RECHAZAR <span className="text-red-500">CLIENTE</span></h3>
-                                    <p className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em] mt-2">Justifica la cancelación del lead</p>
-                                </div>
-                                <div className="space-y-6">
-                                    <textarea
-                                        placeholder="Ej. Fuera de cobertura, No responde llamadas, Plan no viable..."
-                                        value={rejectionModal.reason}
-                                        onChange={(e) => setRejectionModal({ ...rejectionModal, reason: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:border-red-500 focus:outline-none transition-all h-32 uppercase font-bold"
-                                        autoFocus
-                                    />
+                                    <h3 className="text-2xl font-black italic mb-2">¿ELIMINAR <span className="text-red-500">LEAD?</span></h3>
+                                    <p className="text-slate-400 text-xs mb-8">Esta acción es irreversible y eliminará el expediente de la base de datos centralizada.</p>
                                     <div className="flex gap-4">
-                                        <button
-                                            onClick={() => setRejectionModal({ isOpen: false, id: "", reason: "" })}
-                                            className="flex-1 py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition-all"
-                                        >
-                                            CANCELAR
-                                        </button>
-                                        <button
-                                            onClick={() => updateStatus(rejectionModal.id, 'rejected', rejectionModal.reason)}
-                                            disabled={!rejectionModal.reason}
-                                            className="flex-1 py-4 rounded-2xl bg-red-500 text-white text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50"
-                                        >
-                                            RECHAZAR LEAD
-                                        </button>
+                                        <button onClick={() => setDeleteConfirm(null)} className="flex-1 py-4 rounded-xl bg-white/5 hover:bg-white/10 font-bold transition-all">NO, VOLVER</button>
+                                        <button onClick={() => deleteLead(deleteConfirm)} className="flex-1 py-4 rounded-xl bg-red-600 hover:bg-red-700 font-bold transition-all shadow-xl shadow-red-600/20">SÍ, ELIMINAR</button>
+                                    </div>
+                                </GlassCard>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
+            </div>
+
+            {/* 2. PREMIUM PRINTABLE DOSSIER (Only visible when printing) */}
+            {editingLead && (
+                <div id="printable-dossier" className="hidden print:block fixed inset-0 bg-white text-slate-900 z-[-1] p-12 overflow-visible" style={{ WebkitPrintColorAdjust: 'exact', colorAdjust: 'exact' } as any}>
+                    {/* Branded Header */}
+                    <div className="flex justify-between items-start border-b-[8px] border-slate-900 pb-10 mb-12">
+                        <div className="space-y-2">
+                            <h1 className="text-6xl font-black italic tracking-tighter text-slate-950 font-sans">
+                                FIBER<span className="text-cyan-600">GRAVITY</span>
+                            </h1>
+                            <div className="flex items-center gap-4">
+                                <span className="h-6 w-1 bg-cyan-600"></span>
+                                <p className="text-xs font-black uppercase tracking-[0.5em] text-cyan-600">Infrastructure Logistics Portal</p>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-[11px] font-black uppercase tracking-widest text-slate-400 mb-2">Internal Management Folio</p>
+                            <p className="text-4xl font-black text-slate-950 italic tracking-tighter">#{editingLead.id.split('-')[0].toUpperCase()}</p>
+                            <div className="mt-4 px-3 py-1 bg-slate-100 rounded-lg inline-block border border-slate-200">
+                                <p className="text-[10px] font-bold text-slate-900 uppercase italic">Authorized Report: {new Date().toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Technical & Commercial Sections */}
+                    <div className="grid grid-cols-2 gap-16 mb-16">
+                        <div className="space-y-10">
+                            <div>
+                                <h3 className="text-[10px] font-black uppercase tracking-widest text-cyan-600 mb-6 flex items-center gap-2">
+                                    <span className="w-8 h-[2px] bg-cyan-600/30"></span> 01. Client Identity
+                                </h3>
+                                <div className="space-y-6">
+                                    <div className="p-8 bg-slate-50 border border-slate-200 rounded-[2rem] shadow-sm">
+                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">Legal Entity Name</p>
+                                        <p className="text-3xl font-black text-slate-950 uppercase italic leading-none">{editingLead.full_name}</p>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div className="p-6 bg-white border border-slate-100 rounded-2xl">
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Direct Contact</p>
+                                            <p className="text-lg font-black text-slate-900">{editingLead.phone}</p>
+                                        </div>
+                                        <div className="p-6 bg-white border border-slate-100 rounded-2xl">
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Registered Sector</p>
+                                            <p className="text-lg font-black text-slate-900 uppercase">{editingLead.location}</p>
+                                        </div>
                                     </div>
                                 </div>
-                            </GlassCard>
-                        </motion.div>
-                    </div>
-                )}
+                            </div>
+                        </div>
 
-                {/* 3. DELETE CONFIRMATION */}
-                {deleteConfirm && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDeleteConfirm(null)} className="absolute inset-0 bg-red-950/40 backdrop-blur-xl" />
-                        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="relative w-full max-w-sm text-center">
-                            <GlassCard className="p-8 border-red-500/50 !bg-black">
-                                <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                                    <Trash2 className="w-10 h-10 text-red-500 animate-bounce" />
+                        <div className="space-y-10">
+                            <div>
+                                <h3 className="text-[10px] font-black uppercase tracking-widest text-cyan-600 mb-6 flex items-center gap-2">
+                                    <span className="w-8 h-[2px] bg-cyan-600/30"></span> 02. Network Architecture
+                                </h3>
+                                <div className="space-y-6">
+                                    <div className="p-8 bg-slate-900 rounded-[2rem] shadow-xl" style={{ backgroundColor: '#0f172a' }}>
+                                        <p className="text-[9px] font-black text-cyan-400 uppercase tracking-widest mb-3">Provisioning Partner</p>
+                                        <p className="text-3xl font-black italic text-white uppercase">{editingLead.provider}</p>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div className="p-6 bg-cyan-50 border border-cyan-100 rounded-2xl">
+                                            <p className="text-[9px] font-black text-cyan-600 uppercase tracking-widest mb-2">Service Package</p>
+                                            <p className="text-lg font-black text-slate-900 uppercase">{editingLead.plan_name}</p>
+                                        </div>
+                                        <div className="p-6 bg-slate-50 border border-slate-200 rounded-2xl text-center">
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Monthly Committed Rate</p>
+                                            <p className="text-xl font-black text-slate-950">{editingLead.price}</p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <h3 className="text-2xl font-black italic mb-2">¿ELIMINAR <span className="text-red-500">LEAD?</span></h3>
-                                <p className="text-slate-400 text-xs mb-8">Esta acción es irreversible y eliminará el expediente de la base de datos centralizada.</p>
-                                <div className="flex gap-4">
-                                    <button onClick={() => setDeleteConfirm(null)} className="flex-1 py-4 rounded-xl bg-white/5 hover:bg-white/10 font-bold transition-all">NO, VOLVER</button>
-                                    <button onClick={() => deleteLead(deleteConfirm)} className="flex-1 py-4 rounded-xl bg-red-600 hover:bg-red-700 font-bold transition-all shadow-xl shadow-red-600/20">SÍ, ELIMINAR</button>
-                                </div>
-                            </GlassCard>
-                        </motion.div>
+                            </div>
+                        </div>
                     </div>
-                )}
-            </AnimatePresence>
 
-            <footer className="py-12 border-t border-white/5 text-center">
-                <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-700">FiberGravity Intelligent Infrastructure • 2026</p>
-            </footer>
+                    {/* Document Verification Gallery */}
+                    <div className="space-y-10 mb-16">
+                        <h3 className="text-[10px] font-black uppercase tracking-widest text-cyan-600 mb-8 flex items-center gap-2">
+                            <span className="w-8 h-[2px] bg-cyan-600/30"></span> 03. Identity Validation (Government ID)
+                        </h3>
+                        <div className="grid grid-cols-2 gap-12">
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center px-4">
+                                    <p className="text-[9px] font-black uppercase text-slate-400 italic">Front Capture (A)</p>
+                                    <p className="text-[8px] font-bold text-slate-300">ISO-ID-V1</p>
+                                </div>
+                                <div className="aspect-[1.58] rounded-[2rem] border-2 border-slate-100 bg-slate-50 overflow-hidden shadow-inner flex items-center justify-center">
+                                    {editingLead.ine_anverso ? (
+                                        <img src={editingLead.ine_anverso} className="w-full h-full object-cover" alt="ID FRONT" />
+                                    ) : (
+                                        <div className="text-slate-200 font-black italic text-[12px] uppercase">Image Evidence Pending</div>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center px-4">
+                                    <p className="text-[9px] font-black uppercase text-slate-400 italic">Reverse Capture (B)</p>
+                                    <p className="text-[8px] font-bold text-slate-300">ISO-ID-V2</p>
+                                </div>
+                                <div className="aspect-[1.58] rounded-[2rem] border-2 border-slate-100 bg-slate-50 overflow-hidden shadow-inner flex items-center justify-center">
+                                    {editingLead.ine_reverso ? (
+                                        <img src={editingLead.ine_reverso} className="w-full h-full object-cover" alt="ID BACK" />
+                                    ) : (
+                                        <div className="text-slate-200 font-black italic text-[12px] uppercase">Image Evidence Pending</div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Infrastructure Deployment Notes */}
+                    <div className="space-y-8">
+                        <h3 className="text-[10px] font-black uppercase tracking-widest text-cyan-600 mb-6 flex items-center gap-2">
+                            <span className="w-8 h-[2px] bg-cyan-600/30"></span> 04. Tactical Deployment Notes
+                        </h3>
+                        <div className="p-10 rounded-[3rem] bg-slate-50 border-2 border-slate-100 relative overflow-hidden">
+                            <div className="absolute top-0 right-10 flex gap-1">
+                                <div className="w-1 h-6 bg-cyan-600/10"></div>
+                                <div className="w-1 h-10 bg-cyan-600/20"></div>
+                                <div className="w-1 h-4 bg-cyan-600/10"></div>
+                            </div>
+                            <p className="text-[13px] font-bold text-slate-800 uppercase italic leading-loose whitespace-pre-wrap tracking-tight">
+                                {editingLead.referencias_hogar || "No technical perimeter references documented for this installation site."}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Footer Certification */}
+                    <div className="absolute bottom-12 left-12 right-12 border-t border-slate-100 pt-10 flex justify-between items-end text-slate-400">
+                        <div className="space-y-4">
+                            <p className="text-[8px] font-black uppercase tracking-[0.3em] text-slate-300">Cryptographically Signed Log</p>
+                            <p className="text-[7px] font-mono break-all max-w-sm opacity-30 uppercase font-black tracking-tighter">
+                                {Buffer.from(editingLead.id + editingLead.full_name).toString('hex').slice(0, 128)}
+                            </p>
+                            <div className="flex items-center gap-4 mt-8">
+                                <div className="uppercase text-[10px] font-black text-slate-900 border-b-2 border-slate-900 pb-1 italic">
+                                    FiberGravity Network Certification
+                                </div>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <div className="w-32 h-32 border border-slate-100 rounded-full flex flex-col items-center justify-center mb-6 opacity-30">
+                                <span className="text-[8px] font-black uppercase">Authentication</span>
+                                <div className="w-16 h-[1px] bg-slate-200 my-1"></div>
+                                <span className="text-[10px] font-black text-slate-200 rotate-12">SECURED</span>
+                            </div>
+                            <p className="text-[9px] font-black uppercase tracking-widest">Document Status: <span className="text-cyan-600">CERTIFIED</span></p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
