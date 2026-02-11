@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Zap, ShieldCheck, Video, Briefcase, Building2, Globe, Star, Check, Sparkles, Tv } from "lucide-react";
 import { NeonButton } from "./NeonButton";
 import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export type PlanCategory = "Streamer" | "HomeOffice" | "Enterprise" | "TV";
 
@@ -143,19 +144,52 @@ export const CategoryModal = ({ isOpen, onClose, category, providerName }: Categ
         { name: "Plan Personalizado", speed: "Velocidad Máxima", type: "Fibra Óptica", price: "$---", features: ["Solicita cotización especial"] }
     ];
 
+    const [formData, setFormData] = useState({
+        fullName: "",
+        phone: "",
+        location: ""
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = "hidden";
         } else {
             document.body.style.overflow = "unset";
             setSelectedPlan(0);
+            setFormData({ fullName: "", phone: "", location: "" });
         }
     }, [isOpen]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        alert(`¡Registro Exitoso! Un ejecutivo de FiberGravity especializado en ${category === 'Enterprise' ? 'Empresas' : category === 'HomeOffice' ? 'Productividad' : 'Streaming'} te contactará.`);
-        onClose();
+        setIsSubmitting(true);
+
+        try {
+            const { error } = await supabase.from('leads').insert([
+                {
+                    full_name: formData.fullName,
+                    phone: formData.phone,
+                    location: formData.location,
+                    category: category,
+                    provider: providerName,
+                    plan_name: currentPlans[selectedPlan].name,
+                    speed: currentPlans[selectedPlan].speed,
+                    price: currentPlans[selectedPlan].price,
+                    status: 'pending'
+                }
+            ]);
+
+            if (error) throw error;
+
+            alert(`¡Registro Exitoso! Un ejecutivo de FiberGravity especializado en ${category === 'Enterprise' ? 'Empresas' : category === 'HomeOffice' ? 'Productividad' : category === 'TV' ? 'Entretenimiento' : 'Streaming'} te contactará.`);
+            onClose();
+        } catch (error: any) {
+            console.error('Error submitting lead:', error);
+            alert('Hubo un error al enviar tus datos. Por favor intenta de nuevo o contacta a soporte.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -266,6 +300,8 @@ export const CategoryModal = ({ isOpen, onClose, category, providerName }: Categ
                                         <input
                                             required
                                             type="text"
+                                            value={formData.fullName}
+                                            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                                             placeholder="EJ. JUAN PÉREZ / EMPRESA S.A."
                                             className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-white/20 focus:bg-white/[0.05] transition-all uppercase placeholder:text-slate-700 font-bold"
                                         />
@@ -277,6 +313,8 @@ export const CategoryModal = ({ isOpen, onClose, category, providerName }: Categ
                                             <input
                                                 required
                                                 type="tel"
+                                                value={formData.phone}
+                                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                                 placeholder="231 123 4567"
                                                 className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-white/20 focus:bg-white/[0.05] transition-all placeholder:text-slate-700 font-bold"
                                             />
@@ -286,6 +324,8 @@ export const CategoryModal = ({ isOpen, onClose, category, providerName }: Categ
                                             <input
                                                 required
                                                 type="text"
+                                                value={formData.location}
+                                                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                                                 placeholder="ZONA / BARRIO"
                                                 className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-white/20 focus:bg-white/[0.05] transition-all placeholder:text-slate-700 uppercase font-bold"
                                             />
@@ -302,10 +342,11 @@ export const CategoryModal = ({ isOpen, onClose, category, providerName }: Categ
 
                                     <NeonButton
                                         type="submit"
+                                        disabled={isSubmitting}
                                         variant={data.accent === 'neon-cyan' ? 'cyan' : data.accent === 'neon-magenta' ? 'magenta' : 'white'}
-                                        className="w-full !py-6 text-xs font-black tracking-[0.4em] shadow-xl active:scale-95"
+                                        className="w-full !py-6 text-xs font-black tracking-[0.4em] shadow-xl active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        VERIFICAR PACK
+                                        {isSubmitting ? "ENVIANDO..." : "VERIFICAR PACK"}
                                     </NeonButton>
 
                                     <div className="flex items-center justify-center gap-4 mt-6">

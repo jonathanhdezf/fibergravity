@@ -47,25 +47,59 @@ const gamerPlans = [
     }
 ];
 
+import { supabase } from "@/lib/supabase";
+
 export const TelmexGamerModal = ({ isOpen, onClose }: TelmexGamerModalProps) => {
     const [selectedPlan, setSelectedPlan] = useState(0);
     const [step, setStep] = useState(1); // 1: Info, 2: Form
+    const [formData, setFormData] = useState({
+        fullName: "",
+        phone: "",
+        location: ""
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = "hidden";
         } else {
             document.body.style.overflow = "unset";
+            setFormData({ fullName: "", phone: "", location: "" });
             setTimeout(() => {
                 setStep(1);
             }, 300);
         }
     }, [isOpen]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        alert("¡Solicitud enviada! Un asesor de FiberGravity te contactará con el equipo especializado de Telmex.");
-        onClose();
+        setIsSubmitting(true);
+
+        try {
+            const { error } = await supabase.from('leads').insert([
+                {
+                    full_name: formData.fullName,
+                    phone: formData.phone,
+                    location: formData.location,
+                    category: 'Gamer',
+                    provider: 'Telmex Infinitum Gamer',
+                    plan_name: gamerPlans[selectedPlan].name,
+                    speed: gamerPlans[selectedPlan].speed,
+                    price: gamerPlans[selectedPlan].price,
+                    status: 'pending'
+                }
+            ]);
+
+            if (error) throw error;
+
+            alert("¡Solicitud enviada! Un asesor de FiberGravity te contactará con el equipo especializado de Telmex.");
+            onClose();
+        } catch (error: any) {
+            console.error('Error submitting lead:', error);
+            alert('Hubo un error al enviar tus datos. Por favor intenta de nuevo.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -179,6 +213,8 @@ export const TelmexGamerModal = ({ isOpen, onClose }: TelmexGamerModalProps) => 
                                         <input
                                             required
                                             type="text"
+                                            value={formData.fullName}
+                                            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                                             placeholder="EJ. JUAN PÉREZ"
                                             className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-neon-cyan/50 focus:bg-white/[0.05] transition-all uppercase placeholder:text-slate-700"
                                         />
@@ -190,6 +226,8 @@ export const TelmexGamerModal = ({ isOpen, onClose }: TelmexGamerModalProps) => 
                                             <input
                                                 required
                                                 type="tel"
+                                                value={formData.phone}
+                                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                                 placeholder="231 123 4567"
                                                 className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-neon-cyan/50 focus:bg-white/[0.05] transition-all placeholder:text-slate-700"
                                             />
@@ -199,6 +237,8 @@ export const TelmexGamerModal = ({ isOpen, onClose }: TelmexGamerModalProps) => 
                                             <input
                                                 required
                                                 type="text"
+                                                value={formData.location}
+                                                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                                                 placeholder="73800"
                                                 className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-neon-cyan/50 focus:bg-white/[0.05] transition-all placeholder:text-slate-700"
                                             />
@@ -215,10 +255,11 @@ export const TelmexGamerModal = ({ isOpen, onClose }: TelmexGamerModalProps) => 
 
                                     <NeonButton
                                         type="submit"
+                                        disabled={isSubmitting}
                                         variant="cyan"
-                                        className="w-full !py-6 text-xs font-black tracking-[0.4em] shadow-[0_0_40px_rgba(0,243,255,0.1)] active:scale-95"
+                                        className="w-full !py-6 text-xs font-black tracking-[0.4em] shadow-[0_0_40px_rgba(0,243,255,0.1)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        ACTIVAR CONEXIÓN
+                                        {isSubmitting ? "ACTIVANDO..." : "ACTIVAR CONEXIÓN"}
                                     </NeonButton>
 
                                     <p className="text-[9px] text-center text-slate-600 uppercase tracking-widest leading-relaxed">

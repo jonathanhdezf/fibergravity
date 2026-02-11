@@ -154,9 +154,17 @@ const providerData = {
     }
 };
 
+import { supabase } from "@/lib/supabase";
+
 export const ProviderGamerModal = ({ isOpen, onClose, provider }: ProviderGamerModalProps) => {
     const data = providerData[provider] || providerData.Totalplay;
     const [selectedPlan, setSelectedPlan] = useState(0);
+    const [formData, setFormData] = useState({
+        fullName: "",
+        phone: "",
+        location: ""
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
@@ -164,13 +172,39 @@ export const ProviderGamerModal = ({ isOpen, onClose, provider }: ProviderGamerM
         } else {
             document.body.style.overflow = "unset";
             setSelectedPlan(0);
+            setFormData({ fullName: "", phone: "", location: "" });
         }
     }, [isOpen]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        alert(`¡Solicitud enviada! Un asesor de FiberGravity validará tu cobertura de ${data.title} en Teziutlán.`);
-        onClose();
+        setIsSubmitting(true);
+
+        try {
+            const { error } = await supabase.from('leads').insert([
+                {
+                    full_name: formData.fullName,
+                    phone: formData.phone,
+                    location: formData.location,
+                    category: 'Gamer',
+                    provider: data.title,
+                    plan_name: data.plans[selectedPlan].name,
+                    speed: data.plans[selectedPlan].speed,
+                    price: data.plans[selectedPlan].price,
+                    status: 'pending'
+                }
+            ]);
+
+            if (error) throw error;
+
+            alert(`¡Solicitud enviada! Un asesor de FiberGravity especializado en ${data.title} validará tu cobertura en Teziutlán.`);
+            onClose();
+        } catch (error: any) {
+            console.error('Error submitting lead:', error);
+            alert('Hubo un error al enviar tus datos. Por favor intenta de nuevo.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -279,6 +313,8 @@ export const ProviderGamerModal = ({ isOpen, onClose, provider }: ProviderGamerM
                                         <input
                                             required
                                             type="text"
+                                            value={formData.fullName}
+                                            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                                             placeholder="EJ. JUAN PÉREZ"
                                             className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-white/20 focus:bg-white/[0.05] transition-all uppercase placeholder:text-slate-700 font-bold"
                                         />
@@ -290,6 +326,8 @@ export const ProviderGamerModal = ({ isOpen, onClose, provider }: ProviderGamerM
                                             <input
                                                 required
                                                 type="tel"
+                                                value={formData.phone}
+                                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                                 placeholder="231 123 4567"
                                                 className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-white/20 focus:bg-white/[0.05] transition-all placeholder:text-slate-700 font-bold"
                                             />
@@ -299,6 +337,8 @@ export const ProviderGamerModal = ({ isOpen, onClose, provider }: ProviderGamerM
                                             <input
                                                 required
                                                 type="text"
+                                                value={formData.location}
+                                                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                                                 placeholder="EJ. CENTRO"
                                                 className="w-full bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-white/20 focus:bg-white/[0.05] transition-all placeholder:text-slate-700 uppercase font-bold"
                                             />
@@ -315,10 +355,11 @@ export const ProviderGamerModal = ({ isOpen, onClose, provider }: ProviderGamerM
 
                                     <NeonButton
                                         type="submit"
+                                        disabled={isSubmitting}
                                         variant={data.accent === 'neon-cyan' ? 'cyan' : 'white'}
-                                        className="w-full !py-6 text-xs font-black tracking-[0.4em] shadow-[0_0_40px_rgba(0,0,0,0.5)] active:scale-95"
+                                        className="w-full !py-6 text-xs font-black tracking-[0.4em] shadow-[0_0_40px_rgba(0,0,0,0.5)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        VERIFICAR PACK
+                                        {isSubmitting ? "ENVIANDO..." : "VERIFICAR PACK"}
                                     </NeonButton>
 
                                     <p className="text-[9px] text-center text-slate-600 uppercase tracking-widest leading-relaxed font-bold">
