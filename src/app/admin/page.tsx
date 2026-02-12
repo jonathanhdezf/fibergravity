@@ -54,8 +54,7 @@ import {
     AtSign,
     UserPlus,
     UserCheck,
-    Camera,
-    BookOpen
+    Camera
 } from "lucide-react";
 import {
     AreaChart,
@@ -173,26 +172,6 @@ interface SupportTicket {
     technical_notes?: string;
 }
 
-interface BlogPost {
-    id: string;
-    created_at: string;
-    title: string;
-    slug: string;
-    content: string;
-    excerpt?: string;
-    cover_image?: string;
-    published: boolean;
-    views: number;
-    category_id?: string;
-    author_name: string;
-}
-
-interface BlogCategory {
-    id: string;
-    name: string;
-    slug: string;
-}
-
 const COLORS = ['#00f3ff', '#ff00ff', '#ffffff', '#3b82f6', '#10b981'];
 
 export default function PremiumAdminDashboard() {
@@ -201,7 +180,7 @@ export default function PremiumAdminDashboard() {
     const { data: session, status } = useSession();
     const router = useRouter();
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<"overview" | "leads" | "tickets" | "technicians" | "ventas" | "inventory" | "traffic" | "integrations" | "logs" | "blog">("overview");
+    const [activeTab, setActiveTab] = useState<"overview" | "leads" | "tickets" | "technicians" | "ventas" | "inventory" | "traffic" | "integrations" | "logs">("overview");
     const [tickets, setTickets] = useState<SupportTicket[]>([]);
     const [technicians, setTechnicians] = useState<Technician[]>([]);
     const [editingTechnician, setEditingTechnician] = useState<Technician | null>(null);
@@ -215,9 +194,6 @@ export default function PremiumAdminDashboard() {
     const [comisionistas, setComisionistas] = useState<Comisionista[]>([]);
     const [agentSelectionModal, setAgentSelectionModal] = useState<{ isOpen: boolean, leadId?: string, ticketId?: string }>({ isOpen: false });
     const [editingAgent, setEditingAgent] = useState<Comisionista | null>(null);
-    const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
-    const [blogCategories, setBlogCategories] = useState<BlogCategory[]>([]);
-    const [editingBlogPost, setEditingBlogPost] = useState<Partial<BlogPost> | null>(null);
 
     // Print Style Fixes (Global for this page)
     useEffect(() => {
@@ -322,7 +298,7 @@ export default function PremiumAdminDashboard() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [leadsRes, visitsRes, providersRes, plansRes, logsRes, agentsRes, ticketsRes, techsRes, blogRes, blogCatsRes] = await Promise.all([
+            const [leadsRes, visitsRes, providersRes, plansRes, logsRes, agentsRes, ticketsRes, techsRes] = await Promise.all([
                 supabase.from('leads').select('*').order('created_at', { ascending: false }),
                 supabase.from('site_visits').select('*').order('created_at', { ascending: false }).limit(1000),
                 supabase.from('providers').select('*').order('name'),
@@ -330,9 +306,7 @@ export default function PremiumAdminDashboard() {
                 supabase.from('system_logs').select('*').order('created_at', { ascending: false }).limit(500),
                 supabase.from('comisionistas').select('*').order('full_name'),
                 supabase.from('support_tickets').select('*').order('created_at', { ascending: false }),
-                supabase.from('technicians').select('*').order('full_name'),
-                supabase.from('blog_posts').select('*').order('created_at', { ascending: false }),
-                supabase.from('blog_categories').select('*').order('name')
+                supabase.from('technicians').select('*').order('full_name')
             ]);
 
             // Check for specific table errors
@@ -344,9 +318,7 @@ export default function PremiumAdminDashboard() {
                 { name: 'logs', error: logsRes.error },
                 { name: 'agents', error: agentsRes.error },
                 { name: 'tickets', error: ticketsRes.error },
-                { name: 'technicians', error: techsRes.error },
-                { name: 'blog_posts', error: blogRes.error },
-                { name: 'blog_categories', error: blogCatsRes.error }
+                { name: 'technicians', error: techsRes.error }
             ].filter(e => e.error);
 
             if (errors.length > 0) {
@@ -361,8 +333,6 @@ export default function PremiumAdminDashboard() {
             if (agentsRes.data) setComisionistas(agentsRes.data);
             if (ticketsRes.data) setTickets(ticketsRes.data);
             if (techsRes.data) setTechnicians(techsRes.data);
-            if (blogRes.data) setBlogPosts(blogRes.data);
-            if (blogCatsRes.data) setBlogCategories(blogCatsRes.data);
         } catch (error) {
             console.error('Fetch Error:', error);
         } finally {
@@ -697,8 +667,7 @@ export default function PremiumAdminDashboard() {
                 { id: 'integrations', icon: Settings, label: 'Integraciones' },
                 { id: 'logs', icon: Activity, label: 'Log' }
             ]
-        },
-        { id: 'blog', icon: BookOpen, label: 'Blog' },
+        }
     ];
 
     return (
@@ -1922,85 +1891,7 @@ export default function PremiumAdminDashboard() {
                             </motion.div>
                         )}
 
-                        {activeTab === 'blog' && (
-                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
-                                <div className="flex justify-between items-center">
-                                    <div>
-                                        <h2 className="text-2xl font-black italic">GESTIÓN DE <span className="text-neon-cyan neon-text-cyan">BLOG</span></h2>
-                                        <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mt-1">Control de Contenido y Publicaciones</p>
-                                    </div>
-                                    <button
-                                        onClick={() => setEditingBlogPost({ title: '', slug: '', excerpt: '', content: '', published: false, cover_image: '' })}
-                                        className="relative group px-8 py-3 bg-neon-cyan text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,243,255,0.3)] hover:shadow-[0_0_40px_rgba(0,243,255,0.5)] active:scale-95 flex items-center gap-2"
-                                    >
-                                        <Plus className="w-4 h-4 mr-2" /> NUEVA PUBLICACIÓN
-                                    </button>
-                                </div>
 
-                                <div className="grid grid-cols-1 gap-4">
-                                    {blogPosts.map((post) => (
-                                        <GlassCard key={post.id} className="p-6 rounded-3xl border-white/5 hover:border-neon-cyan/20 transition-all group flex items-center justify-between">
-                                            <div className="flex items-center gap-6">
-                                                <div className="w-20 h-20 rounded-2xl bg-slate-900 border border-white/10 overflow-hidden relative shadow-lg">
-                                                    {post.cover_image ? (
-                                                        <img src={post.cover_image} alt="Cover" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity cursor-pointer group-hover:scale-110 duration-700" />
-                                                    ) : (
-                                                        <div className="w-full h-full flex items-center justify-center bg-white/5"><BookOpen className="w-8 h-8 text-white/10" /></div>
-                                                    )}
-                                                </div>
-                                                <div className="flex flex-col gap-2">
-                                                    <h3 className="text-lg font-black italic text-white group-hover:text-neon-cyan transition-colors cursor-pointer uppercase tracking-tight" onClick={() => setEditingBlogPost(post)}>
-                                                        {post.title}
-                                                    </h3>
-                                                    <div className="flex items-center gap-4">
-                                                        <span className={`px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-widest ${post.published ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20'}`}>
-                                                            {post.published ? 'PUBLICADO' : 'BORRADOR'}
-                                                        </span>
-                                                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest flex items-center gap-2">
-                                                            <Calendar className="w-3 h-3" /> {new Date(post.created_at).toLocaleDateString()}
-                                                        </span>
-                                                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest flex items-center gap-2">
-                                                            <Eye className="w-3 h-3" /> {post.views} VISTAS
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
-                                                <a href={`/blog/${post.slug}`} target="_blank" className="p-3 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-xl transition-all" title="Ver Publicación">
-                                                    <ArrowUpRight className="w-4 h-4" />
-                                                </a>
-                                                <button
-                                                    onClick={() => setEditingBlogPost(post)}
-                                                    className="p-3 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-xl transition-all"
-                                                    title="Editar"
-                                                >
-                                                    <Edit2 className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={async () => {
-                                                        if (confirm('¿Eliminar esta publicación de forma permanente?')) {
-                                                            await supabase.from('blog_posts').delete().eq('id', post.id);
-                                                            const { data } = await supabase.from('blog_posts').select('*').order('created_at', { ascending: false });
-                                                            if (data) setBlogPosts(data);
-                                                        }
-                                                    }}
-                                                    className="p-3 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all"
-                                                    title="Eliminar"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </GlassCard>
-                                    ))}
-                                    {blogPosts.length === 0 && (
-                                        <div className="text-center py-20 bg-white/5 rounded-[3rem] border border-white/5 border-dashed">
-                                            <p className="text-slate-500 font-black uppercase tracking-widest text-xs">No hay publicaciones activas</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </motion.div>
-                        )}
 
                     </AnimatePresence>
                 </main>
@@ -2790,144 +2681,6 @@ export default function PremiumAdminDashboard() {
                 )
             }
 
-            <AnimatePresence>
-                {editingBlogPost && (
-                    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingBlogPost(null)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
-                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative w-full max-w-4xl h-[90vh] flex flex-col">
-                            <GlassCard className="flex-1 flex flex-col p-8 border-neon-cyan/20 !bg-slate-900 shadow-2xl rounded-[2rem] overflow-hidden text-white relative">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h3 className="text-2xl font-black italic uppercase">
-                                        EDITOR DE <span className="text-neon-cyan">CONTENIDO</span>
-                                    </h3>
-                                    <button onClick={() => setEditingBlogPost(null)} className="p-2 hover:bg-white/10 rounded-full transition-all">
-                                        <X className="w-6 h-6 text-slate-400" />
-                                    </button>
-                                </div>
-
-                                <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Título del Artículo</label>
-                                            <input
-                                                value={editingBlogPost.title}
-                                                onChange={e => setEditingBlogPost({ ...editingBlogPost, title: e.target.value, slug: e.target.value.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '') })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none font-bold"
-                                                placeholder="Escribe un título impactante..."
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Slug (URL)</label>
-                                            <input
-                                                value={editingBlogPost.slug}
-                                                onChange={e => setEditingBlogPost({ ...editingBlogPost, slug: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none font-mono text-slate-400"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Extracto (Resumen)</label>
-                                        <textarea
-                                            value={editingBlogPost.excerpt || ''}
-                                            onChange={e => setEditingBlogPost({ ...editingBlogPost, excerpt: e.target.value })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none h-20 resize-none"
-                                            placeholder="Breve descripción para SEO y previsualización..."
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Contenido (Markdown Compatible)</label>
-                                        <div className="relative h-[400px]">
-                                            <textarea
-                                                value={editingBlogPost.content || ''}
-                                                onChange={e => setEditingBlogPost({ ...editingBlogPost, content: e.target.value })}
-                                                className="w-full h-full bg-white/5 border border-white/10 rounded-xl p-6 text-sm focus:border-neon-cyan focus:outline-none resize-none font-mono leading-relaxed"
-                                                placeholder="# Escribe tu artículo aquí..."
-                                            />
-                                            <div className="absolute top-4 right-4 text-[10px] font-black uppercase text-slate-600 bg-black/50 px-2 py-1 rounded">MARKDOWN SUPPORTED</div>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Imagen de Portada (URL)</label>
-                                            <input
-                                                value={editingBlogPost.cover_image || ''}
-                                                onChange={e => setEditingBlogPost({ ...editingBlogPost, cover_image: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none"
-                                                placeholder="https://..."
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase text-slate-500 ml-2">Categoría</label>
-                                            <select
-                                                value={editingBlogPost.category_id || ''}
-                                                onChange={e => setEditingBlogPost({ ...editingBlogPost, category_id: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-neon-cyan focus:outline-none text-slate-400"
-                                            >
-                                                <option value="">Seleccionar Categoría...</option>
-                                                {blogCategories.map(cat => (
-                                                    <option key={cat.id} value={cat.id} className="bg-slate-900 text-white">{cat.name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/5">
-                                        <label className="flex items-center gap-3 cursor-pointer">
-                                            <div className={`w-12 h-6 rounded-full p-1 transition-all ${editingBlogPost.published ? 'bg-emerald-500' : 'bg-slate-600'}`}>
-                                                <div className={`w-4 h-4 bg-white rounded-full shadow-md transition-all ${editingBlogPost.published ? 'translate-x-6' : 'translate-x-0'}`} />
-                                            </div>
-                                            <input
-                                                type="checkbox"
-                                                checked={editingBlogPost.published || false}
-                                                onChange={e => setEditingBlogPost({ ...editingBlogPost, published: e.target.checked })}
-                                                className="hidden"
-                                            />
-                                            <span className="text-[10px] font-black uppercase tracking-widest text-white">
-                                                {editingBlogPost.published ? 'ESTADO: PÚBLICO (VISIBLE)' : 'ESTADO: BORRADOR (OCULTO)'}
-                                            </span>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div className="mt-8 pt-6 border-t border-white/10 flex justify-end gap-4">
-                                    <button onClick={() => setEditingBlogPost(null)} className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest transition-all">Cancelar</button>
-                                    <NeonButton
-                                        onClick={async () => {
-                                            if (!editingBlogPost.title || !editingBlogPost.slug) return alert('Título y Slug requeridos');
-
-                                            // Ensure we are sending only the fields that exist in the database table
-                                            const postData = {
-                                                title: editingBlogPost.title,
-                                                slug: editingBlogPost.slug,
-                                                content: editingBlogPost.content,
-                                                excerpt: editingBlogPost.excerpt,
-                                                cover_image: editingBlogPost.cover_image,
-                                                published: editingBlogPost.published,
-                                                category_id: editingBlogPost.category_id,
-                                                author_name: 'Admin FiberGravity' // Explicitly set author
-                                            };
-
-                                            if ((editingBlogPost as any).id) {
-                                                await supabase.from('blog_posts').update(postData).eq('id', (editingBlogPost as any).id);
-                                            } else {
-                                                await supabase.from('blog_posts').insert([postData]);
-                                            }
-                                            fetchData();
-                                            setEditingBlogPost(null);
-                                        }}
-                                        className="py-3 px-8 text-[10px]"
-                                    >
-                                        <Save className="w-4 h-4 mr-2" /> GUARDAR PUBLICACIÓN
-                                    </NeonButton>
-                                </div>
-                            </GlassCard>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
         </div >
     );
 }

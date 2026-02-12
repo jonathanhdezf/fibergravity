@@ -1,26 +1,56 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { createClient } from "@supabase/supabase-js";
+
+// Cliente de Supabase para autenticación del servidor
+const supabaseAuth = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 const handler = NextAuth({
+    secret: process.env.NEXTAUTH_SECRET,
     providers: [
         CredentialsProvider({
             name: "Credentials",
             credentials: {
-                username: { label: "Username", type: "text", placeholder: "admin" },
-                password: { label: "Password", type: "password" }
+                username: { label: "Usuario", type: "text", placeholder: "admin" },
+                password: { label: "Contraseña", type: "password" }
             },
             async authorize(credentials, req) {
-                // Check if user is admin
-                if (credentials?.username === "admin" && credentials?.password === "fiberadmin2026") {
-                    return { id: "1", name: "Admin FiberGravity", email: "admin@fibergravity.mx", role: "ADMIN" };
-                }
+                try {
+                    if (!credentials?.username || !credentials?.password) {
+                        return null;
+                    }
 
-                // Allow user login (placeholder for now, can be extended to DB)
-                if (credentials?.username === "user" && credentials?.password === "user123") {
-                    return { id: "2", name: "Usuario Demo", email: "user@fibergravity.mx", role: "USER" };
-                }
+                    // Verificar credenciales contra Supabase
+                    const { data, error } = await supabaseAuth.rpc('verify_admin_login', {
+                        p_username: credentials.username,
+                        p_password: credentials.password
+                    });
 
-                return null;
+                    if (error) {
+                        console.error("Error de Supabase al verificar login:", error.message);
+                        return null;
+                    }
+
+                    // Si la función retorna un resultado, las credenciales son válidas
+                    if (data && data.length > 0) {
+                        const user = data[0];
+                        return {
+                            id: user.id,
+                            name: user.full_name,
+                            email: user.email,
+                            role: user.role
+                        };
+                    }
+
+                    // Credenciales inválidas
+                    return null;
+                } catch (error) {
+                    console.error("Error en authorize:", error);
+                    return null;
+                }
             }
         })
     ],
