@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Music, ArrowLeft, Headphones, Radio, Mic2, Star } from "lucide-react";
+import { Music, ArrowLeft, Headphones, Radio, Mic2, Star, ShieldCheck, Apple, Smartphone } from "lucide-react";
 import { Navbar } from "@/components/sections/Navbar";
 import { Footer } from "@/components/sections/Footer";
 import { GlassCard } from "@/components/ui/GlassCard";
@@ -113,6 +113,69 @@ const MusicaGratisClientPage = () => {
                             <p className="text-slate-400 text-sm leading-relaxed">
                                 Al vincular tu cuenta Telcel, eliminas las interrupciones. Escucha álbumes completos y crea playlists personalizadas que se sincronizan con todos tus dispositivos automáticamente.
                             </p>
+                        </GlassCard>
+                    </div>
+                </div>
+
+                {/* Official Apps Downloads */}
+                <div className="mt-24 pt-20 border-t border-white/5 relative z-10 px-6">
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl font-black italic mb-4 uppercase tracking-tighter">Lleva la Música Contigo</h2>
+                        <p className="text-slate-400 max-w-xl mx-auto text-sm md:text-base">
+                            Descarga la aplicación oficial y lleva tus playlists favoritas a donde quiera que vayas. <span className="text-white font-bold">Sin consumir tus datos</span>.
+                        </p>
+                    </div>
+
+                    <div className="max-w-3xl mx-auto">
+                        <GlassCard className="!p-8 border-white/10 group/app" hoverEffect={false}>
+                            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8 mb-8 text-center sm:text-left">
+                                <div className="w-24 h-24 rounded-3xl bg-black border border-white/10 flex items-center justify-center p-4 shadow-2xl group-hover/app:border-neon-cyan/50 transition-colors duration-500 relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-neon-cyan/20 to-transparent opacity-50" />
+                                    <Music className="w-12 h-12 text-neon-cyan relative z-10" />
+                                </div>
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-center sm:justify-start gap-3 mb-2">
+                                        <h3 className="text-3xl font-black italic text-white">Claro Música</h3>
+                                        <ShieldCheck className="w-5 h-5 text-neon-cyan" />
+                                    </div>
+                                    <p className="text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black mb-4 flex items-center justify-center sm:justify-start gap-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-neon-cyan" />
+                                        Stream & Download
+                                        <span className="w-1.5 h-1.5 rounded-full bg-neon-cyan" />
+                                    </p>
+                                    <p className="text-sm text-slate-400 leading-relaxed max-w-md">
+                                        Accede a millones de canciones, radios en vivo y listas de reproducción curadas. Escucha gratis y sin conexión con tu Plan Telcel.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <a
+                                    href="https://apps.apple.com/mx/app/claro-m%C3%BAsica/id566367878"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-center gap-4 px-6 py-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-neon-cyan/10 hover:border-neon-cyan/30 transition-all group/store"
+                                >
+                                    <Apple className="w-6 h-6 text-slate-400 group-hover/store:text-white transition-colors" />
+                                    <div className="text-left">
+                                        <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest leading-none mb-1">Download on the</p>
+                                        <p className="text-sm font-black text-white group-hover/store:text-neon-cyan transition-colors">App Store</p>
+                                    </div>
+                                </a>
+
+                                <a
+                                    href="https://play.google.com/store/apps/details?id=com.claro.claromusica.la"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-center gap-4 px-6 py-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-neon-cyan/10 hover:border-neon-cyan/30 transition-all group/store"
+                                >
+                                    <Smartphone className="w-6 h-6 text-slate-400 group-hover/store:text-white transition-colors" />
+                                    <div className="text-left">
+                                        <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest leading-none mb-1">Get it on</p>
+                                        <p className="text-sm font-black text-white group-hover/store:text-neon-cyan transition-colors">Google Play</p>
+                                    </div>
+                                </a>
+                            </div>
                         </GlassCard>
                     </div>
                 </div>
