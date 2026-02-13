@@ -20,7 +20,7 @@ const navLinks = [
             { name: "Empresas", href: "#empresas" },
         ]
     },
-    { name: "TV", href: "#television", icon: <Tv className="w-4 h-4" /> },
+    { name: "Internet + TV", href: "#television", icon: <Tv className="w-4 h-4" /> },
     { name: "Medidor", href: "#speed-test", icon: <Gauge className="w-4 h-4" /> },
     { name: "Cobertura", href: "#cobertura", icon: <Radar className="w-4 h-4" /> },
     { name: "Partners", href: "#socios", icon: <Users className="w-4 h-4" /> },
