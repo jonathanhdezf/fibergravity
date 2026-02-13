@@ -94,7 +94,7 @@ export default function GlossaryPage() {
                         transition={{ delay: 0.1 }}
                         className="text-5xl md:text-7xl font-black mb-6 tracking-tighter italic"
                     >
-                        GLOSARIO <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-blue-600">FIBERGRAVITY</span>
+                        GLOSARIO <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-blue-600 pr-2">FIBERGRAVITY</span>
                     </motion.h1>
 
                     <motion.p
