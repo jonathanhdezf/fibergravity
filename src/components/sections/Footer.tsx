@@ -42,6 +42,7 @@ export const Footer = () => {
                             <li><a href="#plans-header" className="hover:text-neon-cyan transition-colors">Internet Fibra</a></li>
                             <li><a href="#television" className="hover:text-neon-cyan transition-colors">TV de Cable</a></li>
                             <li><a href="/streaming" className="hover:text-neon-cyan transition-colors">Streaming Gratis</a></li>
+                            <li><a href="/musica-gratis" className="hover:text-neon-cyan transition-colors">Música Gratis</a></li>
                             <li><a href="#gamer" className="hover:text-neon-cyan transition-colors">Planes Gamer</a></li>
                             <li><a href="#home-office" className="hover:text-neon-cyan transition-colors">Home Office</a></li>
                             <li><a href="#empresas" className="hover:text-neon-cyan transition-colors">Empresas</a></li>
