@@ -93,6 +93,12 @@ const MusicaGratisClientPage = () => {
                         </GlassCard>
                     </motion.div>
 
+                    <div className="max-w-4xl mx-auto text-center mt-6">
+                        <p className="text-[10px] text-slate-500 font-medium tracking-wide">
+                            Si no te deja agregar el código SMS, abre en una <a href="https://www.claromusica.com/home" target="_blank" rel="noopener noreferrer" className="text-neon-cyan hover:underline">nueva página</a>, genera el código, ingrésalo y ya podrás disfrutar de música. Puedes regresar a nuestra página cuando gustes a escuchar música.
+                        </p>
+                    </div>
+
                     {/* Content Logic & Features */}
                     <div className="grid md:grid-cols-2 gap-12 mt-24">
                         <GlassCard className="p-8 border-white/5 hover:border-neon-cyan/20 transition-all">
