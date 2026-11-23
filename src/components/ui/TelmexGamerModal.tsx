@@ -12,42 +12,54 @@ interface TelmexGamerModalProps {
 
 const gamerPlans = [
     {
-        name: "Infinitum Gamer 150",
-        speed: "150 Megas",
-        type: "Simétrico",
+        name: "Infinitum 250 Simétrico",
+        speed: "250 Megas",
+        type: "Fibra Simétrica",
         price: "$499",
         period: "al mes",
         features: [
-            "150 MB de Bajada / 150 MB de Subida",
-            "IP Pública Dinámica (Ideal para servidores)",
-            "Optimización de Latencia (Ping reducido)",
-            "Wi-Fi Mesh incluido gratis",
-            "Unlimited Calls a todo México",
-            "Netflix incluido (6 meses promo)",
-            "Claro Video & Claro Drive (100GB)"
+            "250 MB de Bajada / 250 MB de Subida",
+            "IP Pública Dinámica (Ideal para lobbies)",
+            "Llamadas ilimitadas MX / EUA / CAN",
+            "Claro Video & Claro Drive (100 GB)",
+            "Promos con Netflix o Max en recibo",
+            "Instalación gratis por portabilidad"
         ],
         highlight: false
     },
     {
-        name: "Infinitum Gamer 300",
-        speed: "300 Megas",
-        type: "Simétrico",
+        name: "Infinitum 500 Simétrico",
+        speed: "500 Megas",
+        type: "Fibra Simétrica",
         price: "$649",
         period: "al mes",
         features: [
-            "300 MB de Bajada / 300 MB de Subida",
-            "Análisis de Red Prioritaria",
-            "VPN Optimized Gaming Support",
-            "2 Equipos Wi-Fi Mesh",
-            "HBO Max incluido (3 meses)",
-            "Seguridad McAfee integrada",
-            "Disney+ opcional con descuento"
+            "500 MB de Bajada / 500 MB de Subida",
+            "Baja latencia para gaming + stream",
+            "Módem Fibra Dual Band WiFi 6",
+            "Claro Video & Antivirus incluidos",
+            "Promociones Netflix / Max / Disney+",
+            "Soporte especializado Infinitum"
         ],
         highlight: true
+    },
+    {
+        name: "Infinitum 1000 (1 Gbps)",
+        speed: "1,000 Megas",
+        type: "Fibra Simétrica",
+        price: "$999",
+        period: "al mes",
+        features: [
+            "1,000 MB de Bajada / 1,000 MB de Subida",
+            "Máxima prioridad para múltiples consolas",
+            "Descargas Day-0 en segundos",
+            "Claro Video + Claro Drive incluidos",
+            "Telefonía fija ilimitada internacional"
+        ],
+        highlight: false
     }
 ];
 
-import { supabase } from "@/lib/supabase";
 import toast from "react-hot-toast";
 
 export const TelmexGamerModal = ({ isOpen, onClose }: TelmexGamerModalProps) => {
@@ -85,23 +97,25 @@ export const TelmexGamerModal = ({ isOpen, onClose }: TelmexGamerModalProps) => 
         }
 
         try {
-            const { error } = await supabase.from('leads').insert([
-                {
-                    full_name: formData.fullName,
-                    phone: formData.phone,
-                    location: formData.location,
-                    category: 'Gamer',
-                    provider: 'Telmex Infinitum Gamer',
-                    plan_name: gamerPlans[selectedPlan].name,
-                    speed: gamerPlans[selectedPlan].speed,
-                    price: gamerPlans[selectedPlan].price,
-                    status: 'pending'
-                }
-            ]);
+            const plan = gamerPlans[selectedPlan];
+            const lead = {
+                id: crypto.randomUUID(),
+                created_at: new Date().toISOString(),
+                full_name: formData.fullName,
+                phone: formData.phone,
+                location: formData.location,
+                category: 'Gamer',
+                provider: 'Telmex Infinitum Gamer',
+                plan_name: plan.name,
+                speed: plan.speed,
+                price: plan.price,
+                status: 'pending'
+            };
 
-            if (error) throw error;
+            const existing = JSON.parse(localStorage.getItem('fiberlink_play_leads') || '[]');
+            localStorage.setItem('fiberlink_play_leads', JSON.stringify([lead, ...existing]));
 
-            toast.success(`¡Enviado con éxito! En breve un representante de FiberGravity se pondrá en contacto contigo.`, {
+            toast.success(`¡Solicitud enviada! Un broker de Fiberlink Play validará tu cobertura de Telmex Infinitum.`, {
                 icon: '📞',
                 style: {
                     borderRadius: '20px',
@@ -114,9 +128,8 @@ export const TelmexGamerModal = ({ isOpen, onClose }: TelmexGamerModalProps) => 
                 }
             });
             onClose();
-        } catch (error: any) {
-            console.error('Error submitting lead:', error);
-            toast.error('Hubo un error al enviar tus datos. Por favor intenta de nuevo.');
+        } catch {
+            toast.error('Hubo un error al procesar tus datos. Por favor intenta de nuevo.');
         } finally {
             setIsSubmitting(false);
         }
@@ -289,7 +302,7 @@ export const TelmexGamerModal = ({ isOpen, onClose }: TelmexGamerModalProps) => 
                                     </NeonButton>
 
                                     <p className="text-[9px] text-center text-slate-600 uppercase tracking-widest leading-relaxed">
-                                        Al presionar activar, un broker profesional de FiberGravity validará tu cobertura gamer en Teziutlán.
+                                        Al presionar activar, un broker profesional de Fiberlink Play validará tu cobertura gamer en Teziutlán.
                                     </p>
                                 </form>
                             </div>

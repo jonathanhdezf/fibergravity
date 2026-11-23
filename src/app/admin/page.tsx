@@ -919,7 +919,7 @@ export default function PremiumAdminDashboard() {
                                                 const url = window.URL.createObjectURL(blob);
                                                 const a = document.createElement('a');
                                                 a.href = url;
-                                                a.download = `leads_fibergravity_${new Date().toISOString().split('T')[0]}.csv`;
+                                                a.download = `leads_fiberlink_play_${new Date().toISOString().split('T')[0]}.csv`;
                                                 a.click();
                                             }}
                                             className="px-6 py-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-black uppercase tracking-widest text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all flex items-center gap-2"
@@ -1222,7 +1222,7 @@ export default function PremiumAdminDashboard() {
                                                                             <FileText className="w-5 h-5 group-hover/action:scale-110" />
                                                                         </button>
                                                                         <a
-                                                                            href={`https://wa.me/52${ticket.phone}?text=Hola%20${ticket.full_name},%20soy%20${ticket.technician_id ? technicians.find(t => t.id === ticket.technician_id)?.full_name : 'tu%20técnico'}%20de%20soporte%20FiberGravity%20sobre%20tu%20ticket%20%23${ticket.id.split('-')[0].toUpperCase()}.`}
+                                                                            href={`https://wa.me/52${ticket.phone}?text=Hola%20${ticket.full_name},%20soy%20${ticket.technician_id ? technicians.find(t => t.id === ticket.technician_id)?.full_name : 'tu%20técnico'}%20de%20soporte%20Fiberlink%20Play%20sobre%20tu%20ticket%20%23${ticket.id.split('-')[0].toUpperCase()}.`}
                                                                             target="_blank"
                                                                             rel="noopener noreferrer"
                                                                             className="w-10 h-10 flex items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white border border-emerald-500/20 shadow-lg shadow-emerald-500/5 transition-all group/action"
@@ -2500,7 +2500,7 @@ export default function PremiumAdminDashboard() {
                         {/* Header: High Contrast & Simple */}
                         <div className="dossier-header">
                             <div>
-                                <h1 className="dossier-header-title">FIBERGRAVITY</h1>
+                                <h1 className="dossier-header-title">FIBERLINK PLAY</h1>
                                 <p className="dossier-header-subtitle">OFFICIAL LOGISTICS DOSSIER v3.0</p>
                             </div>
                             <div>
@@ -2597,7 +2597,7 @@ export default function PremiumAdminDashboard() {
 
                         {/* Footer */}
                         <div className="dossier-footer">
-                            <p className="dossier-footer-text">© 2026 FIBERGRAVITY • DOCUMENTO DE USO CONFIDENCIAL</p>
+                            <p className="dossier-footer-text">© 2026 FIBERLINK PLAY • DOCUMENTO DE USO CONFIDENCIAL</p>
                             <p className="dossier-footer-tag">NOC - INFRASTRUCTURE OPERATIONS</p>
                         </div>
                     </div>
@@ -2610,7 +2610,7 @@ export default function PremiumAdminDashboard() {
                     <div id="printable-dossier" className="hidden print-force-visible dossier-root">
                         <div className="dossier-header">
                             <div>
-                                <h1 className="dossier-header-title text-blue-600">FIBERGRAVITY</h1>
+                                <h1 className="dossier-header-title text-blue-600">FIBERLINK PLAY</h1>
                                 <p className="dossier-header-subtitle">REPORTE TÉCNICO DE CAMPO v1.0</p>
                             </div>
                             <div>
@@ -2675,7 +2675,7 @@ export default function PremiumAdminDashboard() {
 
                         <div className="dossier-footer">
                             <p className="dossier-footer-text">ASIGNADO A: {editingTicket.technician_id ? technicians.find(t => t.id === editingTicket.technician_id)?.full_name : 'SIN ASIGNAR'}</p>
-                            <p className="dossier-footer-tag">CENTER OPS - FIBERGRAVITY SUPPORT</p>
+                            <p className="dossier-footer-tag">CENTER OPS - FIBERLINK PLAY SUPPORT</p>
                         </div>
                     </div>
                 )

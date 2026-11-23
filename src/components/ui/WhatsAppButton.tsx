@@ -12,7 +12,7 @@ interface WhatsAppButtonProps {
 }
 
 /**
- * WhatsAppButton - Componente de conversión premium para FiberGravity
+ * WhatsAppButton - Componente de conversión premium para Fiberlink Play
  * Genera un enlace dinámico de WhatsApp con mensaje preconfigurado del plan solicitado.
  */
 export const WhatsAppButton = ({
@@ -24,7 +24,7 @@ export const WhatsAppButton = ({
 }: WhatsAppButtonProps) => {
 
     // Construcción del mensaje dinámico
-    const rawMessage = `¡Hola FiberGravity! 🚀 Estoy en Teziutlán y me interesa contratar el plan ${planName} de ${provider} por $${price}. ¿Me ayudan a validar mi cobertura?`;
+    const rawMessage = `¡Hola Fiberlink Play! 🚀 Estoy en Teziutlán y me interesa contratar el plan ${planName} de ${provider} por $${price}. ¿Me ayudan a validar mi cobertura?`;
 
     // Formateo seguro para URL
     const encodedMessage = encodeURIComponent(rawMessage);

@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, Send, MessageSquare, Globe2, ArrowLeft } from "lucide-react";
 import { GlassCard } from "../ui/GlassCard";
 import { NeonButton } from "../ui/NeonButton";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 const contactInfo = [
     {
@@ -17,7 +19,7 @@ const contactInfo = [
     {
         icon: <Mail className="w-6 h-6 text-neon-magenta" />,
         label: "Email",
-        value: "fibergravity@gmail.com",
+        value: "fiberlink.serviciostic@gmail.com",
         subValue: "Respuesta en < 2h",
         delay: 0.2
     },
@@ -31,6 +33,41 @@ const contactInfo = [
 ];
 
 export const Contact = () => {
+    const [fullName, setFullName] = useState("");
+    const [email, setEmail] = useState("");
+    const [subject, setSubject] = useState("");
+    const [message, setMessage] = useState("");
+    const [sent, setSent] = useState(false);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!fullName.trim() || !email.trim() || !message.trim()) {
+            toast.error("Por favor completa nombre, correo y mensaje.");
+            return;
+        }
+
+        try {
+            const payload = {
+                id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+                created_at: new Date().toISOString(),
+                full_name: fullName.trim(),
+                email: email.trim(),
+                subject: subject.trim() || "Solicitud de asesoría Fiberlink Play",
+                message: message.trim(),
+            };
+            const existing = JSON.parse(localStorage.getItem("fiberlink_play_contacts") || "[]");
+            localStorage.setItem("fiberlink_play_contacts", JSON.stringify([payload, ...existing]));
+            toast.success("Mensaje enviado. Un asesor de Fiberlink Play te contactará pronto.");
+            setSent(true);
+            setFullName("");
+            setEmail("");
+            setSubject("");
+            setMessage("");
+        } catch {
+            toast.error("No se pudo registrar el mensaje.");
+        }
+    };
+
     return (
         <section id="contacto" className="relative py-32 overflow-hidden bg-[#020617]">
             {/* Background Effects */}
@@ -74,7 +111,7 @@ export const Contact = () => {
                         </h2>
 
                         <p className="text-xl text-slate-400 mb-12 max-w-lg leading-relaxed">
-                            Nuestro equipo está listo para ayudarte a configurar la conexión que transformará tu experiencia digital. No esperes más.
+                            Nuestro equipo está listo para ayudarte a comparar y contratar la conexión que transformará tu experiencia digital. No esperes más.
                         </p>
 
                         <div className="grid gap-6">
@@ -102,7 +139,7 @@ export const Contact = () => {
 
                         <div className="mt-12 flex items-center gap-4 text-slate-500">
                             <Globe2 className="w-5 h-5 animate-spin-slow" />
-                            <span className="text-sm font-medium">Operando globalmente desde infraestructuras locales.</span>
+                            <span className="text-sm font-medium">Broker digital conectando los mejores proveedores de México.</span>
                         </div>
                     </motion.div>
 
@@ -114,21 +151,27 @@ export const Contact = () => {
                         viewport={{ once: true }}
                     >
                         <GlassCard className="p-8 md:p-12 border-white/10" hoverEffect={false}>
-                            <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                            <form className="space-y-6" onSubmit={handleSubmit}>
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <label className="text-xs uppercase tracking-widest text-slate-400 font-bold ml-1">Nombre Completo</label>
                                         <input
                                             type="text"
-                                            placeholder="John Doe"
+                                            required
+                                            value={fullName}
+                                            onChange={(e) => setFullName(e.target.value)}
+                                            placeholder="Ej. Carlos Mendoza"
                                             className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-neon-cyan/50 focus:ring-1 focus:ring-neon-cyan/50 transition-all text-white placeholder:text-slate-600"
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-xs uppercase tracking-widest text-slate-400 font-bold ml-1">Email Corporativo</label>
+                                        <label className="text-xs uppercase tracking-widest text-slate-400 font-bold ml-1">Email</label>
                                         <input
                                             type="email"
-                                            placeholder="john@company.com"
+                                            required
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            placeholder="carlos@correo.com"
                                             className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-neon-magenta/50 focus:ring-1 focus:ring-neon-magenta/50 transition-all text-white placeholder:text-slate-600"
                                         />
                                     </div>
@@ -138,7 +181,9 @@ export const Contact = () => {
                                     <label className="text-xs uppercase tracking-widest text-slate-400 font-bold ml-1">Asunto</label>
                                     <input
                                         type="text"
-                                        placeholder="Quiero contratar Fibra Óptica"
+                                        value={subject}
+                                        onChange={(e) => setSubject(e.target.value)}
+                                        placeholder="Quiero comparar planes de Fibra Óptica"
                                         className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-neon-cyan/50 focus:ring-1 focus:ring-neon-cyan/50 transition-all text-white placeholder:text-slate-600"
                                     />
                                 </div>
@@ -147,18 +192,21 @@ export const Contact = () => {
                                     <label className="text-xs uppercase tracking-widest text-slate-400 font-bold ml-1">Mensaje</label>
                                     <textarea
                                         rows={4}
-                                        placeholder="Cuéntanos sobre tus necesidades de conexión..."
+                                        required
+                                        value={message}
+                                        onChange={(e) => setMessage(e.target.value)}
+                                        placeholder="Cuéntanos sobre tus necesidades de conexión y tu zona..."
                                         className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-neon-cyan/50 focus:ring-1 focus:ring-neon-cyan/50 transition-all text-white placeholder:text-slate-600 resize-none"
                                     />
                                 </div>
 
                                 <div className="pt-4">
-                                    <NeonButton className="w-full flex items-center justify-center gap-3">
-                                        Enviar Mensaje
+                                    <NeonButton type="submit" className="w-full flex items-center justify-center gap-3">
+                                        {sent ? "Enviar Otro Mensaje" : "Enviar Mensaje"}
                                         <Send className="w-4 h-4" />
                                     </NeonButton>
                                     <p className="text-center text-[10px] text-slate-500 mt-6 uppercase tracking-tighter">
-                                        Al enviar este formulario, aceptas nuestros <span className="text-neon-cyan cursor-pointer">Términos de Servicio</span>.
+                                        Al enviar este formulario, aceptas nuestros <Link href="/terminos" className="text-neon-cyan hover:underline">Términos de Servicio</Link>.
                                     </p>
                                 </div>
                             </form>

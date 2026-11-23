@@ -13,8 +13,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "FiberGravity | Internet de Alta Velocidad | Fibra Óptica + TV",
-  description: "Marketplace #1 de telecomunicaciones en Teziutlán. Fibra óptica y televisión con tecnología Zero Gravity.",
+  title: "Fiberlink Play | Broker Digital de Internet, Fibra Óptica y TV",
+  description: "Broker digital #1 de telecomunicaciones en Teziutlán y la región. Compara planes reales de fibra óptica, telefonía y televisión.",
   icons: {
     icon: "/favicon.svg",
   },

@@ -9,7 +9,7 @@ const features = [
     {
         icon: <Zap className="w-8 h-8 text-neon-cyan" />,
         title: "Comparativa Inteligente",
-        description: "Filtramos los mejores planes de Teziutlán basándonos en velocidad real, precio y beneficios de cada proovedor.",
+        description: "Filtramos los mejores planes de Teziutlán basándonos en velocidad real, precio y beneficios de cada proveedor.",
         delay: 0.1
     },
     {
@@ -87,7 +87,7 @@ export const About = () => {
                             </span>
                         </h2>
                         <p className="text-xl text-slate-400 mb-10 leading-relaxed">
-                            En <span className="text-white font-bold italic font-space">FiberGravity</span>, funcionamos como tu broker digital de telecomunicaciones en Teziutlán. Nuestra misión es simplificar tu búsqueda, analizando el mercado para ofrecerte la recomendación perfecta.
+                            En <span className="text-white font-bold italic font-space">Fiberlink Play</span>, funcionamos como tu broker digital de telecomunicaciones en Teziutlán. Nuestra misión es simplificar tu búsqueda, analizando el mercado para ofrecerte la recomendación perfecta.
                         </p>
 
                         <div className="space-y-6">

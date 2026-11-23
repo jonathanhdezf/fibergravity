@@ -10,15 +10,15 @@ import { useModal } from "../ModalProvider";
 const streamerPlans = [
     {
         category: "STREAMER PROFESIONAL (4K/8K)",
-        provider: "Totalplay 1200 Megas",
-        speed: "Fibra XGS-PON (Hasta 10 Gbps)",
+        provider: "Totalplay 1000 Megas",
+        speed: "1,000 Mbps Simétricos (1 Gbps)",
         features: [
-            "Velocidad brutal para multitarea masiva",
-            "Optimizado para streaming 4K y 8K",
-            "WiFi Pro de última generación incluido",
-            "Estabilidad premium para transmisiones largas"
+            "1,000 Mbps de subida y bajada para 4K60 sin drops",
+            "Fibra XGS-PON con opciones hasta 5,000–10,000 Mbps",
+            "WiFi 6 / WiFi Pro con prioridad de tráfico",
+            "Estabilidad profesional para Twitch, Kick y YouTube"
         ],
-        price: "$1,470",
+        price: "$1,000",
         recommendation: "MÁXIMO RENDIMIENTO PROFESIONAL",
         color: "cyan",
         icon: <Video className="w-8 h-8" />
@@ -26,44 +26,44 @@ const streamerPlans = [
     {
         category: "STREAMER PROFESIONAL (4K/8K)",
         provider: "Megacable Streamers",
-        speed: "500 Mbps Estables",
+        speed: "500 Mbps Simétricos",
         features: [
-            "Transmisión 8K garantizada sin lag",
-            "Incluye suscripción a Netflix",
-            "Incluye TV XVIEW+ para monitoreo",
-            "Gestión avanzada de contenido multimedia"
+            "Subida simétrica estable para bitrate alto en OBS",
+            "Incluye Xview+ y Amazon Prime / Netflix según pack",
+            "Extensor WiFi incluido en cobertura de fibra",
+            "Gran equilibrio entre velocidad de subida y precio"
         ],
-        price: "$880",
+        price: "$730 – $800",
         recommendation: "IDEAL CREADORES MULTIMEDIA",
         color: "magenta",
         icon: <Zap className="w-8 h-8" />
     },
     {
-        category: "STREAMER PROFESIONAL (4K/8K)",
-        provider: "Telmex Infinitum Gamer",
-        speed: "150 Mbps Simétricos",
+        category: "STREAMER PRO & COSTO-BENEFICIO",
+        provider: "Telmex Infinitum Fibra",
+        speed: "250 – 600 Mbps Simétricos",
         features: [
-            "IP Pública fija para servidores propios",
-            "Incluye Claro Video y Antivirus",
-            "Almacenamiento masivo en la nube",
-            "Baja latencia a precio competitivo"
+            "250 Mbps por $499 o 600 Mbps por $725 MXN/mes",
+            "Claro Drive en la nube y Claro Video incluidos",
+            "Promociones con Netflix / Max en el recibo",
+            "Estabilidad sólida para directos y edición en nube"
         ],
-        price: "$499 – $999",
+        price: "$499 – $725",
         recommendation: "OPCIÓN COSTO-BENEFICIO",
         color: "white",
         icon: <Cloud className="w-8 h-8" />
     },
     {
-        category: "STREAMER CASUAL (REDES SOCIALES)",
-        provider: "Telcel Casa Libre 4",
-        speed: "50 Mbps / 125 GB Datos",
+        category: "STREAMER MÓVIL / EXTERIOR",
+        provider: "Telcel Internet en Casa",
+        speed: "10 – 20 Mbps (Red 4G/5G • 150 GB)",
         features: [
-            "Perfecto para Instagram y TikTok Live",
-            "Incluye Claro Video + Paramount+",
-            "Fácil instalación, solo conecta y transmite",
-            "Movilidad total dentro de tu hogar"
+            "Plan WiFi Telcel 3 a $399 MXN/mes sin cableado",
+            "Ideal para TikTok Live e Instagram desde cualquier punto",
+            "Solo conecta a la luz y transmite al instante",
+            "Planes gama alta hasta $799–$1,399 MXN con más datos"
         ],
-        price: "$499",
+        price: "$399",
         recommendation: "PERFECTO PARA LIVES MÓVILES",
         color: "cyan",
         icon: <Smartphone className="w-8 h-8" />
@@ -71,15 +71,15 @@ const streamerPlans = [
     {
         category: "STREAMER CASUAL (REDES SOCIALES)",
         provider: "Cablecom / Impactel",
-        speed: "Paquetes Estándar",
+        speed: "50 – 100 Mbps Regional",
         features: [
-            "La opción más económica para iniciar",
-            "Suficiente para lives esporádicos en FB",
-            "Internet estable para uso doméstico",
-            "Sin contratos de larga duración"
+            "La opción más económica para iniciar tu canal",
+            "Suficiente para lives en Facebook y Reels en 1080p",
+            "Internet estable para uso doméstico diario",
+            "Sin contratos forzosos de larga duración"
         ],
-        price: "$280",
-        recommendation: "OPCIÓN ECONOMICA",
+        price: "$280 – $500",
+        recommendation: "OPCIÓN ECONÓMICA",
         color: "white",
         icon: <Users className="w-8 h-8" />
     }
@@ -244,7 +244,7 @@ export const StreamerPlans = () => {
                             <Camera className="w-4 h-4 text-neon-cyan" /> Ganador profesional
                         </h4>
                         <p className="text-xs text-slate-400 leading-relaxed">
-                            <span className="text-white font-bold">Totalplay 1200M</span> es la elección definitiva para multitarea y transmisiones simultáneas en 4K/8K.
+                            <span className="text-white font-bold">Totalplay 1000M</span> es la elección definitiva para multitarea y transmisiones simultáneas en 4K/8K por $1,000 MXN.
                         </p>
                     </div>
                     <div className="p-6 rounded-3xl bg-white/5 border border-white/5 group hover:bg-white/10 transition-colors">
@@ -252,7 +252,7 @@ export const StreamerPlans = () => {
                             <Radio className="w-4 h-4 text-neon-magenta" /> Ganador Multimedia
                         </h4>
                         <p className="text-xs text-slate-400 leading-relaxed">
-                            <span className="text-white font-bold">Megacable Streamers</span> equilibra perfectamente costo y estabilidad con beneficios de entretenimiento incluidos.
+                            <span className="text-white font-bold">Megacable Streamers</span> equilibra 500 Mbps simétricos con Xview+ y plataformas incluidas.
                         </p>
                     </div>
                     <div className="p-6 rounded-3xl bg-white/5 border border-white/5 group hover:bg-white/10 transition-colors">
@@ -260,7 +260,7 @@ export const StreamerPlans = () => {
                             <Smartphone className="w-4 h-4 text-white" /> Ganador casual
                         </h4>
                         <p className="text-xs text-slate-400 leading-relaxed">
-                            <span className="text-white font-bold">Telcel Casa Libre</span> permite lives espontáneos con calidad constante sin depender de cableado tradicional.
+                            <span className="text-white font-bold">Telcel Internet en Casa</span> permite transmitir sin depender de fibra ni esperar visita técnica.
                         </p>
                     </div>
                 </div>

@@ -10,13 +10,13 @@ export const Footer = () => {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
                     <div className="md:col-span-2">
                         <div className="flex items-center gap-2 mb-6 cursor-pointer">
-                            <img src="/favicon.svg" alt="FiberGravity Logo" className="w-10 h-10" />
+                            <img src="/favicon.svg" alt="Fiberlink Play Logo" className="w-10 h-10" />
                             <span className="text-2xl font-bold tracking-tighter">
-                                FIBER<span className="text-neon-cyan">GRAVITY</span>
+                                FIBERLINK <span className="text-neon-cyan">PLAY</span>
                             </span>
                         </div>
                         <p className="text-slate-400 max-w-sm mb-6 leading-relaxed text-sm">
-                            El marketplace #1 de telecomunicaciones en Teziutlán. Comparamos proovedores para conectarte con el futuro, sin complicaciones y con asesoría experta.
+                            Tu broker digital #1 de telecomunicaciones en Teziutlán. Comparamos planes reales del mercado para conectarte con el mejor proveedor, sin complicaciones y con asesoría experta.
                         </p>
                         <div className="flex gap-4">
                             {[
@@ -64,11 +64,23 @@ export const Footer = () => {
                 </div>
 
                 <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
-                    <p>© 2026 FiberGravity - Marketplace Digital de Telecomunicaciones. Teziutlán, Puebla.</p>
+                    <p>© 2026 Fiberlink Play - Broker Digital de Telecomunicaciones. Teziutlán, Puebla.</p>
                     <div className="flex gap-6">
                         <a href="/terminos" className="hover:text-white transition-colors">Términos</a>
                         <a href="/cookies" className="hover:text-white transition-colors">Cookies</a>
                     </div>
+                </div>
+
+                <div className="mt-6 pt-6 border-t border-white/5 flex flex-col sm:flex-row justify-center items-center gap-2 text-xs text-slate-500">
+                    <span>Operado y respaldado por</span>
+                    <a
+                        href="https://fiberlinkserviciostic.vercel.app/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-bold text-neon-cyan hover:text-white transition-colors underline underline-offset-4 decoration-neon-cyan/40"
+                    >
+                        Fiberlink Servicios TIC
+                    </a>
                 </div>
             </div>
 

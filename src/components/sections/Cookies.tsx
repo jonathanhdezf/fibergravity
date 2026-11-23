@@ -21,7 +21,7 @@ const cookieTypes = [
     {
         icon: <Settings2 className="w-8 h-8 text-white" />,
         title: "Preferencias",
-        desc: "Recuerdan tu ubicación regional y tus proovedores de interés para ofrecerte una comparativa personalizada.",
+        desc: "Recuerdan tu ubicación regional y tus proveedores de interés para ofrecerte una comparativa personalizada.",
         status: "Opcional"
     }
 ];
@@ -51,7 +51,7 @@ export const CookiesContent = () => {
                         Política de <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-magenta">Cookies</span>
                     </h1>
                     <p className="text-xl text-slate-400 font-light leading-relaxed max-w-2xl">
-                        En FiberGravity utilizamos tecnologías de rastreo mínimo para asegurar que tu experiencia de comparación sea rápida y segura.
+                        En Fiberlink Play utilizamos tecnologías de rastreo mínimo para asegurar que tu experiencia de comparación sea rápida y segura.
                     </p>
                 </div>
 

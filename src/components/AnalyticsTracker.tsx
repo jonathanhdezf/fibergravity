@@ -29,6 +29,10 @@ export const AnalyticsTracker = () => {
             else if (ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
             else if (ua.includes("Linux")) os = "Linux";
 
+            if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+                return;
+            }
+
             try {
                 await supabase.from('site_visits').insert({
                     page_path: pathname,
@@ -37,7 +41,7 @@ export const AnalyticsTracker = () => {
                     browser: browser,
                     os: os,
                     screen_resolution: `${window.screen.width}x${window.screen.height}`,
-                    session_id: window.crypto.randomUUID() // Simple ephemeral session
+                    session_id: window.crypto.randomUUID()
                 });
             } catch (error) {
                 console.error("Analytics Error:", error);

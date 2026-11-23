@@ -164,7 +164,7 @@ export const RealTimeSpeedTestModal = ({ isOpen, onClose }: RealTimeSpeedTestMod
                             <div className="text-center mb-6 md:mb-10">
                                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neon-cyan/30 bg-neon-cyan/10 text-neon-cyan text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] mb-3 md:mb-4">
                                     <Activity className="w-3 md:w-3.5 h-3 md:h-3.5 animate-pulse" />
-                                    FiberGravity UltraCore v6.0
+                                    Fiberlink Play UltraCore v6.0
                                 </div>
                                 <h2 className="text-2xl md:text-5xl font-black italic tracking-tighter mb-1 uppercase text-white">Auditoría <span className="text-neon-cyan drop-shadow-[0_0_10px_#00f3ff]">XGS-PON</span></h2>
                                 <p className="text-slate-500 text-[9px] md:text-sm font-bold uppercase tracking-[0.15em] md:tracking-[0.2em]">Sincronizado con nodos de baja latencia</p>

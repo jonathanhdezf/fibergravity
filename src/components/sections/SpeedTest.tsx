@@ -59,7 +59,7 @@ export const SpeedTest = () => {
                             Auditoría de Conexión
                         </h2>
                         <p className="text-slate-400 text-lg mb-8">
-                            Mide el rendimiento real de tu proovedor actual. Como broker neutral, te ayudamos a auditar si estás recibiendo lo que pagas para recomendarte una alternativa superior si es necesario.
+                            Mide el rendimiento real de tu proveedor actual. Como broker neutral, te ayudamos a auditar si estás recibiendo lo que pagas para recomendarte una alternativa superior si es necesario.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 mb-8">
                             <button

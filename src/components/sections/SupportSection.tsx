@@ -29,7 +29,7 @@ const supportSteps = [
     {
         icon: <ShieldCheck className="w-6 h-6 text-white" />,
         title: "Garantía de Resolución",
-        description: "Si el proovedor no cumple, nuestro equipo técnico local interviene para encontrar una solución."
+        description: "Si el proveedor no cumple, nuestro equipo técnico local interviene para encontrar una solución."
     }
 ];
 
@@ -126,7 +126,7 @@ export const SupportSection = () => {
 
                                 <h3 className="text-3xl font-black mb-4 italic">¿Necesitas ayuda ahora mismo?</h3>
                                 <p className="text-slate-400 mb-8 leading-relaxed text-sm">
-                                    ¿Problemas con tu servicio actual? Escanea el código para hablar con un especialista en conectividad regional. Auditamos tu conexión y gestionamos soluciones inmediatas con el proovedor.
+                                    ¿Problemas con tu servicio actual? Escanea el código para hablar con un especialista en conectividad regional. Auditamos tu conexión y gestionamos soluciones inmediatas con el proveedor.
                                 </p>
 
                                 <div className="p-4 bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 flex flex-col items-center gap-6 group/qr transition-all hover:border-neon-cyan/30">
@@ -141,7 +141,7 @@ export const SupportSection = () => {
                                     </div>
                                     <div className="text-center">
                                         <span className="text-[10px] uppercase font-black text-slate-500 tracking-[0.2em]">Escanea para Soporte</span>
-                                        <div className="text-neon-cyan font-bold mt-1 tracking-widest">01-800-GRAVITY</div>
+                                        <div className="text-neon-cyan font-bold mt-1 tracking-widest">231 102 4672</div>
                                     </div>
                                 </div>
 
@@ -149,7 +149,7 @@ export const SupportSection = () => {
                                     <span className="flex items-center gap-2">
                                         <Zap className="w-3 h-3 text-neon-cyan" /> Latencia de respuesta: 2min
                                     </span>
-                                    <span className="text-neon-magenta">FIBERGRAVITY SUPPORT</span>
+                                    <span className="text-neon-magenta">FIBERLINK PLAY SUPPORT</span>
                                 </div>
                             </div>
                         </GlassCard>

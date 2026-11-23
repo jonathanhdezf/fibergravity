@@ -11,14 +11,14 @@ const gamerPlans = [
     {
         category: "PC / CONSOLA (COMPETITIVO)",
         provider: "Totalplay Gamer",
-        speed: "200 – 1200 Mbps (Hasta 10 Gbps)",
+        speed: "150 – 1,000 Mbps Simétricos",
         features: [
-            "Fibra óptica XGS-PON de última generación",
-            "Ultra baja latencia optimizada para gaming",
-            "Perfecto para streaming y juego competitivo",
-            "Estabilidad de nivel profesional"
+            "Fibra óptica simétrica XGS-PON directa al hogar",
+            "150M desde $460, 250M $560 o 1,000M $1,000 (pronto pago)",
+            "Ultra baja latencia y WiFi 6 / WiFi Pro disponible",
+            "Llamadas ilimitadas MX/EUA/CAN y estabilidad pro"
         ],
-        price: "$460 – $1,470",
+        price: "$460 – $1,000",
         recommendation: "MÁXIMA VELOCIDAD Y ESTABILIDAD",
         color: "cyan",
         icon: <Trophy className="w-8 h-8" />
@@ -26,41 +26,41 @@ const gamerPlans = [
     {
         category: "PC / CONSOLA (COMPETITIVO)",
         provider: "Telmex Infinitum Gamer",
-        speed: "150 Mbps Simétricos",
+        speed: "250 – 500 Mbps Simétricos",
         features: [
-            "IP Pública incluida para mejores partidas",
-            "Baja latencia garantizada",
-            "Soporte especializado para gamers",
-            "Conexión sólida y balanceada"
+            "250 Mbps simétricos por $499 o 500 Mbps por $649 MXN",
+            "IP Pública dinámica y fibra óptica estable",
+            "Claro Video incluido + promos Netflix o Max",
+            "Llamadas ilimitadas y excelente ping nacional"
         ],
-        price: "$499",
-        recommendation: "SÓLIDO Y ECONÓMICO",
+        price: "$499 – $649",
+        recommendation: "MEJOR COSTO-BENEFICIO",
         color: "magenta",
         icon: <Cpu className="w-8 h-8" />
     },
     {
         category: "PC / CONSOLA (COMPETITIVO)",
         provider: "Megacable Gamer",
-        speed: "500 Mbps",
+        speed: "300 – 500 Mbps Simétricos",
         features: [
-            "Velocidad alta y estable",
-            "Incluye suscripción a Netflix",
-            "Excelente balance precio/rendimiento",
-            "Ideal para descargas pesadas"
+            "Fibra simétrica con extensor WiFi en planes altos",
+            "Incluye Xview+ y Amazon Prime / Netflix opcional",
+            "Descuentos por domiciliación y pronto pago",
+            "Ideal para descargas pesadas de Day-0"
         ],
-        price: "$880",
+        price: "$650 – $800",
         color: "white",
         icon: <Zap className="w-8 h-8" />
     },
     {
         category: "GAMER MÓVIL",
         provider: "Telcel COD Mobile Pack",
-        speed: "Velocidad 5G Optimizado",
+        speed: "Red 4.5G / 5G Optimizada",
         features: [
-            "Internet ilimitado por horas para jugar",
-            "Beneficios exclusivos dentro de COD Mobile",
-            "Optimización de señal para redes móviles",
-            "Sin lag en tus partidas fuera de casa"
+            "Paquete I ($30): 2 hrs ilimitadas + 60 COD Points",
+            "Paquete II ($99): 2 hrs ilimitadas + 350 COD Points",
+            "Cajas de recompensa exclusivas y canje directo",
+            "Juega fuera de casa sin gastar tus gigas base"
         ],
         price: "$30 – $99",
         recommendation: "EL REY DEL GAMING MÓVIL",
@@ -70,12 +70,12 @@ const gamerPlans = [
     {
         category: "GAMER CASUAL / FAMILIAR",
         provider: "Impactel / Cablecom",
-        speed: "Paquetes Estándar",
+        speed: "50 – 100 Mbps Estables",
         features: [
-            "Internet estable para uso diario",
-            "Incluye servicios de TV básicos",
-            "La opción más económica del mercado",
-            "Suficiente para juegos no competitivos"
+            "Solo Internet desde $280 MXN/mes",
+            "Dúo Internet + TV básica desde $500 MXN/mes",
+            "La opción regional más económica sin plazos",
+            "Suficiente para juegos casuales y hogar"
         ],
         price: "$280 – $500",
         recommendation: "ECONOMÍA Y HOGAR",
@@ -116,7 +116,7 @@ export const GamerPlans = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         className="text-slate-400 max-w-md text-sm leading-relaxed"
                     >
-                        No todos los Megas son iguales. Hemos auditado las rutas de red de cada proovedor en Teziutlán para recomendarte los planes con el Ping más bajo hacia tus servidores favoritos.
+                        No todos los Megas son iguales. Comparamos las rutas de red y precios vigentes de cada proveedor en Teziutlán para recomendarte el plan con el Ping más bajo.
                     </motion.p>
                 </div>
             </div>

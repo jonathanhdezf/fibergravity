@@ -1,23 +1,44 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Zap, Timer } from "lucide-react";
+
+const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+const COUNTDOWN_STORAGE_KEY = "fiberlink_play_countdown_target_v1";
 
 export const LaunchCountdown = () => {
     const [isMounted, setIsMounted] = useState(false);
 
-    // Fecha objetivo estable
-    const targetDate = useMemo(() => new Date("2026-02-18T00:00:00"), []);
-
     const [timeLeft, setTimeLeft] = useState({
-        days: 0, hours: 0, minutes: 0, seconds: 0
+        days: 7, hours: 0, minutes: 0, seconds: 0
     });
 
     useEffect(() => {
         setIsMounted(true);
+
+        const getOrInitTarget = () => {
+            try {
+                const stored = window.localStorage.getItem(COUNTDOWN_STORAGE_KEY);
+                const now = Date.now();
+                if (stored) {
+                    const parsed = parseInt(stored, 10);
+                    if (!Number.isNaN(parsed) && parsed > now) {
+                        return parsed;
+                    }
+                }
+                const nextTarget = now + ONE_WEEK_MS;
+                window.localStorage.setItem(COUNTDOWN_STORAGE_KEY, String(nextTarget));
+                return nextTarget;
+            } catch {
+                return Date.now() + ONE_WEEK_MS;
+            }
+        };
+
+        const targetTime = getOrInitTarget();
+
         const calculateTimeLeft = () => {
-            const difference = +targetDate - +new Date();
+            const difference = targetTime - Date.now();
             if (difference > 0) {
                 return {
                     days: Math.floor(difference / (1000 * 60 * 60 * 24)),
@@ -29,10 +50,10 @@ export const LaunchCountdown = () => {
             return { days: 0, hours: 0, minutes: 0, seconds: 0 };
         };
 
-        const timer = setInterval(() => setTimeLeft(calculateTimeLeft()), 1000);
         setTimeLeft(calculateTimeLeft());
+        const timer = setInterval(() => setTimeLeft(calculateTimeLeft()), 1000);
         return () => clearInterval(timer);
-    }, [targetDate]);
+    }, []);
 
     const TimeUnit = ({ value, label, isSeconds = false }: { value: number; label: string; isSeconds?: boolean }) => {
         return (
@@ -81,7 +102,7 @@ export const LaunchCountdown = () => {
                         className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/[0.03] border border-white/10 mb-10"
                     >
                         <div className="w-2 h-2 rounded-full bg-neon-cyan animate-pulse" />
-                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-cyan-400">Sincronización v3.0</span>
+                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-cyan-400">Lanzamiento Fiberlink Play • 7 Días</span>
                     </motion.div>
 
                     <motion.h2
@@ -100,7 +121,7 @@ export const LaunchCountdown = () => {
                         viewport={{ once: true }}
                         className="text-slate-400 text-[10px] md:text-lg max-w-xl mb-20 uppercase font-bold tracking-[0.2em] leading-relaxed opacity-70"
                     >
-                        Estamos orquestando el despliegue de infraestructura.
+                        Activa promociones de lanzamiento en nuestra semana inaugural de Broker Digital.
                     </motion.p>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-14 mb-24">

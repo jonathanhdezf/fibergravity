@@ -9,89 +9,89 @@ import { useModal } from "../ModalProvider";
 
 const enterprisePlans = [
     {
-        category: "CORPORATIVOS / EMPRESAS GRANDES",
+        category: "PYMES / COMERCIOS Y RESTAURANTES",
         provider: "Totalplay Negocios",
-        speed: "150 – 250 Mbps Simétricos",
+        speed: "100 – 350 Mbps Simétricos",
         features: [
-            "Fibra XGS-PON con Internet Seguro",
-            "Página web y Tienda en línea incluida",
-            "Gestión en la nube y WiFi Pro",
-            "Infraestructura digital completa"
+            "Fibra XGS-PON con 2 líneas telefónicas físicas",
+            "Facturación electrónica ilimitada y nube incluidas",
+            "Creador de página web y tienda en línea",
+            "Soluciones para TPV, cámaras y WiFi seguro"
         ],
-        price: "$450 – $650",
-        recommendation: "INFRAESTRUCTURA TOTAL",
+        price: "$420 – $660",
+        recommendation: "INFRAESTRUCTURA TOTAL PYME",
         color: "cyan",
         icon: <Building2 className="w-8 h-8" />
     },
     {
-        category: "CORPORATIVOS / EMPRESAS GRANDES",
-        provider: "Telmex Negocios",
-        speed: "80 – 150 Mbps Infinitum",
+        category: "CORPORATIVOS / OFICINAS",
+        provider: "Telmex Infinitum Negocio",
+        speed: "150 – 1,000 Mbps Fibra",
         features: [
-            "Telefonía ilimitada y Correo Empresarial",
-            "Publicidad en Sección Amarilla",
-            "Antivirus y Almacenamiento en la Nube",
-            "Netflix, Disney+ y HBO Max Premium"
+            "Telefonía comercial ilimitada MX/EUA/CAN",
+            "ADM Factura, Claro Drive y correo empresarial",
+            "Presencia en Google My Business y Seguridad Web",
+            "Escalabilidad desde $460 hasta 1 Gbps ($2,289)"
         ],
-        price: "$399 – $549",
+        price: "$460 – $2,289",
         recommendation: "ESTABILIDAD Y VALOR AGREGADO",
         color: "white",
         icon: <Shield className="w-8 h-8" />
     },
     {
-        category: "PyMEs / OFICINAS PEQUEÑAS",
+        category: "PYMES / OFICINAS EN CRECIMIENTO",
         provider: "Megacable Empresas",
-        speed: "100 – 300 Mbps Simétricos",
+        speed: "200 – 1,000 Mbps Simétricos",
         features: [
-            "Dominio web y Cuentas de correo ilimitadas",
-            "Módulo de Facturación Electrónica",
-            "Telefonía fija ilimitada + Protección",
-            "Equilibrio perfecto precio/rendimiento"
+            "Fibra simétrica + telefonía ilimitada MX y EUA",
+            "Televisión Xview+ ideal para salas de espera",
+            "Servicios Cloud, dominios web y respaldo",
+            "Descuentos corporativos por domiciliación"
         ],
-        price: "$350 – $550",
+        price: "$350 – $1,000",
         recommendation: "IDEAL PARA CRECIMIENTO",
         color: "cyan",
         icon: <BarChart3 className="w-8 h-8" />
     },
     {
-        category: "PyMEs / OFICINAS PEQUEÑAS",
-        provider: "Cablecom Empresas",
-        speed: "100 – 300 Mbps Estables",
+        category: "COMERCIOS / SALAS DE ESPERA",
+        provider: "izzi Negocios + TV+",
+        speed: "100 – 200 Mbps Estables",
         features: [
-            "Combo Internet + TV Corporativa",
-            "Facturación electrónica incluida",
-            "Cuentas de correo empresarial",
-            "Telefonía fija de alto rendimiento"
+            "Combo Internet + 100 a 200+ canales HD",
+            "Ideal para consultorios, hoteles y restaurantes",
+            "Telefonía fija ilimitada y apps de streaming",
+            "Promociones de primer mes y facturación fiscal"
         ],
-        price: "$350 – $550",
-        recommendation: "SOLUCIÓN COMPETITIVA PyME",
+        price: "$499 – $720",
+        recommendation: "SOLUCIÓN COMERCIAL CON TV",
         color: "white",
         icon: <Briefcase className="w-8 h-8" />
     },
     {
         category: "MOVILIDAD Y LOGÍSTICA",
         provider: "Telcel Internet Empresa",
-        speed: "Planes 2GB – 60GB 5G",
+        speed: "Planes 4G / 5G Corporativos",
         features: [
-            "Movilidad total para equipos en campo",
-            "Redes sociales ilimitadas para ventas",
-            "Conexión constante en movimiento",
-            "Planes flexibles según necesidad"
+            "Movilidad total para fuerza de ventas en campo",
+            "Redes sociales y WhatsApp ilimitados",
+            "Control de flotillas y conectividad en ruta",
+            "Planes flexibles según volumen de datos"
         ],
-        price: "$149 – $1,219",
+        price: "$199 – $1,219",
         recommendation: "LÍDER EN MOVILIDAD",
         color: "cyan",
         icon: <Truck className="w-8 h-8" />
     },
     {
-        category: "BAJO PRESUPUESTO",
-        provider: "Impactel Negocios",
-        speed: "Internet + TV Básico",
+        category: "BAJO PRESUPUESTO LOCAL",
+        provider: "Impactel / Cablecom Negocios",
+        speed: "50 – 100 Mbps Regional",
         features: [
-            "La inversión más baja del mercado",
-            "Ideal para oficinas con bajo consumo",
-            "Conexión básica funcional 24/7",
-            "Sin cargos extras por servicios pro"
+            "La inversión más baja del mercado local",
+            "Ideal para puntos de venta y comercios chicos",
+            "Conexión funcional 24/7 sin plazos forzosos",
+            "Atención técnica directa en Teziutlán"
         ],
         price: "$280 – $500",
         recommendation: "ECONOMÍA EMPRESARIAL",

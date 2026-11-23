@@ -17,7 +17,7 @@ const SpeedTestTrigger = () => {
             onClick={openSpeedTestModal}
         >
             <Gauge className="w-5 h-5 mr-3" />
-            Iniciar Auditoría FiberGravity
+            Iniciar Auditoría Fiberlink Play
         </NeonButton>
     );
 };
@@ -46,7 +46,7 @@ export default function MedidorVelocidadPage() {
                             <span className="text-neon-cyan drop-shadow-[0_0_15px_#00f3ff]">XGS-PON</span> CERTIFICADA
                         </h1>
                         <p className="text-slate-400 max-w-3xl mx-auto text-lg md:text-xl font-medium leading-relaxed mb-10">
-                            En FiberGravity la transparencia es nuestro pilar. No vendemos "hasta" cierta velocidad; entregamos el rendimiento técnico que tu vida digital exige.
+                            En Fiberlink Play la transparencia es nuestro pilar. No vendemos "hasta" cierta velocidad; evaluamos el rendimiento técnico real que tu vida digital exige.
                         </p>
 
                         <div className="flex justify-center">

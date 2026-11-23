@@ -130,7 +130,7 @@ export const Hero = () => {
                     </h1>
 
                     <p className="text-lg text-slate-400 mb-10 max-w-lg leading-relaxed border-l-2 border-white/5 pl-6">
-                        Comparador claro y confiable de planes de <span className="text-white font-bold">internet + TV</span> en Teziutlán.
+                        Tu broker digital para comparar y contratar planes reales de <span className="text-white font-bold">internet + TV</span> en Teziutlán.
                     </p>
 
                     <div className="flex flex-wrap gap-6 items-center">
@@ -219,7 +219,7 @@ export const Hero = () => {
                                         {/* Status Header */}
                                         <div className="flex flex-col items-center gap-2">
                                             <div className="flex gap-1 text-[8px] font-black text-neon-cyan uppercase tracking-[0.4em]">
-                                                <span className="animate-pulse">●</span> FiberGravity
+                                                <span className="animate-pulse">●</span> Fiberlink Play
                                             </div>
                                             <div className="w-12 h-[2px] bg-gradient-to-r from-transparent via-neon-cyan to-transparent" />
                                         </div>
@@ -230,7 +230,7 @@ export const Hero = () => {
                                             transition={{ duration: 4, repeat: Infinity }}
                                             className="w-24 h-24 rounded-3xl bg-gradient-to-br from-slate-900 to-black border border-white/10 flex items-center justify-center shadow-inner group-hover:border-neon-cyan transition-colors"
                                         >
-                                            <img src="/favicon.svg" alt="FiberGravity Icon" className="w-16 h-16" />
+                                            <img src="/favicon.svg" alt="Fiberlink Play Icon" className="w-16 h-16" />
                                         </motion.div>
 
                                         {/* Data Oscilloscope Layout */}

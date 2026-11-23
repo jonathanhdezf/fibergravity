@@ -15,7 +15,7 @@ const downloadCategories = [
         icon: <FileText className="w-8 h-8 text-neon-cyan" />,
         items: [
             { name: "Contrato de Adhesión Totalplay", size: "1.2 MB", type: "PDF" },
-            { name: "Términos y Condiciones FiberGravity", size: "850 KB", type: "PDF" },
+            { name: "Términos y Condiciones Fiberlink Play", size: "850 KB", type: "PDF" },
             { name: "Aviso de Privacidad Integral", size: "450 KB", type: "PDF" },
             { name: "Políticas de Uso Justo", size: "620 KB", type: "PDF" }
         ]

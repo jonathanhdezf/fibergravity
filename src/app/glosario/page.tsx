@@ -52,7 +52,7 @@ export default function GlossaryPage() {
         },
         {
             term: "ISP",
-            definition: "Internet Service Provider (Proveedor de Servicios de Internet). Es la compañía (como FiberGravity) que te brinda acceso a internet.",
+            definition: "Internet Service Provider (Proveedor de Servicios de Internet). Es la compañía (como Totalplay, Telmex o Megacable) que te brinda acceso a internet, comparada en Fiberlink Play.",
             icon: <Globe className="w-6 h-6 text-neon-purple" />,
             category: "Entidad"
         },
@@ -94,7 +94,7 @@ export default function GlossaryPage() {
                         transition={{ delay: 0.1 }}
                         className="text-5xl md:text-7xl font-black mb-6 tracking-tighter italic"
                     >
-                        GLOSARIO <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-blue-600 pr-2">FIBERGRAVITY</span>
+                        GLOSARIO <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-blue-600 pr-2">FIBERLINK PLAY</span>
                     </motion.h1>
 
                     <motion.p

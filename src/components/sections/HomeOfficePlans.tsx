@@ -10,15 +10,15 @@ import { useModal } from "../ModalProvider";
 const homeOfficePlans = [
     {
         category: "HOME OFFICE PROFESIONAL (ZOOM / MULTITAREA)",
-        provider: "Totalplay Business",
-        speed: "200 – 500 Mbps (Fibra XGS-PON)",
+        provider: "Totalplay Home & Business",
+        speed: "150 – 350 Mbps Simétricos",
         features: [
-            "Velocidad Simétrica para videollamadas 4K",
-            "WiFi Pro con cobertura extendida",
-            "Llamadas ilimitadas para tu negocio",
-            "Estabilidad máxima para trabajo 24/7"
+            "150M $460, 250M $560 o 350M $660 MXN (pronto pago)",
+            "Velocidad simétrica para videollamadas 4K y VPN",
+            "Llamadas ilimitadas MX/EUA/CAN incluidas",
+            "WiFi Pro con cobertura extendida para oficina en casa"
         ],
-        price: "$460 – $680",
+        price: "$460 – $660",
         recommendation: "MÁXIMA ESTABILIDAD Y VELOCIDAD",
         color: "cyan",
         icon: <Video className="w-8 h-8" />
@@ -26,44 +26,44 @@ const homeOfficePlans = [
     {
         category: "HOME OFFICE PROFESIONAL (ZOOM / MULTITAREA)",
         provider: "Megacable Pro-Work",
-        speed: "300 – 500 Mbps Simétricos",
+        speed: "200 – 500 Mbps Simétricos",
         features: [
-            "Ideal para diseño y transferencia de archivos",
-            "Transmisión fluida sin interrupciones",
-            "Incluye XVIEW+ y suscripción a Netflix",
-            "Priorización de datos para productividad"
+            "Doble Pack 200M desde $350–$400 o 500M hasta $800",
+            "Ideal para diseño, nube y archivos pesados",
+            "Xview+ y plataformas de streaming en Triple Pack",
+            "Descuento adicional domiciliando tu tarjeta"
         ],
-        price: "$680 – $880",
+        price: "$400 – $800",
         recommendation: "PERFECTO PARA DISEÑO Y VIDEO",
         color: "white",
         icon: <Layout className="w-8 h-8" />
     },
     {
-        category: "HOME OFFICE PROFESIONAL (ZOOM / MULTITAREA)",
+        category: "HOME OFFICE CONFIABLE",
         provider: "Telmex Infinitum Office",
-        speed: "100 Mbps Estables",
+        speed: "120 – 350 Mbps Simétricos",
         features: [
-            "Telefonía ilimitada incluida",
-            "Netflix, Disney+ y HBO Max Premium",
-            "Confiabilidad líder en el mercado",
-            "Resolución de incidencias priorizada"
+            "Desde $389 (120–200M) hasta $599 MXN (350M)",
+            "Solo internet disponible desde $349 MXN/mes",
+            "Claro Drive 100 GB + telefonía fija ilimitada",
+            "Cobertura consolidada y atención prioritaria"
         ],
-        price: "$435 – $499",
-        recommendation: "CONFIABILIDAD Y ENTRETENIMIENTO",
+        price: "$349 – $599",
+        recommendation: "CONFIABILIDAD Y PRECIO FIJO",
         color: "cyan",
         icon: <Shield className="w-8 h-8" />
     },
     {
-        category: "HOME OFFICE BALANCEADO (ADMINISTRATIVO)",
-        provider: "Telcel Casa Freelance",
-        speed: "50 Mbps / 125 GB de Datos",
+        category: "HOME OFFICE MOVILIDAD / RESPALDO",
+        provider: "Telcel Internet en Casa",
+        speed: "10 – 20 Mbps (150 GB • Red 4G/5G)",
         features: [
-            "Conexión inalámbrica instantánea",
-            "Sin necesidad de instalación técnica",
-            "Claro Video + Paramount+ incluido",
-            "Ideal para gestión administrativa"
+            "Conexión inalámbrica instantánea sin visita técnica",
+            "Plan WiFi Telcel 3 a $399 MXN o Gama Alta $799",
+            "Respaldo perfecto ante cortes de fibra en tu zona",
+            "Opciones prepago Amigo desde $200 MXN"
         ],
-        price: "$499",
+        price: "$399 – $799",
         recommendation: "CONEXIÓN RÁPIDA SIN CABLES",
         color: "white",
         icon: <Smartphone className="w-8 h-8" />
@@ -71,14 +71,14 @@ const homeOfficePlans = [
     {
         category: "HOME OFFICE BÁSICO (TRABAJO LIGERO)",
         provider: "Cablecom / Impactel",
-        speed: "Paquetes Esenciales",
+        speed: "50 – 100 Mbps Regional",
         features: [
-            "La solución más económica del catálogo",
-            "Internet estable + TV para el hogar",
-            "Perfecto para correos y navegación",
-            "Suficiente para videollamadas ocasionales"
+            "La solución más económica del catálogo ($280–$500)",
+            "Internet estable + TV opcional para el hogar",
+            "Perfecto para correos, ERP y juntas en Meet/Teams",
+            "Sin plazos forzosos y atención local directa"
         ],
-        price: "$280",
+        price: "$280 – $500",
         recommendation: "ECONOMÍA Y PRODUCTIVIDAD",
         color: "cyan",
         icon: <Globe className="w-8 h-8" />
@@ -244,7 +244,7 @@ export const HomeOfficePlans = () => {
                             <Video className="w-4 h-4 text-neon-cyan" /> Ganador profesional
                         </h4>
                         <p className="text-xs text-slate-400 leading-relaxed">
-                            <span className="text-white font-bold">Totalplay Business</span> ofrece la simetría necesaria para videollamadas fluidas y estabilidad corporativa.
+                            <span className="text-white font-bold">Totalplay Home & Business</span> ofrece simetría XGS-PON para videollamadas fluidas desde $460 MXN.
                         </p>
                     </div>
                     <div className="p-6 rounded-3xl bg-white/5 border border-white/5 group hover:bg-white/10 transition-colors">
@@ -252,7 +252,7 @@ export const HomeOfficePlans = () => {
                             <Smartphone className="w-4 h-4 text-white" /> Ganador Balanceado
                         </h4>
                         <p className="text-xs text-slate-400 leading-relaxed">
-                            <span className="text-white font-bold">Telcel Freelance</span> es la mejor opción para departamentos sin fibra o trabajadores en movimiento constante.
+                            <span className="text-white font-bold">Telcel Internet en Casa</span> es ideal para zonas sin fibra o como respaldo inmediato desde $399 MXN.
                         </p>
                     </div>
                     <div className="p-6 rounded-3xl bg-white/5 border border-white/5 group hover:bg-white/10 transition-colors">

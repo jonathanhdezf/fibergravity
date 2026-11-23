@@ -81,7 +81,7 @@ export const Privacy = () => {
                         viewport={{ once: true }}
                         className="text-xl text-slate-400 leading-relaxed font-light"
                     >
-                        Como broker digital, en <span className="text-white font-bold italic">FiberGravity</span> actuamos como tu escudo. Tu información solo fluye hacia el proveedor que tú elijas bajo los más altos estándares de encriptación y transparencia.
+                        Como broker digital, en <span className="text-white font-bold italic">Fiberlink Play</span> actuamos como tu escudo. Tu información solo fluye hacia el proveedor que tú elijas bajo los más altos estándares de encriptación y transparencia.
                     </motion.p>
                 </div>
 

@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Wifi, Monitor, Cpu, Briefcase, Tv, Star, Shield, ArrowRight, Smartphone, MapPin, User, CheckCircle2 } from "lucide-react";
 import { NeonButton } from "./NeonButton";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
 import toast from "react-hot-toast";
 
 export type PlanCategory = "Streamer" | "HomeOffice" | "Enterprise" | "TV";
@@ -16,79 +15,137 @@ interface CategoryModalProps {
     providerName: string;
 }
 
-const providerData: any = {
-    "Totalplay Doble Play": {
-        plans: {
-            TV: [
-                { name: "Totalplay Doble Play 150", speed: "150 Mbps (Simétrico)", type: "Internet + TV", price: "$450", features: ["Televisión HD", "WiFi Pro Incluido", "Telefonía Ilimitada", "Fibra XGS-PON"] },
-                { name: "Totalplay Doble Play 250", speed: "250 Mbps (Simétrico)", type: "Internet + TV", price: "$650", features: ["Televisión HD Plus", "Prioridad Gaming", "WiFi Pro Gama Alta", "Fibra XGS-PON"] },
-            ]
-        }
-    },
-    "Megacable Doble Play": {
-        plans: {
-            TV: [
-                { name: "Megacable 300 MB", speed: "300 Mbps (Simétrico)", type: "Internet + TV", price: "$680", features: ["XVIEW+ Incluido", "Suscripción Netflix", "Internet Simétrico", "Telefonía Fija"] },
-                { name: "Megacable 500 MB", speed: "500 Mbps (Simétrico)", type: "Internet + TV", price: "$880", features: ["XVIEW+ Premium", "Netflix Incluido", "Velocidad Extrema", "Soporte Prioritario"] },
-            ]
-        }
-    },
-    "Telmex Infinitum + TV": {
-        plans: {
-            TV: [
-                { name: "Infinitum 80 MB", speed: "80 Mbps", type: "Internet + TV", price: "$399", features: ["Claro Video Gratis", "Netflix Incluido", "Disney+ opcional", "Línea Telmex"] },
-                { name: "Infinitum 150 MB", speed: "150 Mbps", type: "Internet + TV", price: "$549", features: ["Claro Video Gratis", "Netflix + Disney+", "HBO Max Incluido", "Línea Telmex"] },
-            ]
-        }
-    },
-    "izzi 150 Megas + TV+": {
-        plans: {
-            TV: [
-                { name: "izzi tv+ 150", speed: "150 Mbps", type: "Internet + TV", price: "$720", features: ["izzi tv+ incluido", "Televisión Digital", "Netflix Opcional", "App izzi go"] },
-            ]
-        }
-    },
-    "Cablecom Estándar": {
-        plans: {
-            TV: [
-                { name: "Combo Esencial 100", speed: "100 Mbps", type: "Internet + TV", price: "$350", features: ["TV Básica Digital", "Internet Fiable", "Telefonía Incluida", "Soporte en Sitio"] },
-                { name: "Combo Plus 300", speed: "300 Mbps", type: "Internet + TV", price: "$550", features: ["TV Premium HD", "Internet Alta Velocidad", "Módem Dual Band", "SLA Residencial"] },
-            ]
-        }
-    },
+const providerData: Record<string, { plans: Partial<Record<PlanCategory, { name: string; speed: string; type: string; price: string; features: string[] }[]>> }> = {
     Totalplay: {
         plans: {
             Streamer: [
-                { name: "Plan Simétrico 150", speed: "150 MB", type: "Internet Simétrico", price: "$569", features: ["12 Meses de descuento", "Club Totalplay", "Wifi 6"] },
-                { name: "Plan Simétrico 300", speed: "300 MB", type: "Internet Simétrico", price: "$689", features: ["Ideal para 4K", "Prioridad Gamer", "Wifi 6"] },
+                { name: "Totalplay 500 Megas", speed: "500 Mbps Simétricos", type: "Fibra XGS-PON", price: "$860", features: ["Pronto pago mensual", "Subida 500 Mbps", "WiFi 6 incluido"] },
+                { name: "Totalplay 1,000 Megas", speed: "1,000 Mbps Simétricos", type: "Fibra XGS-PON", price: "$1,000", features: ["1 Gbps simétrico", "Ideal 4K/8K OBS", "WiFi Pro disponible"] },
             ],
             HomeOffice: [
-                { name: "Productividad 500", speed: "500 MB", type: "Fibra Profesional", price: "$859", features: ["Soporte Premium", "Antivirus incluido", "IP Dinámica"] },
+                { name: "Totalplay Simétrico 150", speed: "150 Mbps Simétricos", type: "Internet + Telefonía", price: "$460", features: ["Pronto pago", "Llamadas ilimitadas", "Estabilidad Zoom/Teams"] },
+                { name: "Totalplay Simétrico 250", speed: "250 Mbps Simétricos", type: "Fibra Profesional", price: "$560", features: ["Subida rápida nube", "WiFi Pro opcional", "Apps streaming promo"] },
+                { name: "Totalplay Simétrico 350", speed: "350 Mbps Simétricos", type: "Fibra Profesional", price: "$660", features: ["Multitarea intensiva", "Cobertura extendida", "Soporte 24/7"] },
             ],
             Enterprise: [
-                { name: "Empresarial 1000", speed: "1 GB", type: "Fibra Dedicada", price: "$1,299", features: ["SLA 99.9%", "IP Fija disponible", "Soporte 24/7"] },
+                { name: "Negocios Esencial 100", speed: "100 Mbps Simétricos", type: "Fibra Negocios", price: "$420", features: ["2 líneas telefónicas", "Facturación ilimitada", "Página web incluida"] },
+                { name: "Negocios Pro 250", speed: "250 Mbps Simétricos", type: "Fibra Negocios", price: "$560", features: ["Tienda en línea", "Nube y TPV estables", "WiFi Seguro"] },
+                { name: "Negocios Max 350", speed: "350 Mbps Simétricos", type: "Fibra Empresarial", price: "$660", features: ["Alta concurrencia", "Soporte comercial", "Escalable a Dedicado"] },
             ],
             TV: [
-                { name: "Plan TV Plus", speed: "250 MB", type: "Internet + TV", price: "$729", features: ["140 Canales", "App Totalplay", "4K HDR"] },
+                { name: "Triple Play 150 + TV", speed: "150 Mbps + 80 Canales", type: "Internet + TV 4K", price: "$718", features: ["Decodificador 4K", "App Totalplay TV", "Telefonía ilimitada"] },
+                { name: "Triple Play 250 + TV", speed: "250 Mbps + TV HD", type: "Internet + TV 4K", price: "$779", features: ["WiFi Pro incluido", "Add-on Netflix/Max", "Pronto pago"] },
+                { name: "Triple Play 500 + TV", speed: "500 Mbps + TV Premium", type: "Internet + TV 4K", price: "$999", features: ["Hasta 280 canales", "Simetría total", "Multi-dispositivo"] },
             ]
         }
     },
     Megacable: {
         plans: {
             Streamer: [
-                { name: "Internet Ilimitado 100", speed: "100 MB", type: "Fibra Óptica", price: "$450", features: ["Hbo Max Incluido", "Módem Dual Band"] },
-                { name: "Internet Ilimitado 200", speed: "200 MB", type: "Fibra Óptica", price: "$550", features: ["Paramount+ Incluido", "Módem Dual Band"] },
+                { name: "MEGA Fibra 300", speed: "300 Mbps Simétricos", type: "Fibra Óptica", price: "$650", features: ["Xview+ incluido", "Subida simétrica", "Domiciliación promo"] },
+                { name: "MEGA Fibra 500", speed: "500 Mbps Simétricos", type: "Fibra Óptica", price: "$730", features: ["Extensor WiFi", "Amazon Prime / Max", "Bitrate 4K estable"] },
+            ],
+            HomeOffice: [
+                { name: "Doble Pack 200", speed: "200 Mbps Simétricos", type: "Internet + Telefonía", price: "$400", features: ["Tarifa domiciliada", "Llamadas ilimitadas", "Estabilidad Zoom"] },
+                { name: "MEGA Pro-Work 500", speed: "500 Mbps Simétricos", type: "Fibra Simétrica", price: "$800", features: ["Extensor WiFi Mesh", "Xview+ incluido", "Transferencia rápida"] },
+            ],
+            Enterprise: [
+                { name: "MEGA Empresas 200", speed: "200 Mbps Simétricos", type: "Fibra PyME", price: "$450", features: ["Telefonía MX/EUA", "Xview+ sala de espera", "Soporte comercial"] },
+                { name: "MEGA Empresas 1000", speed: "1,000 Mbps Simétricos", type: "Fibra Corporativa", price: "$1,000", features: ["Dominio y Cloud", "Mesh empresarial", "Máximo ancho de banda"] },
             ],
             TV: [
-                { name: "Tríple Clásico", speed: "150 MB", type: "Internet + TV + Telef", price: "$650", features: ["80 Canales HD", "Xview+ Incluido"] },
+                { name: "Triple Pack 200 + Xview+", speed: "200 Mbps + 80 Canales", type: "Internet + TV + Tel", price: "$430", features: ["Promo domiciliada", "Xview+ interactivo", "Amazon Prime promo"] },
+                { name: "Triple Pack 500 + Xview+", speed: "500 Mbps + TV HD", type: "Internet + TV + Tel", price: "$800", features: ["Netflix / Max opcional", "Extensor WiFi", "Fibra simétrica"] },
             ]
         }
     },
-    "Impactel TV & Internet": {
+    Telmex: {
         plans: {
+            Streamer: [
+                { name: "Infinitum 250 Simétrico", speed: "250 Mbps Simétricos", type: "Fibra Óptica", price: "$499", features: ["Claro Video gratis", "Claro Drive 100 GB", "Estabilidad OBS"] },
+                { name: "Infinitum 600 Simétrico", speed: "600 Mbps Simétricos", type: "Fibra Óptica", price: "$725", features: ["Subida 600 Mbps", "Promos Netflix/Max", "Llamadas ilimitadas"] },
+            ],
+            HomeOffice: [
+                { name: "Solo Internet 100", speed: "100 Mbps Fibra", type: "Solo Internet", price: "$349", features: ["Sin línea fija", "Precio fijo mensual", "Ideal trabajo remoto"] },
+                { name: "Infinitum 200 + Tel", speed: "120–200 Mbps Fibra", type: "Internet + Telefonía", price: "$389", features: ["Llamadas ilimitadas", "Claro Video incluido", "Cobertura nacional"] },
+                { name: "Infinitum 350 Simétrico", speed: "350 Mbps Simétricos", type: "Internet + Telefonía", price: "$599", features: ["Videollamadas 4K", "Claro Drive 100 GB", "Antivirus incluido"] },
+            ],
+            Enterprise: [
+                { name: "Infinitum Negocio 150", speed: "150 Mbps Fibra", type: "PyME / Comercio", price: "$460", features: ["ADM Factura", "Claro Drive respaldo", "Correo comercial"] },
+                { name: "Infinitum Negocio 1000", speed: "1,000 Mbps Fibra", type: "Corporativo", price: "$2,289", features: ["Múltiples líneas", "Google My Business", "Seguridad avanzada"] },
+            ],
             TV: [
-                { name: "Solo Internet", speed: "50 Mbps", type: "Internet", price: "$280", features: ["Señal regional estable", "100+ Canales", "Soporte local", "Sin plazos forzosos"] },
-                { name: "TV + Internet", speed: "50 Mbps", type: "Internet + TV", price: "$500", features: ["Navegación Estable", "100+ Canales", "Hasta 4 TV", "Servicio Residencial"] }
+                { name: "Infinitum 150 + Claro Video", speed: "150 Mbps Simétricos", type: "Internet + Streaming", price: "$435", features: ["Claro Video incluido", "Agrega Netflix o Max", "Telefonía ilimitada"] },
+                { name: "Infinitum 250 + Streaming", speed: "250 Mbps Simétricos", type: "Internet + Streaming", price: "$499", features: ["Ideal Smart TV 4K", "Disney+ / Max en recibo", "Fibra directa"] },
+            ]
+        }
+    },
+    izzi: {
+        plans: {
+            Enterprise: [
+                { name: "izzi Negocios 100 + TV", speed: "100 Mbps + 100 Canales", type: "Internet + TV", price: "$499", features: ["Ideal sala de espera", "ViX Premium incluido", "Telefonía ilimitada"] },
+                { name: "izzi Negocios 200 + TV+", speed: "200 Mbps + 200 Canales", type: "Internet + TV", price: "$720", features: ["Max y Disney+ promo", "App izzi go", "Facturación fiscal"] },
+            ],
+            TV: [
+                { name: "izzi 100 + izzi tv+", speed: "100 Mbps + 100 Canales", type: "Internet + TV + Tel", price: "$579", features: ["ViX Premium", "Max / Apple TV promo", "Primer mes promo"] },
+                { name: "izzi 150 + izzi tv+", speed: "150 Mbps + 200 Canales", type: "Internet + TV + Tel", price: "$639", features: ["Disney+ y Max 12m", "App izzi go móvil", "Llamadas ilimitadas"] },
+                { name: "izzi 200 + izzi tv+", speed: "200 Mbps + 200 Canales", type: "Internet + TV + Tel", price: "$720", features: ["200+ canales HD", "Streaming incluido", "Opción izzi móvil"] },
+            ]
+        }
+    },
+    Telcel: {
+        plans: {
+            Streamer: [
+                { name: "WiFi Telcel 3", speed: "10–20 Mbps (150 GB PUJ)", type: "Internet Inalámbrico", price: "$399", features: ["Sin instalación fija", "Conecta a la luz", "Red 4G/5G Telcel"] },
+                { name: "WiFi Telcel 7", speed: "Alta Velocidad 4G/5G", type: "Internet Inalámbrico", price: "$799", features: ["Mayor cuota de datos", "Ideal lives en exterior", "Portabilidad en casa"] },
+            ],
+            HomeOffice: [
+                { name: "WiFi Telcel 3 (Respaldo)", speed: "10–20 Mbps (150 GB PUJ)", type: "Internet en Casa", price: "$399", features: ["Plug & Play inmediato", "Ideal sin cobertura fibra", "Renta mensual fija"] },
+                { name: "Amigo Internet Casa", speed: "Prepago (30 GB+)", type: "Sin Plazos", price: "$200", features: ["Recarga cuando quieras", "Sin contrato forzoso", "Movilidad inmediata"] },
+            ],
+            Enterprise: [
+                { name: "Telcel Empresa Base", speed: "Datos 4G/5G + Redes", type: "Plan Corporativo", price: "$199", features: ["WhatsApp y llamadas", "Ideal vendedores", "Control de gasto"] },
+                { name: "Telcel Empresa Pro 5G", speed: "Alto Volumen 5G", type: "Plan Corporativo", price: "$1,219", features: ["Datos masivos 5G", "Roaming EUA/CAN", "Soporte flotillas"] },
+            ]
+        }
+    },
+    Cablecom: {
+        plans: {
+            Streamer: [
+                { name: "Regional Esencial 50", speed: "50 Mbps Estables", type: "Internet Regional", price: "$280", features: ["El más económico", "Sin plazos forzosos", "Atención en Teziutlán"] },
+                { name: "Regional Plus 100", speed: "100 Mbps Estables", type: "Internet Regional", price: "$500", features: ["Lives en 1080p", "Incluye TV básica", "Soporte local rápido"] },
+            ],
+            HomeOffice: [
+                { name: "Oficina Esencial 50", speed: "50 Mbps Estables", type: "Internet Regional", price: "$280", features: ["Correos y Meet", "Precio más bajo", "Sin plazos forzosos"] },
+                { name: "Oficina Dúo 100", speed: "100 Mbps + TV", type: "Internet + TV", price: "$500", features: ["Estabilidad regional", "Módem Dual Band", "Técnicos locales"] },
+            ],
+            Enterprise: [
+                { name: "Comercio Local 50", speed: "50 Mbps Estables", type: "Internet Negocio", price: "$280", features: ["Ideal punto de venta", "Mínima inversión", "Soporte en sitio"] },
+                { name: "PyME Regional 100", speed: "100 Mbps + TV", type: "Internet + TV", price: "$500", features: ["Hasta 4 TVs locales", "Sin cargos ocultos", "Atención directa"] },
+            ],
+            TV: [
+                { name: "Combo Esencial 100", speed: "100 Mbps + TV Digital", type: "Internet + TV", price: "$350", features: ["TV Básica Digital", "Telefonía incluida", "Soporte local"] },
+                { name: "Combo Plus 300", speed: "300 Mbps + TV HD", type: "Internet + TV", price: "$550", features: ["TV Premium HD", "Módem Dual Band", "Alta capacidad"] },
+            ]
+        }
+    },
+    Impactel: {
+        plans: {
+            Streamer: [
+                { name: "Solo Internet Impactel", speed: "50 Mbps Regional", type: "Internet Local", price: "$280", features: ["El más accesible", "Sin plazos forzosos", "Cobertura Teziutlán"] },
+                { name: "Combo Impactel 100", speed: "100 Mbps + TV", type: "Internet + TV", price: "$500", features: ["100+ canales locales", "Hasta 4 TVs", "Soporte directo"] },
+            ],
+            HomeOffice: [
+                { name: "Solo Internet Impactel", speed: "50 Mbps Regional", type: "Internet Local", price: "$280", features: ["Ideal tareas y Meet", "Mínima mensualidad", "Atención inmediata"] },
+                { name: "Combo Impactel 100", speed: "100 Mbps + TV", type: "Internet + TV", price: "$500", features: ["Trabajo + ocio familiar", "Sin contrato forzoso", "Técnicos en zona"] },
+            ],
+            Enterprise: [
+                { name: "Impactel Comercio", speed: "50 Mbps Regional", type: "Internet Negocio", price: "$280", features: ["Ideal para TPV y POS", "Ahorro garantizado", "Soporte local"] },
+                { name: "Impactel Negocio + TV", speed: "100 Mbps + 100 Canales", type: "Internet + TV", price: "$500", features: ["Hasta 4 pantallas", "Señal regional estable", "Sin cargos extras"] },
+            ],
+            TV: [
+                { name: "Solo Internet", speed: "50 Mbps", type: "Internet", price: "$280", features: ["Señal regional estable", "Sin plazos forzosos", "Soporte local"] },
+                { name: "TV + Internet", speed: "100 Mbps + 100 Canales", type: "Internet + TV", price: "$500", features: ["Más de 100 canales", "Hasta 4 Televisiones", "Servicio Residencial"] },
             ]
         }
     }
@@ -98,24 +155,18 @@ export const CategoryModal = ({ isOpen, onClose, category, providerName }: Categ
     const [selectedPlan, setSelectedPlan] = useState(0);
 
     const getProviderPlans = () => {
-        // First try exact match
-        let data = providerData[providerName];
-
-        // If no exact match, try fuzzy match on names that start with the provider
-        if (!data) {
-            const key = Object.keys(providerData).find(k =>
-                providerName.toLowerCase().startsWith(k.toLowerCase()) ||
-                k.toLowerCase().startsWith(providerName.toLowerCase())
-            );
-            data = key ? providerData[key] : providerData.Totalplay;
-        }
+        const lower = providerName.toLowerCase();
+        const key = Object.keys(providerData).find(k =>
+            lower.includes(k.toLowerCase()) || k.toLowerCase().includes(lower)
+        );
+        const data = key ? providerData[key] : providerData.Totalplay;
 
         const plans = data.plans[category];
         if (plans) return plans;
 
-        const allCategories = Object.keys(data.plans);
-        const closeMatchKey = allCategories.find(k => k.toLowerCase().includes(category.toLowerCase()));
-        return closeMatchKey ? data.plans[closeMatchKey] : null;
+        const allCategories = Object.keys(data.plans) as PlanCategory[];
+        const fallbackCat = allCategories[0];
+        return fallbackCat ? data.plans[fallbackCat] : null;
     };
 
     const currentPlans = getProviderPlans() || [
@@ -152,23 +203,25 @@ export const CategoryModal = ({ isOpen, onClose, category, providerName }: Categ
         }
 
         try {
-            const { error } = await supabase.from('leads').insert([
-                {
-                    full_name: formData.fullName,
-                    phone: formData.phone,
-                    location: formData.location,
-                    category: category,
-                    provider: providerName,
-                    plan_name: currentPlans[selectedPlan].name,
-                    speed: currentPlans[selectedPlan].speed,
-                    price: currentPlans[selectedPlan].price,
-                    status: 'pending'
-                }
-            ]);
+            const plan = currentPlans[selectedPlan];
+            const lead = {
+                id: crypto.randomUUID(),
+                created_at: new Date().toISOString(),
+                full_name: formData.fullName,
+                phone: formData.phone,
+                location: formData.location,
+                category: category,
+                provider: providerName,
+                plan_name: plan.name,
+                speed: plan.speed,
+                price: plan.price,
+                status: 'pending'
+            };
 
-            if (error) throw error;
+            const existing = JSON.parse(localStorage.getItem('fiberlink_play_leads') || '[]');
+            localStorage.setItem('fiberlink_play_leads', JSON.stringify([lead, ...existing]));
 
-            toast.success(`¡Enviado con éxito! En breve un representante de FiberGravity se pondrá en contacto contigo.`, {
+            toast.success(`¡Solicitud enviada! Un asesor de Fiberlink Play se pondrá en contacto contigo.`, {
                 icon: '🚀',
                 style: {
                     borderRadius: '20px',
@@ -181,9 +234,8 @@ export const CategoryModal = ({ isOpen, onClose, category, providerName }: Categ
                 }
             });
             onClose();
-        } catch (error: any) {
-            console.error('Error submitting lead:', error);
-            toast.error('Hubo un error al enviar tus datos. Por favor intenta de nuevo.');
+        } catch {
+            toast.error('Hubo un error al procesar tus datos. Por favor intenta de nuevo.');
         } finally {
             setIsSubmitting(false);
         }
@@ -369,7 +421,7 @@ export const CategoryModal = ({ isOpen, onClose, category, providerName }: Categ
 
                                         <p className="text-[9px] text-center text-slate-600 font-bold tracking-tighter mt-4">
                                             AL ENVIAR ACEPTAS NUESTRA POLÍTICA DE PRIVACIDAD. <br />
-                                            FIBERGRAVITY ZERO DATA PROTECTION 2026.
+                                            FIBERLINK PLAY BROKER DIGITAL 2026.
                                         </p>
                                     </form>
                                 </div>

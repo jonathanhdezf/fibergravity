@@ -5,7 +5,7 @@ import { X, User, Phone, MessageSquare, Send, CheckCircle2, AlertCircle, Wrench,
 import { NeonButton } from "./NeonButton";
 import { GlassCard } from "./GlassCard";
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import toast from "react-hot-toast";
 
 interface SupportTicketModalProps {
     isOpen: boolean;
@@ -48,21 +48,24 @@ export const SupportTicketModal = ({ isOpen, onClose }: SupportTicketModalProps)
         setIsSubmitting(true);
 
         try {
-            const { error } = await supabase.from('support_tickets').insert({
+            const newTicket = {
+                id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+                created_at: new Date().toISOString(),
                 full_name: fullName,
                 phone: phone,
                 type: ticketType,
                 description: description,
                 status: 'pending'
-            });
+            };
 
-            if (error) throw error;
+            const existing = JSON.parse(localStorage.getItem("fiberlink_play_tickets") || "[]");
+            localStorage.setItem("fiberlink_play_tickets", JSON.stringify([newTicket, ...existing]));
+
+            toast.success("Ticket registrado en Fiberlink Play");
             setIsSuccess(true);
-        } catch (error: any) {
+        } catch (error) {
             console.error('Error submitting ticket:', error);
-            if (error?.message) console.error('Error message:', error.message);
-            if (error?.details) console.error('Error details:', error.details);
-            alert('Error al enviar el ticket. Por favor intenta de nuevo. (' + (error?.message || 'Desconocido') + ')');
+            toast.error('No se pudo guardar el ticket localmente. Intenta de nuevo.');
         } finally {
             setIsSubmitting(false);
         }

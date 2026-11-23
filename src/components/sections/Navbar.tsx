@@ -133,11 +133,11 @@ export const Navbar = () => {
                         className="flex items-center gap-2 pl-3 md:pl-5 group"
                     >
                         <div className="relative">
-                            <img src="/favicon.svg" alt="FiberGravity Logo" className="w-8 h-8 md:w-10 md:h-10 group-hover:scale-110 transition-transform" />
+                            <img src="/favicon.svg" alt="Fiberlink Play Logo" className="w-8 h-8 md:w-10 md:h-10 group-hover:scale-110 transition-transform" />
                             <div className="absolute inset-0 bg-neon-cyan blur-md opacity-20" />
                         </div>
                         <span className="text-xl font-black tracking-tighter italic text-white hidden sm:block">
-                            FIBER<span className="text-neon-cyan">GRAVITY</span>
+                            FIBERLINK <span className="text-neon-cyan">PLAY</span>
                         </span>
                     </a>
 
@@ -240,11 +240,11 @@ export const Navbar = () => {
                                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                                     className="relative mb-4"
                                 >
-                                    <img src="/favicon.svg" alt="FiberGravity Logo" className="w-20 h-20" />
+                                    <img src="/favicon.svg" alt="Fiberlink Play Logo" className="w-20 h-20" />
                                     <div className="absolute inset-0 bg-neon-cyan blur-2xl opacity-20 -z-10" />
                                 </motion.div>
                                 <h3 className="text-3xl font-black italic tracking-tighter text-white">
-                                    FIBER<span className="text-neon-cyan">GRAVITY</span>
+                                    FIBERLINK <span className="text-neon-cyan">PLAY</span>
                                 </h3>
                                 <div className="h-px w-32 bg-gradient-to-r from-transparent via-white/20 to-transparent mt-4" />
                             </motion.div>

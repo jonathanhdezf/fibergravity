@@ -55,7 +55,7 @@ export default function LoginPage() {
                             <div className="absolute inset-0 bg-neon-cyan/20 blur-xl rounded-full opacity-50 animate-pulse" />
                             <ShieldCheck className="w-10 h-10 text-neon-cyan relative z-10 drop-shadow-[0_0_15px_rgba(0,243,255,0.8)]" />
                         </div>
-                        <h1 className="text-3xl font-black italic tracking-tighter mb-2">FIBER<span className="text-neon-cyan neon-text-cyan">GRAVITY</span></h1>
+                        <h1 className="text-3xl font-black italic tracking-tighter mb-2">FIBERLINK <span className="text-neon-cyan neon-text-cyan">PLAY</span></h1>
                         <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.3em]">Acceso Seguro al Panel de Control</p>
                     </div>
 
@@ -109,7 +109,7 @@ export default function LoginPage() {
 
                     <div className="mt-8 text-center">
                         <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">
-                            Protegido por FiberGravity Auth v2.0
+                            Protegido por Fiberlink Play Auth v2.0
                         </p>
                     </div>
                 </div>

@@ -55,7 +55,7 @@ export const TVPlayerModal = ({ isOpen, onClose, channelName = "Canal en Vivo", 
                                             <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
                                             <span className="text-[9px] text-red-500 uppercase font-black tracking-tighter">Live</span>
                                         </div>
-                                        <span className="text-[10px] text-slate-400 uppercase font-bold tracking-[0.2em]">FiberGravity Ultra-Stream</span>
+                                        <span className="text-[10px] text-slate-400 uppercase font-bold tracking-[0.2em]">Fiberlink Play Ultra-Stream</span>
                                     </div>
                                 </div>
                             </div>
@@ -124,7 +124,7 @@ export const TVPlayerModal = ({ isOpen, onClose, channelName = "Canal en Vivo", 
                                 </div>
                                 <div className="flex items-center gap-8 text-[10px] text-slate-600 font-bold uppercase tracking-[0.3em]">
                                     <span>Latencia: 0.002s</span>
-                                    <span className="text-neon-cyan">FiberGravity Core V2</span>
+                                    <span className="text-neon-cyan">Fiberlink Play Core V2</span>
                                 </div>
                             </div>
                         </div>

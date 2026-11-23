@@ -73,7 +73,7 @@ export const WhatsAppWidget = () => {
                                         <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-[#020617] animate-pulse" />
                                     </div>
                                     <div>
-                                        <h4 className="text-white font-bold text-lg leading-tight">Asesor FiberGravity</h4>
+                                        <h4 className="text-white font-bold text-lg leading-tight">Asesor Fiberlink Play</h4>
                                         <div className="flex items-center gap-1.5 mt-1">
                                             <ShieldCheck className="w-3 h-3 text-green-400" />
                                             <span className="text-[10px] text-green-400 font-bold uppercase tracking-widest">En Línea • Ventas</span>

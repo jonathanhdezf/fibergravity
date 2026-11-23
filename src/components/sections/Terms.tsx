@@ -9,17 +9,17 @@ const termSections = [
     {
         icon: <Scale className="w-8 h-8 text-neon-cyan" />,
         title: "Condiciones de Uso",
-        content: "Al acceder a FiberGravity, aceptas nuestras condiciones de intermediación digital. Como marketplace, facilitamos la conexión entre tú y los proveedores de servicios en Teziutlán."
+        content: "Al acceder a Fiberlink Play, aceptas nuestras condiciones de intermediación digital. Como marketplace, facilitamos la conexión entre tú y los proveedores de servicios en Teziutlán."
     },
     {
         icon: <ShieldAlert className="w-8 h-8 text-neon-magenta" />,
         title: "Responsabilidad Local",
-        content: "Nuestra auditoría de señal es una herramienta de referencia. FiberGravity no es responsable directo de las fallas de infraestructura del proveedor, pero actuamos como tu defensor legal."
+        content: "Nuestra auditoría de señal es una herramienta de referencia. Fiberlink Play no es responsable directo de las fallas de infraestructura del proveedor, pero actuamos como tu defensor."
     },
     {
         icon: <Clock className="w-8 h-8 text-white" />,
         title: "Vigencia de Precios",
-        content: "Los precios mostrados en nuestro comparador están sujetos a cambios por parte de los proveedores. FiberGravity garantiza la transparencia en la información al momento de la consulta."
+        content: "Los precios mostrados en nuestro comparador están sujetos a cambios por parte de los proveedores. Fiberlink Play garantiza la transparencia en la información al momento de la consulta."
     }
 ];
 

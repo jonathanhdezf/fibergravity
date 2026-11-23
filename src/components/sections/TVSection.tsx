@@ -9,74 +9,74 @@ import { useModal } from "../ModalProvider";
 
 const tvBundlePlans = [
     {
-        category: "HOGARES ALTA DEMANDA (FAMILIAS / GAMING)",
-        provider: "Totalplay Doble Play",
-        speed: "150 – 250 Mbps (Fibra XGS-PON)",
+        category: "HOGARES ALTA DEMANDA (FAMILIAS / 4K)",
+        provider: "Totalplay Triple Play",
+        speed: "150 – 500 Mbps + Totalplay TV 4K",
         features: [
-            "Televisión HD con máxima nitidez",
-            "Velocidad Simétrica garantizada",
-            "WiFi Pro de largo alcance incluido",
-            "Llamadas ilimitadas a todo destino"
+            "150M + TV desde $718 • 250M + TV $779 • 500M $999",
+            "Decodificador 4K con 80 a 280+ canales HD",
+            "Internet simétrico por fibra XGS-PON + telefonía",
+            "App Totalplay TV y add-ons de Netflix / Max / Disney+"
         ],
-        price: "$450 – $650",
-        recommendation: "ESTABILIDAD SIMÉTRICA",
+        price: "$718 – $999",
+        recommendation: "ESTABILIDAD 4K SIMÉTRICA",
         color: "cyan",
         icon: <Zap className="w-8 h-8" />
     },
     {
-        category: "HOGARES ALTA DEMANDA (FAMILIAS / GAMING)",
-        provider: "Megacable Doble Play",
-        speed: "300 – 500 Mbps Simétricos",
+        category: "ENTRETENIMIENTO TOTAL",
+        provider: "Megacable Triple Pack",
+        speed: "200 – 500 Mbps + Xview+",
         features: [
-            "Internet simétrico de alta potencia",
-            "XVIEW+ con miles de contenidos",
-            "Suscripción a Netflix incluida",
-            "Ideal para trabajo remoto y ocio"
+            "Desde $430 (200M promo) hasta $800 MXN (500M)",
+            "Xview+ interactivo con +80 canales HD y VOD",
+            "Amazon Prime / Netflix / Max según paquete",
+            "Telefonía ilimitada + descuento por domiciliación"
         ],
-        price: "$680 – $880",
+        price: "$430 – $800",
         recommendation: "ENTRETENIMIENTO TOTAL",
         color: "magenta",
         icon: <Tv className="w-8 h-8" />
     },
     {
-        category: "HOGARES BALANCEADOS (ENTRETENIMIENTO)",
-        provider: "Telmex Infinitum + TV",
-        speed: "80 – 150 Mbps Estables",
+        category: "EL REY DEL CABLE Y STREAMING",
+        provider: "izzi Internet + izzi tv+",
+        speed: "100 – 200 Mbps + 100–200 Canales",
         features: [
-            "Claro Video sin costo adicional",
-            "Netflix, Disney+ y HBO Max Premium",
-            "Telefonía ilimitada para tu hogar",
-            "Conexión confiable para toda la familia"
+            "100M + TV desde $499 • 150M $639 • 200M $720 MXN",
+            "ViX Premium + Max / Disney+ / Apple TV (promo 12m)",
+            "App izzi go para ver TV en vivo desde tu celular",
+            "Opción Cuádruple Play con izzi móvil desde $699"
         ],
-        price: "$399 – $549",
-        recommendation: "CINE Y SERIES INCLUIDAS",
-        color: "cyan",
-        icon: <Play className="w-8 h-8" />
-    },
-    {
-        category: "HOGARES BALANCEADOS (ENTRETENIMIENTO)",
-        provider: "izzi 150 Megas + TV+",
-        speed: "150 Mbps de Velocidad",
-        features: [
-            "izzi tv+ con la mejor programación",
-            "Televisión Digital Interactiva",
-            "Netflix opcional en el mismo recibo",
-            "Promoción especial el primer mes"
-        ],
-        price: "$720",
-        recommendation: "EL REY DEL CABLE",
+        price: "$499 – $720",
+        recommendation: "MÁS STREAMING INCLUIDO",
         color: "white",
         icon: <Users className="w-8 h-8" />
     },
     {
+        category: "INTERNET + PLATAFORMAS",
+        provider: "Telmex Infinitum + Streaming",
+        speed: "150 – 500 Mbps Simétricos",
+        features: [
+            "150M $435 • 250M $499 • 500M $649 MXN/mes",
+            "Claro Video incluido sin costo adicional",
+            "Agrega Netflix, Max o Disney+ en el mismo recibo",
+            "Llamadas ilimitadas a México, EE.UU. y Canadá"
+        ],
+        price: "$435 – $649",
+        recommendation: "CINE Y SERIES EN TU RECIBO",
+        color: "cyan",
+        icon: <Play className="w-8 h-8" />
+    },
+    {
         category: "HOGARES BÁSICOS (ECONOMÍA)",
         provider: "Cablecom Estándar",
-        speed: "100 – 300 Mbps Fiables",
+        speed: "100 – 300 Mbps + TV Digital",
         features: [
-            "Combo Internet + TV Esencial",
-            "Cuentas de correo ilimitadas",
-            "Facturación electrónica incluida",
-            "La mejor relación calidad/precio"
+            "Combo Internet + TV Esencial desde $350 MXN",
+            "Paquetes Plus 300M hasta $550 MXN/mes",
+            "Telefonía incluida y módem Dual Band",
+            "Excelente relación calidad/precio regional"
         ],
         price: "$350 – $550",
         recommendation: "ESENCIAL AL MEJOR PRECIO",
@@ -86,15 +86,14 @@ const tvBundlePlans = [
     {
         category: "HOGARES BÁSICOS (ECONOMÍA)",
         provider: "Impactel TV & Internet",
-        speed: "Elige tu modalidad",
+        speed: "Elige tu modalidad local",
         features: [
-            "🌐 Solo Internet: $280 mensuales",
-            "📺 TV + Internet: $500 mensuales",
-            "Señal regional 100% estable",
-            "Más de 100 canales",
-            "Hasta 4 Televisiones"
+            "🌐 Solo Internet: $280 MXN mensuales",
+            "📺 TV + Internet: $500 MXN mensuales",
+            "Señal regional 100% estable sin plazos forzosos",
+            "Más de 100 canales hasta en 4 Televisiones"
         ],
-        price: "280 o 500",
+        price: "$280 o $500",
         recommendation: "DÚO DE AHORRO",
         color: "white",
         icon: <Heart className="w-8 h-8" />
@@ -154,7 +153,7 @@ export const TVSection = () => {
                 "Maratón de Temporada",
                 "Lo Mejor de la Semana",
                 "Estreno Exclusivo",
-                "Cine FiberGravity",
+                "Cine Fiberlink Play",
                 "Contenido Premium"
             ][Math.floor(Math.random() * 6)],
             nextShow: "Gran Estreno: 20:00 hrs",
@@ -313,7 +312,7 @@ export const TVSection = () => {
                         Señal Digital Estabilidad 99.9%
                     </span>
                     <div className="w-px h-4 bg-white/10" />
-                    <span className="text-neon-cyan">FiberX Streaming Enabled</span>
+                    <span className="text-neon-cyan">Fiberlink Play Streaming</span>
                 </div>
             </div>
         </section>

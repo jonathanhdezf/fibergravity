@@ -14,70 +14,84 @@ interface ProviderGamerModalProps {
 const providerData = {
     Totalplay: {
         title: "Totalplay Gamer",
-        subtitle: "Fiber Optic XGS-PON",
+        subtitle: "Fibra Óptica XGS-PON",
         accent: "neon-cyan",
         plans: [
             {
-                name: "Internet Simétrico 150",
+                name: "Totalplay Simétrico 150",
                 speed: "150 Megas",
-                type: "Simétrico",
-                price: "$599",
+                type: "Simétrico (Pronto Pago)",
+                price: "$460",
                 period: "al mes",
                 features: [
-                    "WiFi 7 de última generación",
-                    "Latencia ultra baja auditada",
-                    "Disney+ incluido (promo)",
-                    "Soporte 24/7 especializado",
-                    "WiFi Mesh gratis en planes altos"
+                    "150 Mbps de bajada y subida simétrica",
+                    "Fibra XGS-PON de ultra baja latencia",
+                    "Llamadas ilimitadas MX/EUA/CAN",
+                    "Promociones temporales de apps streaming",
+                    "Club Totalplay WiFi incluido"
                 ]
             },
             {
-                name: "Internet Simétrico 500",
-                speed: "500 Megas",
-                type: "Simétrico",
-                price: "$999",
+                name: "Totalplay Simétrico 250",
+                speed: "250 Megas",
+                type: "Simétrico (Pronto Pago)",
+                price: "$560",
                 period: "al mes",
                 features: [
-                    "Canales de TV 4K incluidos",
-                    "Streaming sin pérdida de calidad",
-                    "WiFi Pro Prioritized Gaming",
-                    "Instalación Express",
-                    "APP Totalplay para gestión"
+                    "250 Mbps simétricos para gaming y stream",
+                    "Opción WiFi Pro de última generación",
+                    "Prioridad de paquetes y bajo jitter",
+                    "Add-ons de Netflix / Max / Disney+",
+                    "Soporte 24/7 especializado"
+                ]
+            },
+            {
+                name: "Totalplay 1,000 Megas",
+                speed: "1,000 Megas (1 Gbps)",
+                type: "Fibra XGS-PON",
+                price: "$1,000",
+                period: "al mes",
+                features: [
+                    "1 Gbps simétrico para equipos competitivos",
+                    "Descargas pesadas al instante",
+                    "Cero cuello de botella multi-dispositivo",
+                    "Escalable hasta 5,000–10,000 Mbps",
+                    "Estabilidad de nivel profesional"
                 ]
             }
         ]
     },
     Megacable: {
         title: "Megacable Gamer",
-        subtitle: "Gamer & Streaming Pack",
+        subtitle: "Fibra Simétrica + Xview+",
         accent: "white",
         plans: [
             {
-                name: "Internet + Netflix 200",
+                name: "MEGA Triple Pack 200",
                 speed: "200 Megas",
                 type: "Fibra Óptica",
                 price: "$430",
                 period: "al mes",
                 features: [
-                    "Netflix incluido (promocional)",
-                    "WIFI Ultra sin costo",
-                    "Velocidad estable de subida",
-                    "Ideal para descargas de Day-0",
-                    "Xview+ con 80 canales"
+                    "200 Mbps con descuento domiciliado",
+                    "Xview+ con +80 canales HD",
+                    "Telefonía fija ilimitada MX/EUA",
+                    "Excelente entrada para gaming familiar",
+                    "Apps de streaming según promo vigente"
                 ]
             },
             {
-                name: "Internet + Netflix 500",
+                name: "MEGA Fibra 500",
                 speed: "500 Megas",
-                type: "Fibra Óptica",
+                type: "Fibra Simétrica",
                 price: "$730",
                 period: "al mes",
                 features: [
-                    "Suscripción Amazon Prime incluida",
-                    "Max (HBO) incluido",
-                    "2 Equipos WIFI Ultra",
-                    "Prioridad en red Megacable",
-                    "Telefonía fija ilimitada"
+                    "500 Mbps simétricos (en zona fibra)",
+                    "Extensor WiFi incluido en gama alta",
+                    "Amazon Prime / Netflix / Max opcional",
+                    "Xview+ interactivo incluido",
+                    "Descargas pesadas sin saturar la red"
                 ]
             }
         ]
@@ -88,73 +102,72 @@ const providerData = {
         accent: "neon-cyan",
         plans: [
             {
-                name: "COD Mobile Pack 2Hrs",
-                speed: "Red 5G Ready",
-                type: "Ilimitado x Tiempo",
+                name: "Paquete COD Mobile I",
+                speed: "Red 4.5G / 5G",
+                type: "2 Hrs Ilimitadas + 60 CP",
                 price: "$30",
                 period: "x activación",
                 features: [
-                    "2 Horas de Red Ilimitada",
-                    "Cupones de Cajas COD",
-                    "Prioridad de Red 5G",
-                    "Redes Sociales Incluidas",
-                    "Activación Instantánea SMS"
+                    "2 Horas de Internet Ilimitado para CODM",
+                    "Cupón canjeable por 60 COD Points",
+                    "Lote de cajas (Bronce, Plata y Oro)",
+                    "No consume los gigas de tu plan base",
+                    "Activación inmediata vía Amigo Telcel"
                 ]
             },
             {
-                name: "COD Mobile Premium",
+                name: "Paquete COD Mobile II",
                 speed: "Red 5G Ultra",
-                type: "Ilimitado + CP",
+                type: "2 Hrs Ilimitadas + 350 CP",
                 price: "$99",
                 period: "x activación",
                 features: [
-                    "Datos Ilimitados x 24Hrs",
-                    "COD Points (CP) de Regalo",
-                    "Baja Latencia Móvil",
-                    "Soporte Gamer Remoto",
-                    "Acumulable con tu Plan"
+                    "2 Horas de Internet Ilimitado para jugar",
+                    "Cupón canjeable por 350 COD Points",
+                    "Cajas de diseño exclusivo (Gran Ola)",
+                    "Baja latencia móvil en zona 5G",
+                    "Canje directo en portal oficial COD"
                 ]
             }
         ]
     },
     "Impactel/Cablecom": {
-        title: "Impactel Gamer Lite",
-        subtitle: "Essential Gaming",
+        title: "Impactel / Cablecom",
+        subtitle: "Gaming Regional Accesible",
         accent: "white",
         plans: [
             {
-                name: "Lite Gamer Hub",
+                name: "Solo Internet Regional",
                 speed: "50 Megas",
-                type: "Estándar HFC",
+                type: "Estándar Local",
                 price: "$280",
                 period: "al mes",
                 features: [
-                    "Internet estable para MOBA",
-                    "Precio más bajo de Teziutlán",
-                    "TV Básica de regalo",
+                    "Precio más bajo en Teziutlán",
+                    "Conexión estable para MOBA y casual",
                     "Sin plazos forzosos",
-                    "Mantenimiento incluido"
+                    "Atención directa en la región",
+                    "Mantenimiento local incluido"
                 ]
             },
             {
-                name: "Family Gamer Hub",
+                name: "Dúo Internet + TV",
                 speed: "100 Megas",
-                type: "Estándar HFC",
+                type: "Internet + TV",
                 price: "$500",
                 period: "al mes",
                 features: [
-                    "Suficiente para 3 jugadores",
-                    "Ruta nacional optimizada",
-                    "Soporte local en Teziutlán",
-                    "Instalación rápida",
-                    "Paquete Familiar TV"
+                    "100 Mbps para juego familiar",
+                    "Más de 100 canales hasta en 4 TVs",
+                    "Instalación rápida en Teziutlán",
+                    "Soporte técnico en sitio",
+                    "Sin cargos ocultos"
                 ]
             }
         ]
     }
 };
 
-import { supabase } from "@/lib/supabase";
 import toast from "react-hot-toast";
 
 export const ProviderGamerModal = ({ isOpen, onClose, provider }: ProviderGamerModalProps) => {
@@ -190,23 +203,25 @@ export const ProviderGamerModal = ({ isOpen, onClose, provider }: ProviderGamerM
         }
 
         try {
-            const { error } = await supabase.from('leads').insert([
-                {
-                    full_name: formData.fullName,
-                    phone: formData.phone,
-                    location: formData.location,
-                    category: 'Gamer',
-                    provider: data.title,
-                    plan_name: data.plans[selectedPlan].name,
-                    speed: data.plans[selectedPlan].speed,
-                    price: data.plans[selectedPlan].price,
-                    status: 'pending'
-                }
-            ]);
+            const plan = data.plans[selectedPlan];
+            const lead = {
+                id: crypto.randomUUID(),
+                created_at: new Date().toISOString(),
+                full_name: formData.fullName,
+                phone: formData.phone,
+                location: formData.location,
+                category: 'Gamer',
+                provider: data.title,
+                plan_name: plan.name,
+                speed: plan.speed,
+                price: plan.price,
+                status: 'pending'
+            };
 
-            if (error) throw error;
+            const existing = JSON.parse(localStorage.getItem('fiberlink_play_leads') || '[]');
+            localStorage.setItem('fiberlink_play_leads', JSON.stringify([lead, ...existing]));
 
-            toast.success(`¡Enviado con éxito! En breve un representante de FiberGravity se pondrá en contacto contigo.`, {
+            toast.success(`¡Enviado con éxito! Un broker de Fiberlink Play se pondrá en contacto contigo para tu plan ${plan.name}.`, {
                 icon: '📡',
                 style: {
                     borderRadius: '20px',
@@ -219,9 +234,8 @@ export const ProviderGamerModal = ({ isOpen, onClose, provider }: ProviderGamerM
                 }
             });
             onClose();
-        } catch (error: any) {
-            console.error('Error submitting lead:', error);
-            toast.error('Hubo un error al enviar tus datos. Por favor intenta de nuevo.');
+        } catch {
+            toast.error('Hubo un error al procesar tus datos. Por favor intenta de nuevo.');
         } finally {
             setIsSubmitting(false);
         }
@@ -323,7 +337,7 @@ export const ProviderGamerModal = ({ isOpen, onClose, provider }: ProviderGamerM
                                         Verificar Cobertura
                                     </h3>
                                     <p className="text-sm text-slate-500">
-                                        Escritorio de auditoría <span className={`text-${data.accent} font-bold italic underline`}>FiberGravity</span> para Teziutlán.
+                                        Escritorio de broker digital <span className={`text-${data.accent} font-bold italic underline`}>Fiberlink Play</span> para Teziutlán.
                                     </p>
                                 </div>
 
@@ -389,7 +403,7 @@ export const ProviderGamerModal = ({ isOpen, onClose, provider }: ProviderGamerM
                                     </NeonButton>
 
                                     <p className="text-[9px] text-center text-slate-600 uppercase tracking-widest leading-relaxed font-bold">
-                                        FiberGravity audita la señal de {data.title} en tiempo real.
+                                        Fiberlink Play valida la cobertura de {data.title} en tiempo real.
                                     </p>
                                 </form>
                             </div>
