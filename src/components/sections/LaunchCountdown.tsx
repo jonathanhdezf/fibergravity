@@ -92,7 +92,7 @@ export const LaunchCountdown = () => {
     };
 
     return (
-        <section className="relative py-28 md:py-36 overflow-hidden bg-black">
+        <section id="lanzamiento" className="relative py-28 md:py-36 overflow-hidden bg-black">
             <div className="max-w-7xl mx-auto px-6 relative z-10">
                 <div className="flex flex-col items-center text-center">
                     <motion.div

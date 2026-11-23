@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Inter } from "next/font/google";
+import { Space_Grotesk, Inter, Orbitron, Exo_2, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -10,6 +10,24 @@ const spaceGrotesk = Space_Grotesk({
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+});
+
+const orbitron = Orbitron({
+  variable: "--font-orbitron",
+  subsets: ["latin"],
+  weight: ["500", "700", "900"],
+});
+
+const exo2 = Exo_2({
+  variable: "--font-exo2",
+  subsets: ["latin"],
+  weight: ["200", "300", "400", "500", "600"],
+});
+
+const plusJakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -25,6 +43,7 @@ import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 import { Toaster } from "react-hot-toast";
 import { WhatsAppWidget } from "@/components/ui/WhatsAppWidget";
 import { Providers } from "@/components/Providers";
+import { ScrollExperience } from "@/components/ui/ScrollExperience";
 
 export default function RootLayout({
   children,
@@ -34,8 +53,9 @@ export default function RootLayout({
   return (
     <html lang="es" className="dark">
       <body
-        className={`${spaceGrotesk.variable} ${inter.variable} font-inter antialiased bg-[#020617] text-white selection:bg-neon-cyan/30`}
+        className={`${spaceGrotesk.variable} ${inter.variable} ${orbitron.variable} ${exo2.variable} ${plusJakarta.variable} font-inter antialiased bg-[#020617] text-white selection:bg-neon-cyan/30`}
       >
+        <ScrollExperience />
         <Toaster
           position="bottom-right"
           toastOptions={{

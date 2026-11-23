@@ -6,6 +6,7 @@ import { Briefcase, Zap, Video, Smartphone, Users, ChevronRight, Star, Shield, L
 import { GlassCard } from "../ui/GlassCard";
 import { NeonButton } from "../ui/NeonButton";
 import { useModal } from "../ModalProvider";
+import { PlanCarouselControls, useHorizontalDragScroll } from "../ui/PlanCarouselControls";
 
 const homeOfficePlans = [
     {
@@ -89,6 +90,7 @@ export const HomeOfficePlans = () => {
     const { openCategoryModal } = useModal();
     const containerRef = useRef<HTMLDivElement>(null);
     const { scrollXProgress } = useScroll({ container: containerRef });
+    const dragHandlers = useHorizontalDragScroll(containerRef);
 
     return (
         <section id="home-office" className="py-24 relative overflow-hidden bg-gradient-to-b from-black to-slate-900/50">
@@ -151,7 +153,8 @@ export const HomeOfficePlans = () => {
 
                 <div
                     ref={containerRef}
-                    className="flex overflow-x-auto gap-8 px-6 pt-10 pb-12 snap-x snap-mandatory no-scrollbar cursor-grab active:cursor-grabbing scroll-smooth"
+                    {...dragHandlers}
+                    className="flex overflow-x-auto gap-8 px-6 pt-10 pb-8 snap-x snap-mandatory no-scrollbar cursor-grab active:cursor-grabbing scroll-smooth select-none"
                 >
                     {/* Spacer for centering logic */}
                     <div className="min-w-[5vw] h-1 md:block hidden" />
@@ -226,15 +229,13 @@ export const HomeOfficePlans = () => {
                 </div>
             </div>
 
-            {/* Scroll Indicator */}
-            <div className="flex justify-center mt-4">
-                <div className="w-48 h-1 bg-white/5 rounded-full overflow-hidden">
-                    <motion.div
-                        style={{ scaleX: scrollXProgress }}
-                        className="h-full bg-gradient-to-r from-neon-cyan to-white origin-left"
-                    />
-                </div>
-            </div>
+            {/* Modern Carousel Controls & Provider Pills */}
+            <PlanCarouselControls
+                containerRef={containerRef}
+                labels={homeOfficePlans.map((p) => p.provider.replace(/ Home & Business| Home Office| Internet en Casa| Infinitum/gi, ""))}
+                scrollXProgress={scrollXProgress}
+                accent="cyan"
+            />
 
             {/* Comparison Grid Area - Home Office Focus */}
             <div className="container mx-auto px-6 mt-24">

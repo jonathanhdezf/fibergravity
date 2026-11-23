@@ -6,6 +6,7 @@ import { Building2, Zap, Globe, Smartphone, Users, ChevronRight, Star, Shield, B
 import { GlassCard } from "../ui/GlassCard";
 import { NeonButton } from "../ui/NeonButton";
 import { useModal } from "../ModalProvider";
+import { PlanCarouselControls, useHorizontalDragScroll } from "../ui/PlanCarouselControls";
 
 const enterprisePlans = [
     {
@@ -104,6 +105,7 @@ export const EnterprisePlans = () => {
     const { openCategoryModal } = useModal();
     const containerRef = useRef<HTMLDivElement>(null);
     const { scrollXProgress } = useScroll({ container: containerRef });
+    const dragHandlers = useHorizontalDragScroll(containerRef);
 
     return (
         <section id="empresas" className="py-24 relative overflow-hidden bg-gradient-to-b from-slate-900/50 to-black">
@@ -166,7 +168,8 @@ export const EnterprisePlans = () => {
 
                 <div
                     ref={containerRef}
-                    className="flex overflow-x-auto gap-8 px-6 pt-10 pb-12 snap-x snap-mandatory no-scrollbar cursor-grab active:cursor-grabbing scroll-smooth"
+                    {...dragHandlers}
+                    className="flex overflow-x-auto gap-8 px-6 pt-10 pb-8 snap-x snap-mandatory no-scrollbar cursor-grab active:cursor-grabbing scroll-smooth select-none"
                 >
                     {/* Spacer for centering logic */}
                     <div className="min-w-[5vw] h-1 md:block hidden" />
@@ -241,15 +244,13 @@ export const EnterprisePlans = () => {
                 </div>
             </div>
 
-            {/* Scroll Indicator */}
-            <div className="flex justify-center mt-4">
-                <div className="w-48 h-1 bg-white/5 rounded-full overflow-hidden">
-                    <motion.div
-                        style={{ scaleX: scrollXProgress }}
-                        className="h-full bg-gradient-to-r from-sky-400 to-slate-400 origin-left"
-                    />
-                </div>
-            </div>
+            {/* Modern Carousel Controls & Provider Pills */}
+            <PlanCarouselControls
+                containerRef={containerRef}
+                labels={enterprisePlans.map((p) => p.provider.replace(/ Negocios| Negocio| Empresas| Empresa/gi, ""))}
+                scrollXProgress={scrollXProgress}
+                accent="sky"
+            />
 
             {/* Comparison Grid Area - Business Focus */}
             <div className="container mx-auto px-6 mt-24">

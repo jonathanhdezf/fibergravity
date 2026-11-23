@@ -6,6 +6,9 @@
   --color-glass: rgba(255, 255, 255, 0.05);
   --color-glass-border: rgba(255, 255, 255, 0.1);
   --font-space: "Space Grotesk", sans-serif;
+  --font-digital: var(--font-orbitron), "Orbitron", monospace;
+  --font-header: var(--font-exo2), "Exo 2", sans-serif;
+  --font-footer: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
 }
 
 :root {
@@ -13,11 +16,38 @@
   --foreground: #f8fafc;
 }
 
+html {
+  scroll-behavior: smooth;
+  overflow-x: clip;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-space);
-  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+section[id] {
+  scroll-margin-top: 24px;
+}
+
+.font-digital {
+  font-family: var(--font-orbitron), "Orbitron", monospace;
+}
+
+.font-header {
+  font-family: var(--font-exo2), "Exo 2", sans-serif;
+}
+
+.font-footer {
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
 }
 
 /* Glassmorphism Utility */
@@ -97,6 +127,18 @@ body {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 243, 255, 0.4);
+}
+
+/* Hide classic OS horizontal scrollbars in modern carousels */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 /* Hero Background Grid */

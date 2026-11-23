@@ -6,6 +6,7 @@ import { Tv, Wifi, Phone, Zap, Play, ChevronRight, Star, Shield, Home, Users, He
 import { GlassCard } from "../ui/GlassCard";
 import { NeonButton } from "../ui/NeonButton";
 import { useModal } from "../ModalProvider";
+import { PlanCarouselControls, useHorizontalDragScroll } from "../ui/PlanCarouselControls";
 
 const tvBundlePlans = [
     {
@@ -143,6 +144,7 @@ export const TVSection = () => {
     const carouselRef = useRef<HTMLDivElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
     const { scrollXProgress } = useScroll({ container: carouselRef });
+    const dragHandlers = useHorizontalDragScroll(carouselRef);
     const { openCategoryModal, openPlayerModal } = useModal();
 
     useEffect(() => {
@@ -227,7 +229,8 @@ export const TVSection = () => {
 
                 <div
                     ref={carouselRef}
-                    className="flex overflow-x-auto gap-8 px-6 pt-10 pb-12 snap-x snap-mandatory no-scrollbar cursor-grab active:cursor-grabbing scroll-smooth"
+                    {...dragHandlers}
+                    className="flex overflow-x-auto gap-8 px-6 pt-10 pb-8 snap-x snap-mandatory no-scrollbar cursor-grab active:cursor-grabbing scroll-smooth select-none"
                 >
                     <div className="min-w-[5vw] h-1 md:block hidden" />
 
@@ -302,10 +305,18 @@ export const TVSection = () => {
 
                     <div className="min-w-[5vw] h-1 md:block hidden" />
                 </div>
+
+                {/* Modern Carousel Controls & Provider Pills */}
+                <PlanCarouselControls
+                    containerRef={carouselRef}
+                    labels={tvBundlePlans.map((p) => p.provider.replace(/ Triple Play| Triple Pack| \+ .*/gi, ""))}
+                    scrollXProgress={scrollXProgress}
+                    accent="magenta"
+                />
             </div>
 
             {/* Bundle Plans Section is enough for now */}
-            <div className="mt-12 flex justify-center pb-24">
+            <div className="mt-8 flex justify-center pb-24">
                 <div className="glass px-6 py-3 rounded-2xl flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
                     <span className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-neon-magenta animate-pulse shadow-[0_0_10px_rgba(255,0,255,0.5)]" />

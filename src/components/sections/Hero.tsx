@@ -70,7 +70,7 @@ export const Hero = () => {
         <section
             id="hero"
             ref={containerRef}
-            className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden bg-[#020617]"
+            className="relative min-h-screen flex items-center justify-center pt-24 pb-16 overflow-x-clip bg-[#020617]"
         >
             {/* 1. ADVANCED BACKGROUND: Persistence Grid & Perspective */}
             <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
@@ -191,14 +191,55 @@ export const Hero = () => {
                             />
                         ))}
 
-                        {/* Connection Nodes */}
+                        {/* Connection Nodes - 4 Digital ISP Spheres */}
                         <motion.div
                             animate={{ rotate: 360 }}
-                            transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-                            className="absolute inset-0 z-0"
+                            transition={{ duration: 48, repeat: Infinity, ease: "linear" }}
+                            className="absolute inset-0 z-20 pointer-events-none"
                         >
-                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-neon-cyan shadow-[0_0_15px_#00f3ff]" />
-                            <div className="absolute bottom-1/4 right-0 w-3 h-3 rounded-full bg-neon-magenta shadow-[0_0_15px_#ff00ff]" />
+                            {[
+                                {
+                                    name: "TELMEX",
+                                    pos: "top-0 left-1/2 -translate-x-1/2 -translate-y-1/2",
+                                    sphereClass: "bg-neon-cyan shadow-[0_0_20px_#00f3ff,0_0_40px_rgba(0,243,255,0.6)]",
+                                    textClass: "text-neon-cyan border-neon-cyan/40 bg-slate-950/90 shadow-[0_0_15px_rgba(0,243,255,0.3)]",
+                                },
+                                {
+                                    name: "MEGACABLE",
+                                    pos: "top-1/2 right-0 translate-x-1/2 -translate-y-1/2",
+                                    sphereClass: "bg-neon-magenta shadow-[0_0_20px_#ff00ff,0_0_40px_rgba(255,0,255,0.6)]",
+                                    textClass: "text-neon-magenta border-neon-magenta/40 bg-slate-950/90 shadow-[0_0_15px_rgba(255,0,255,0.3)]",
+                                },
+                                {
+                                    name: "IZZI",
+                                    pos: "bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2",
+                                    sphereClass: "bg-blue-400 shadow-[0_0_20px_#60a5fa,0_0_40px_rgba(96,165,250,0.6)]",
+                                    textClass: "text-blue-300 border-blue-400/40 bg-slate-950/90 shadow-[0_0_15px_rgba(96,165,250,0.3)]",
+                                },
+                                {
+                                    name: "STARLINK",
+                                    pos: "top-1/2 left-0 -translate-x-1/2 -translate-y-1/2",
+                                    sphereClass: "bg-white shadow-[0_0_20px_#ffffff,0_0_40px_rgba(255,255,255,0.5)]",
+                                    textClass: "text-white border-white/40 bg-slate-950/90 shadow-[0_0_15px_rgba(255,255,255,0.25)]",
+                                },
+                            ].map((node) => (
+                                <div key={node.name} className={`absolute ${node.pos}`}>
+                                    <motion.div
+                                        animate={{ rotate: -360 }}
+                                        transition={{ duration: 48, repeat: Infinity, ease: "linear" }}
+                                        className="flex flex-col items-center gap-1.5"
+                                    >
+                                        <div className={`relative w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center ${node.sphereClass}`}>
+                                            <span className="w-2 h-2 rounded-full bg-white/90 animate-pulse" />
+                                        </div>
+                                        <span
+                                            className={`font-digital text-[9px] md:text-[11px] font-black tracking-[0.22em] uppercase px-2.5 py-0.5 rounded-md border backdrop-blur-md whitespace-nowrap ${node.textClass}`}
+                                        >
+                                            {node.name}
+                                        </span>
+                                    </motion.div>
+                                </div>
+                            ))}
                         </motion.div>
 
                         {/* THE HUB CORE */}

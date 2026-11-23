@@ -120,52 +120,52 @@ export const Navbar = () => {
                         width: scrolled ? "92%" : "98%",
                         y: scrolled ? 0 : 0,
                     }}
-                    className={`max-w-7xl flex items-center justify-between p-2 md:p-3 rounded-full border shadow-2xl pointer-events-auto transition-all duration-300 ${mobileMenu ? "opacity-0 pointer-events-none" : "opacity-100 pointer-events-auto"
+                    className={`font-header max-w-7xl flex items-center justify-between p-2 md:p-3 rounded-full border pointer-events-auto transition-all duration-300 ${mobileMenu ? "opacity-0 pointer-events-none" : "opacity-100 pointer-events-auto"
                         } ${scrolled
-                            ? "bg-black/70 backdrop-blur-xl border-white/10 shadow-neon-cyan/5"
-                            : "bg-black/30 backdrop-blur-md border-white/5"
+                            ? "bg-transparent backdrop-blur-md border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.18)]"
+                            : "bg-transparent backdrop-blur-[2px] border-white/10 shadow-none"
                         }`}
                 >
                     {/* Logo Area */}
                     <a
                         href={getLinkHref("#hero")}
                         onClick={(e) => handleLinkClick(e, "#hero")}
-                        className="flex items-center gap-2 pl-3 md:pl-5 group"
+                        className="flex items-center gap-2.5 pl-3 md:pl-5 group shrink-0"
                     >
                         <div className="relative">
                             <img src="/favicon.svg" alt="Fiberlink Play Logo" className="w-8 h-8 md:w-10 md:h-10 group-hover:scale-110 transition-transform" />
                             <div className="absolute inset-0 bg-neon-cyan blur-md opacity-20" />
                         </div>
-                        <span className="text-xl font-black tracking-tighter italic text-white hidden sm:block">
-                            FIBERLINK <span className="text-neon-cyan">PLAY</span>
+                        <span className="text-2xl md:text-[26px] font-light tracking-[0.12em] text-white hidden sm:block drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] whitespace-nowrap">
+                            FIBERLINK <span className="text-neon-cyan font-normal">PLAY</span>
                         </span>
                     </a>
 
                     {/* Desktop Navigation */}
-                    <div className="hidden lg:flex items-center gap-8 pr-2">
-                        <ul className="flex items-center gap-6">
+                    <div className="hidden lg:flex items-center gap-5 xl:gap-7 pr-2">
+                        <ul className="flex items-center gap-4 xl:gap-6">
                             {navLinks.map((link) => (
                                 <li key={link.name} className="relative group/item">
                                     <div className="flex items-center gap-1">
                                         <a
                                             href={getLinkHref(link.href)}
                                             onClick={(e) => handleLinkClick(e, link.href)}
-                                            className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-colors py-4 flex items-center gap-1"
+                                            className="text-xs xl:text-[13px] font-light uppercase tracking-[0.14em] text-slate-200 hover:text-neon-cyan transition-colors py-3.5 flex items-center gap-1.5 drop-shadow-[0_1px_6px_rgba(0,0,0,0.85)] whitespace-nowrap"
                                         >
                                             {link.name}
-                                            {link.submenu && <ChevronDown className="w-3 h-3 group-hover/item:rotate-180 transition-transform duration-300" />}
+                                            {link.submenu && <ChevronDown className="w-3.5 h-3.5 group-hover/item:rotate-180 transition-transform duration-300" />}
                                         </a>
                                     </div>
 
                                     {link.submenu && (
                                         <div className="absolute top-[100%] left-0 pt-2 opacity-0 translate-y-2 pointer-events-none group-hover/item:opacity-100 group-hover/item:translate-y-0 group-hover/item:pointer-events-auto transition-all duration-300 z-[10000]">
-                                            <div className="bg-black/90 backdrop-blur-2xl border border-white/10 rounded-2xl p-2 min-w-[160px] shadow-2xl">
+                                            <div className="bg-slate-950/70 backdrop-blur-2xl border border-white/15 rounded-2xl p-2 min-w-[175px] shadow-2xl">
                                                 {link.submenu.map((sub) => (
                                                     <a
                                                         key={sub.name}
                                                         href={getLinkHref(sub.href)}
                                                         onClick={(e) => handleLinkClick(e, sub.href)}
-                                                        className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-[9px] font-bold uppercase tracking-widest text-slate-400 hover:text-neon-cyan transition-all"
+                                                        className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-[11px] font-light uppercase tracking-[0.14em] text-slate-300 hover:text-neon-cyan transition-all"
                                                     >
                                                         <div className="w-1 h-1 rounded-full bg-neon-cyan/50" />
                                                         {sub.name}
@@ -180,7 +180,7 @@ export const Navbar = () => {
                         <div className="w-px h-6 bg-white/10" />
                         <NeonButton
                             onClick={() => openModal()}
-                            className="!py-2 !px-6 text-[10px] font-black tracking-widest"
+                            className="!py-2 !px-6 text-xs font-normal tracking-[0.15em]"
                             variant="cyan"
                         >
                             CONTRATAR
@@ -191,7 +191,7 @@ export const Navbar = () => {
                     <div className="flex items-center gap-2 lg:hidden pr-1">
                         <NeonButton
                             onClick={() => openModal()}
-                            className="!py-2 !px-4 text-[9px] font-black tracking-widest"
+                            className="!py-2 !px-4 text-[11px] font-normal tracking-[0.14em]"
                             variant="cyan"
                         >
                             CONTRATAR
@@ -214,7 +214,7 @@ export const Navbar = () => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="fixed inset-0 z-[11000] lg:hidden bg-black/98 backdrop-blur-2xl flex flex-col pt-32 px-6 pb-12 overflow-y-auto"
+                        className="font-header fixed inset-0 z-[11000] lg:hidden bg-black/98 backdrop-blur-2xl flex flex-col pt-32 px-6 pb-12 overflow-y-auto"
                     >
                         {/* Mobile Dedicated Close Button */}
                         <button
@@ -243,8 +243,8 @@ export const Navbar = () => {
                                     <img src="/favicon.svg" alt="Fiberlink Play Logo" className="w-20 h-20" />
                                     <div className="absolute inset-0 bg-neon-cyan blur-2xl opacity-20 -z-10" />
                                 </motion.div>
-                                <h3 className="text-3xl font-black italic tracking-tighter text-white">
-                                    FIBERLINK <span className="text-neon-cyan">PLAY</span>
+                                <h3 className="text-4xl font-light tracking-[0.12em] text-white">
+                                    FIBERLINK <span className="text-neon-cyan font-normal">PLAY</span>
                                 </h3>
                                 <div className="h-px w-32 bg-gradient-to-r from-transparent via-white/20 to-transparent mt-4" />
                             </motion.div>
@@ -261,8 +261,8 @@ export const Navbar = () => {
                                             className="relative z-20 flex items-center justify-between p-5 rounded-3xl bg-white/[0.03] border border-white/5 active:bg-white/10 active:scale-[0.98] transition-all no-underline group"
                                         >
                                             <div className="flex items-center gap-5">
-                                                <span className="text-white/20 font-black text-lg group-hover:text-neon-cyan transition-colors">0{i + 1}</span>
-                                                <span className="text-xl font-black uppercase tracking-tighter italic text-white group-hover:translate-x-1 transition-transform">
+                                                <span className="text-white/25 font-light text-lg group-hover:text-neon-cyan transition-colors">0{i + 1}</span>
+                                                <span className="text-2xl font-light uppercase tracking-[0.08em] text-white group-hover:translate-x-1 transition-transform">
                                                     {link.name}
                                                 </span>
                                             </div>
