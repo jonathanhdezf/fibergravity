@@ -4,12 +4,14 @@ import { createClient } from "@supabase/supabase-js";
 
 // Cliente de Supabase para autenticación del servidor
 const supabaseAuth = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ||
+        'placeholder'
 );
 
 const handler = NextAuth({
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: process.env.NEXTAUTH_SECRET || 'dev-secret-fallback-change-in-production',
     providers: [
         CredentialsProvider({
             name: "Credentials",
